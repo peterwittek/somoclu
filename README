@@ -1,6 +1,9 @@
 GPU-Accelerated MapReduce-Based Self-Organizing Maps
 
-You will need CUDA, MPI, and MR-MPI to compile the code.  
+You will need CUDA, MPI, and MR-MPI to compile the code. Example usage with two GPUs:
+
+mpirun -np 2 ./mrsom data/rgbs.txt data/rgbs
+
 
 The code was derived from the MR-MPI SOM implementation by Seung-Jin Sul:
 https://github.com/andreyto/mr-mpi-som

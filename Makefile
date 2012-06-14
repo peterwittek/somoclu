@@ -6,9 +6,9 @@ CXX=$(MPI_DIR)/bin/mpicxx
 CXXFLAGS = -g -Wall
 
 NVCC=$(CUDA_DIR)/bin/nvcc
-NVCCFLAGS=-arch sm_11 -I $(CUDA_DIR)/include -g --compiler-options -rdynamic
+NVCCFLAGS=-arch sm_11 -g --compiler-options -rdynamic
 
-INCLUDE=-I $(MRMPI_DIR)
+INCLUDE=-I$(MRMPI_DIR) -I$(MPI_DIR)/include -I$(CUDA_DIR)/include
 LIBS=$(MRMPI_DIR)/libmrmpi.a -L $(CUDA_DIR)/lib64 -lcublas
 
 all: mrsom

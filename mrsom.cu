@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
+#undef _GLIBCXX_ATOMIC_BUILTINS
 #include <iostream>
 #include <cublas_v2.h>
 #include <vector>
