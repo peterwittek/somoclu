@@ -19,6 +19,7 @@
 #include <cmath> 
 #include <cstdlib>
 #include <mpi.h>
+#include <unistd.h>
 
 #include "somoclu.h"
  
@@ -29,43 +30,59 @@ using namespace std;
 #define MPI_WTIME_IS_GLOBAL 1
 #endif
 
+// Default parameters
+#define N_EPOCH 10
+#define N_SOM_X 50 
+#define N_SOM_Y 50
+#define KERNEL_TYPE 0
+#define ENABLE_SNAPSHOTS false
+
+void processCommandLine(int argc, char** argv, unsigned int *nEpoch, 
+                        unsigned int *nSomX, unsigned int *nSomY, 
+                        unsigned int *kernelType, bool *enableSnapshots);
+
 /* -------------------------------------------------------------------------- */
 int main(int argc, char** argv)
 /* -------------------------------------------------------------------------- */
 {    
-  unsigned int nEpoch = 10;
-  unsigned int nSomX = 10;
-  unsigned int nSomY = 10;
-  
-  if (argc!=3){
-    cout << "Usage: mrsom input_filename output_prefix\n";
-    exit(1);
-  }
-          
-  const char *inFileName = argv[1];
-  const char *outPrefix = argv[2];
-
   ///
   /// MPI init
   ///
   MPI_Init(&argc, &argv);
-  int MPI_myId, MPI_nProcs;
-  MPI_Comm_rank(MPI_COMM_WORLD, &MPI_myId);
-  MPI_Comm_size(MPI_COMM_WORLD, &MPI_nProcs);
+  int rank, nProcs;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
   MPI_Barrier(MPI_COMM_WORLD); 
+  
+  unsigned int nEpoch = 0;
+  unsigned int nSomX = 0;
+  unsigned int nSomY = 0;
+  unsigned int kernelType = 0;
+  bool enableSnapshots = false;
+  const char *inFileName = "data/rgbs.txt";
+  const char *outPrefix = "data/rgbs";
+
+  if (rank==0) {
+      processCommandLine(argc, argv, &nEpoch, &nSomX, &nSomY, &kernelType,
+                         &enableSnapshots);
+  }
+  MPI_Bcast(&nEpoch, 1, MPI_INT, 0, MPI_COMM_WORLD);  
+  MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);
   
   double profile_time = MPI_Wtime();
 
   float * dataRoot = NULL;    
   unsigned int nDimensions = 0;    
   unsigned int nVectors = 0;           /// Total num of feature vectors 
-  if(MPI_myId == 0){
+  if(rank == 0){
       dataRoot = readMatrix(inFileName, nVectors, nDimensions);
   }
   MPI_Barrier(MPI_COMM_WORLD); 
 
   MPI_Bcast(&nVectors, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  unsigned int nVectorsPerRank = ceil(nVectors / (1.0*MPI_nProcs));    
+  unsigned int nVectorsPerRank = ceil(nVectors / (1.0*nProcs));    
   MPI_Bcast(&nDimensions, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   // Allocate a buffer on each node
@@ -76,7 +93,7 @@ int main(int argc, char** argv)
               data, nVectorsPerRank*nDimensions, MPI_FLOAT,
               0, MPI_COMM_WORLD);
   
-  if(MPI_myId == 0){
+  if(rank == 0){
       // No need for root data any more
       delete [] dataRoot;
       cout << "nVectors: " << nVectors << " ";
@@ -85,23 +102,105 @@ int main(int argc, char** argv)
       cout << endl;
   }
   
-  setDevice(MPI_myId, MPI_nProcs);
+  setDevice(rank, nProcs);
   initializeGpu(data, nVectorsPerRank, nDimensions);
 
   // TRAINING
-  train(MPI_myId, data, nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
-        nEpoch, outPrefix, true, 1);
+  train(rank, data, nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
+        nEpoch, outPrefix, enableSnapshots, kernelType);
 
   delete [] data;
   
   profile_time = MPI_Wtime() - profile_time;
-  if (MPI_myId == 0) {
+  if (rank == 0) {
     cerr << "Total Execution Time: " << profile_time << endl;
   }
   
   shutdownGpu();
   MPI_Finalize();
   return 0;
+}
+
+void printUsage() {
+    cout << "Usage:\n" \
+              "     mpirun -np NPROC somoclu [OPTIONs]\n" \
+              "Arguments:\n" \
+              "     -e NUMBER     Maximum number of epochs (default: " << N_EPOCH << ")\n" \
+              "     -k NUMBER     Kernel type (default: " << KERNEL_TYPE << "): \n" \
+              "                      0: Dense CPU\n" \
+              "                      1: Dense GPU\n" \
+              "     -s            Enable snapshots U-matrix (default: false)\n" \
+              "     -x NUMBER     Dimension of SOM in direction x (default: " << N_SOM_X << ")\n" \
+              "     -y NUMBER     Dimension of SOM in direction y (default: " << N_SOM_Y << ")\n";
+
+}
+
+void processCommandLine(int argc, char** argv, unsigned int *nEpoch, unsigned int *nSomX, unsigned int *nSomY, unsigned int *kernelType, bool *enableSnapshots) {
+  
+    // Setting default values
+    *nEpoch = N_EPOCH;
+    *nSomX = N_SOM_X;
+    *nSomY = N_SOM_Y;
+    *kernelType = KERNEL_TYPE;
+    *enableSnapshots = ENABLE_SNAPSHOTS;
+    
+    int c;
+    while ((c = getopt (argc, argv, "hsx:y:e:k:")) != -1) {
+        switch (c) {
+        case 'e':
+            *nEpoch = atoi(optarg);
+            if (*nEpoch<=0) {
+                fprintf (stderr, "The argument of option -e should be a positive integer.\n");
+                MPI_Abort(MPI_COMM_WORLD, 1);
+            }
+            break;
+        case 'h':
+            printUsage();
+            MPI_Abort(MPI_COMM_WORLD, 0);
+            break;
+        case 'k':
+            *kernelType = atoi(optarg);
+            if (*kernelType<0||*kernelType>1) {
+                fprintf (stderr, "The argument of option -k should be a valid kernel.\n");
+                MPI_Abort(MPI_COMM_WORLD, 1);
+            }
+            break;
+        case 's':
+              *enableSnapshots = true;
+              break;
+        case 'x':
+            *nSomX = atoi(optarg);
+            if (*nSomX<=0) {
+                fprintf (stderr, "The argument of option -x should be a positive integer.\n");
+                MPI_Abort(MPI_COMM_WORLD, 1);
+            }
+            break;
+        case 'y':
+            *nSomY = atoi(optarg);
+            if (*nSomY<=0) {
+                fprintf (stderr, "The argument of option -y should be a positive integer.\n");
+                MPI_Abort(MPI_COMM_WORLD, 1);
+            }
+            break;
+        case '?':
+            if (optopt == 'e' || optopt == 'k' || optopt == 's' || 
+                optopt == 'x'    || optopt == 'y') {
+                fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+                printUsage();
+                MPI_Abort(MPI_COMM_WORLD, 1);
+            } else if (isprint (optopt)) {
+                fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+                printUsage();
+                MPI_Abort(MPI_COMM_WORLD, 1);
+            } else {
+                fprintf (stderr, "Unknown option character `\\x%x'.\n",  optopt);
+                printUsage();
+                MPI_Abort(MPI_COMM_WORLD, 1);
+            }
+        default:
+            abort ();
+        }
+    }
 }
 
 /** Shut down MPI cleanly if something goes wrong
