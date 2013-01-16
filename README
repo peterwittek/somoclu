@@ -2,13 +2,23 @@ This project is a fork of
 
 https://github.com/peterwittek/mr-mpi-som-gpu
 
-Example usage with two GPUs:
-
-mpirun -np 2 ./somoclu data/rgbs.txt data/rgbs
-
 The input is a plain-text dense matrix, where the rows correspond to the instances.
 
 You will need CUDA and MPI to compile the code.
+
+Usage:
+    [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX
+    Arguments:
+         -e NUMBER     Maximum number of epochs (default: " << N_EPOCH << ")
+         -k NUMBER     Kernel type (default: " << KERNEL_TYPE << "): 
+                          0: Dense CPU
+                          1: Dense GPU
+         -s            Enable snapshots U-matrix (default: false)
+         -x NUMBER     Dimension of SOM in direction x (default: " << N_SOM_X << ")
+         -y NUMBER     Dimension of SOM in direction y (default: " << N_SOM_Y << ")
+    Examples:
+         somoclu data/rgbs.txt data/rgbs\n"
+         mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs\n";
 
 The GPU setting method for a distributed system is based on GPMR by Jeff Stuart:
 http://code.google.com/p/gpmr/
