@@ -30,12 +30,22 @@ float *readMatrix(const char *inFileName,
 void train(int itask, float *data, unsigned int nSomX, unsigned int nSomY, 
            unsigned int nDimensions, unsigned int nVectors, 
            unsigned int nVectorsPerRank, unsigned int nEpoch, 
-           const char *outPrefix, bool shouldSaveInterim);
+           const char *outPrefix, bool shouldSaveInterim, 
+           unsigned int kernelType);
+void trainOneEpochDenseCPU(int itask, float *data, float *numerator, 
+                           float *denominator, float *codebook, 
+                           unsigned int nSomX, unsigned int nSomY, 
+                           unsigned int nDimensions, unsigned int nVectors,
+                           unsigned int nVectorsPerRank, float radius);
 
 extern "C" {
 void setDevice(int commRank, int commSize);
 void shutdownGpu();
-void getBmusOnGpu(int *bmus, float *deviceCodebook, int SOM_X, int SOM_Y, int NDIMEN, int NVECSPERRANK);
 void initializeGpu(float *hostData, int height, int width);
+void trainOneEpochDenseGPU(int itask, float *data, float *numerator, 
+                           float *denominator, float *codebook, 
+                           unsigned int nSomX, unsigned int nSomY, 
+                           unsigned int nDimensions, unsigned int nVectors,
+                           unsigned int nVectorsPerRank, float radius);
 void my_abort(int err);
 }

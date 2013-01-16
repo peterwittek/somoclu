@@ -4,7 +4,7 @@ https://github.com/peterwittek/mr-mpi-som-gpu
 
 Example usage with two GPUs:
 
-mpirun -np 2 ./mrsom data/rgbs.txt data/rgbs
+mpirun -np 2 ./somoclu data/rgbs.txt data/rgbs
 
 The input is a plain-text dense matrix, where the rows correspond to the instances.
 

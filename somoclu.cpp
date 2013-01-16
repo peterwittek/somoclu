@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 
   // TRAINING
   train(MPI_myId, data, nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
-        nEpoch, outPrefix, true);
+        nEpoch, outPrefix, true, 1);
 
   delete [] data;
   

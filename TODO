@@ -1,5 +1,4 @@
 Argument parsing
-Remove C-ish constructs
 Optimize GPU code:
   -Transposing the codebook just cannot be right
 Autoconf
