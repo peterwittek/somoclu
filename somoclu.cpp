@@ -95,12 +95,12 @@ int main(int argc, char** argv)
 
   // Allocate a buffer on each node
   float* data = new float[nVectorsPerRank*nDimensions];
-  
+ 
   // Dispatch a portion of the input data to each node
   MPI_Scatter(dataRoot, nVectorsPerRank*nDimensions, MPI_FLOAT,
               data, nVectorsPerRank*nDimensions, MPI_FLOAT,
               0, MPI_COMM_WORLD);
-  
+
   if(rank == 0){
       // No need for root data any more
       delete [] dataRoot;

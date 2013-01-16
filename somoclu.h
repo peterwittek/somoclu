@@ -17,6 +17,7 @@
  *
  */
 
+#define DEBUG
 #define CUDA
  
 float *loadCodebook(const char *mapFilename, 

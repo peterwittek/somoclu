@@ -30,28 +30,27 @@
 float get_distance(float* codebook, float* data, 
                    unsigned int som_y, unsigned int som_x, unsigned int nSomX,
                    unsigned int nDimensions, unsigned int nVectorsPerRank,
-                   int itask, unsigned int r)
+                   unsigned int r)
 {
     float distance = 0.0f;
     //float n1 = 0.0f, n2 = 0.0f;
     for (unsigned int d = 0; d < nDimensions; d++)
         distance += (codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] - 
-                    *((data + itask*nDimensions*nVectorsPerRank) + r*nDimensions + d))
+                    *(data + r*nDimensions + d))
                     *
                     (codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] - 
-                    *((data + itask*nDimensions*nVectorsPerRank) + r*nDimensions + d));
+                    *(data + r*nDimensions + d));
     return sqrt(distance);
 }
 
 /** Get node coords for the best matching unit (BMU)
  * @param coords - BMU coords
- * @param itask - #task
  * @param n - row num in the input feature file
  */
 void get_bmu_coord(float* codebook, float* data, 
                    unsigned int nSomY, unsigned int nSomX, 
                    unsigned int nDimensions, unsigned int nVectorsPerRank,
-                   int* coords, int itask, unsigned int n)
+                   int* coords, unsigned int n)
 { 
     float mindist = 9999.99;
     float dist = 0.0f;
@@ -62,7 +61,7 @@ void get_bmu_coord(float* codebook, float* data,
     for (unsigned int som_y = 0; som_y < nSomY; som_y++) { 
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
             dist = get_distance(codebook, data, som_y, som_x, nSomX,
-                                nDimensions, nVectorsPerRank, itask, n);
+                                nDimensions, nVectorsPerRank, n);
             if (dist < mindist) { 
                 mindist = dist;
                 coords[0] = som_x;
@@ -70,6 +69,7 @@ void get_bmu_coord(float* codebook, float* data,
             }
         }
     }
+    //std::cout << mindist << "\n";
 }
 
 void trainOneEpochDenseCPU(int itask, float *data, float *numerator, 
@@ -91,13 +91,12 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                 localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] = 0.0;
         }
     }
-    
+        
     for (unsigned int n = 0; n < nVectorsPerRank; n++) {
-
         /// get the best matching unit
         get_bmu_coord(codebook, data, nSomY, nSomX,
-                      nDimensions, nVectorsPerRank, p1, itask, n);
-            
+                      nDimensions, nVectorsPerRank, p1, n);
+
         /// Accumulate denoms and numers
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) { 
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
@@ -107,19 +106,18 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                 for (unsigned int p = 0; p < 2; p++)
                     dist += (p1[p] - p2[p]) * (p1[p] - p2[p]);
                 dist = sqrt(dist);
-                
+          
                 float neighbor_fuct = 0.0f;
                 neighbor_fuct = exp(-(1.0f * dist * dist) / (radius * radius));
                 
                 for (unsigned int d = 0; d < nDimensions; d++) {
                     localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] += 
                         1.0f * neighbor_fuct 
-                        * (*((data + itask*nDimensions*nVectorsPerRank) 
-                        + n*nDimensions + d));
+                        * (*(data + n*nDimensions + d));
                 }
                 localDenominator[som_y*nSomX + som_x] += neighbor_fuct;
             }
-        }        
+        }    
     }     
   MPI_Reduce(localNumerator, numerator, 
           nSomY*nSomX*nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);

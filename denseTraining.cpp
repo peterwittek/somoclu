@@ -74,7 +74,6 @@ void train(int itask, float *data, unsigned int nSomX, unsigned int nSomY,
     denominator = new float[nSomY*nSomX];
     initializeCodebook(0, codebook, nSomX, nSomY, nDimensions);
   }
-  
   MPI_Barrier(MPI_COMM_WORLD);
   
   ///
@@ -142,8 +141,9 @@ void train(int itask, float *data, unsigned int nSomX, unsigned int nSomY,
           for (unsigned int d = 0; d < nDimensions; d++) {
               float newWeight = numerator[som_y*nSomX*nDimensions 
                                   + som_x*nDimensions + d] / denom;
-              if (newWeight > 0.0) 
+              if (newWeight > 0.0) {
                   codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] = newWeight;
+                }
           }
         }
       }

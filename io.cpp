@@ -163,12 +163,18 @@ float *readMatrix(const char *inFileName, unsigned int &nRows, unsigned int &nCo
   file.open(inFileName);
   string line;
   int elements = 0;
+  float tmp;
   while(getline(file,line)){
     stringstream linestream(line);
     string value;
     while(getline(linestream,value,' ')){
+      //&& EOF != sscanf(str_float, "%f", &tmp)
       if(value.length()>0){
-            elements++;
+        istringstream myStream(value);
+        myStream >> tmp;
+        if (!myStream.fail()){
+          elements++;
+        }
       }
     }
     if (nRows==0){
@@ -185,8 +191,10 @@ float *readMatrix(const char *inFileName, unsigned int &nRows, unsigned int &nCo
     while(getline(linestream,value,' ')){
       if (value.length()>0){
         istringstream myStream(value);
-        myStream >> data[j];
-        j++;
+        myStream >> tmp;
+        if (!myStream.fail()){
+          data[j++]=tmp;
+        }
       }
     }
   }
