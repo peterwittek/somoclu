@@ -11,7 +11,7 @@ INCLUDES=-I$(MPI_DIR)/include -I$(CUDA_DIR)/include
 LIBS=-L $(CUDA_DIR)/lib64 -lcublas
 
 OBJDIR=obj
-OBJS := $(addprefix $(OBJDIR)/,io.o denseTraining.o denseCpuKernels.o denseGpuKernels.cu.co somoclu.o)
+OBJS := $(addprefix $(OBJDIR)/,somoclu.o io.o denseTraining.o denseCpuKernels.o denseGpuKernels.cu.co)
 
 TARGETS=somoclu
 

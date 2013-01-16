@@ -37,7 +37,8 @@ using namespace std;
 #define KERNEL_TYPE 0
 #define ENABLE_SNAPSHOTS false
 
-void processCommandLine(int argc, char** argv, unsigned int *nEpoch, 
+void processCommandLine(int argc, char** argv, char* inFileName, 
+                        char* outPrefix, unsigned int *nEpoch, 
                         unsigned int *nSomX, unsigned int *nSomY, 
                         unsigned int *kernelType, bool *enableSnapshots);
 
@@ -59,12 +60,13 @@ int main(int argc, char** argv)
   unsigned int nSomY = 0;
   unsigned int kernelType = 0;
   bool enableSnapshots = false;
-  const char *inFileName = "data/rgbs.txt";
-  const char *outPrefix = "data/rgbs";
+  char *inFileName = new char[255];
+  char *outPrefix = new char[255];
 
   if (rank==0) {
-      processCommandLine(argc, argv, &nEpoch, &nSomX, &nSomY, &kernelType,
-                         &enableSnapshots);
+      processCommandLine(argc, argv, inFileName, outPrefix, 
+                         &nEpoch, &nSomX, &nSomY, 
+                         &kernelType, &enableSnapshots);
   }
   MPI_Bcast(&nEpoch, 1, MPI_INT, 0, MPI_COMM_WORLD);  
   MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -123,7 +125,7 @@ int main(int argc, char** argv)
 
 void printUsage() {
     cout << "Usage:\n" \
-              "     mpirun -np NPROC somoclu [OPTIONs]\n" \
+              "     [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX\n" \
               "Arguments:\n" \
               "     -e NUMBER     Maximum number of epochs (default: " << N_EPOCH << ")\n" \
               "     -k NUMBER     Kernel type (default: " << KERNEL_TYPE << "): \n" \
@@ -131,11 +133,16 @@ void printUsage() {
               "                      1: Dense GPU\n" \
               "     -s            Enable snapshots U-matrix (default: false)\n" \
               "     -x NUMBER     Dimension of SOM in direction x (default: " << N_SOM_X << ")\n" \
-              "     -y NUMBER     Dimension of SOM in direction y (default: " << N_SOM_Y << ")\n";
-
+              "     -y NUMBER     Dimension of SOM in direction y (default: " << N_SOM_Y << ")\n" \
+              "Examples:\n" \
+              "     somoclu data/rgbs.txt data/rgbs\n"
+              "     mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs\n";
 }
 
-void processCommandLine(int argc, char** argv, unsigned int *nEpoch, unsigned int *nSomX, unsigned int *nSomY, unsigned int *kernelType, bool *enableSnapshots) {
+void processCommandLine(int argc, char** argv, char* inFileName, 
+                        char* outPrefix, unsigned int *nEpoch, 
+                        unsigned int *nSomX, unsigned int *nSomY, 
+                        unsigned int *kernelType, bool *enableSnapshots) {
   
     // Setting default values
     *nEpoch = N_EPOCH;
@@ -145,6 +152,7 @@ void processCommandLine(int argc, char** argv, unsigned int *nEpoch, unsigned in
     *enableSnapshots = ENABLE_SNAPSHOTS;
     
     int c;
+    extern int optind, optopt;
     while ((c = getopt (argc, argv, "hsx:y:e:k:")) != -1) {
         switch (c) {
         case 'e':
@@ -201,6 +209,13 @@ void processCommandLine(int argc, char** argv, unsigned int *nEpoch, unsigned in
             abort ();
         }
     }
+    if (argc-optind!=2) {
+                fprintf(stderr, "Incorrect number of mandatory parameters");
+                printUsage();
+                MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+    strcpy(inFileName, argv[optind++]);
+    strcpy(outPrefix, argv[optind++]);
 }
 
 /** Shut down MPI cleanly if something goes wrong
