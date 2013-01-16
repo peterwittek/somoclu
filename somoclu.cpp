@@ -111,10 +111,14 @@ int main(int argc, char** argv)
   }
 
 #ifdef CUDA  
-  setDevice(rank, nProcs);
-  initializeGpu(data, nVectorsPerRank, nDimensions);
+  if (kernelType == 1){
+    setDevice(rank, nProcs);
+    initializeGpu(data, nVectorsPerRank, nDimensions);
+  }
 #endif
-
+  
+  MPI_Barrier(MPI_COMM_WORLD); 
+  
   // TRAINING
   train(rank, data, nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
         nEpoch, outPrefix, enableSnapshots, kernelType);
@@ -127,7 +131,9 @@ int main(int argc, char** argv)
   }
 
 #ifdef CUDA  
-  shutdownGpu();
+  if (kernelType == 1){
+    shutdownGpu();
+  }
 #endif  
   MPI_Finalize();
   return 0;
