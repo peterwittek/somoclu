@@ -67,6 +67,12 @@ int main(int argc, char** argv)
       processCommandLine(argc, argv, inFileName, outPrefix, 
                          &nEpoch, &nSomX, &nSomY, 
                          &kernelType, &enableSnapshots);
+#ifndef CUDA
+      if (kernelType == 1){
+          cerr << "Somoclu was compile without GPU support!\n";
+          MPI_Abort(MPI_COMM_WORLD, 1);          
+      }
+#endif
   }
   MPI_Bcast(&nEpoch, 1, MPI_INT, 0, MPI_COMM_WORLD);  
   MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -103,9 +109,11 @@ int main(int argc, char** argv)
       cout << "nDimensions: " << nDimensions << " ";
       cout << endl;
   }
-  
+
+#ifdef CUDA  
   setDevice(rank, nProcs);
   initializeGpu(data, nVectorsPerRank, nDimensions);
+#endif
 
   // TRAINING
   train(rank, data, nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
@@ -117,8 +125,10 @@ int main(int argc, char** argv)
   if (rank == 0) {
     cerr << "Total Execution Time: " << profile_time << endl;
   }
-  
+
+#ifdef CUDA  
   shutdownGpu();
+#endif  
   MPI_Finalize();
   return 0;
 }

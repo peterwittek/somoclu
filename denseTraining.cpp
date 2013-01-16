@@ -124,11 +124,13 @@ void train(int itask, float *data, unsigned int nSomX, unsigned int nSomY,
                             nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
                             radius);
               break;
+#ifdef CUDA              
       case 1: /// Dense GPU
               trainOneEpochDenseGPU(itask, data, numerator, denominator, codebook,
                             nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
                             radius);
               break;              
+#endif
     }            
                           
     /// 3. Update codebook using numerator and denominator

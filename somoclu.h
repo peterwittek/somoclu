@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
+#define CUDA
  
 float *loadCodebook(const char *mapFilename, 
                     unsigned int SOM_X, unsigned int SOM_Y, 
@@ -39,6 +41,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nVectorsPerRank, float radius);
 
 extern "C" {
+#ifdef CUDA
 void setDevice(int commRank, int commSize);
 void shutdownGpu();
 void initializeGpu(float *hostData, int height, int width);
@@ -47,5 +50,6 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                            unsigned int nSomX, unsigned int nSomY, 
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius);
+#endif                           
 void my_abort(int err);
 }
