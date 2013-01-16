@@ -1,4 +1,6 @@
-GPU-Accelerated MapReduce-Based Self-Organizing Maps
+This project is a fork of 
+
+https://github.com/peterwittek/mr-mpi-som-gpu
 
 Example usage with two GPUs:
 
@@ -6,14 +8,7 @@ mpirun -np 2 ./mrsom data/rgbs.txt data/rgbs
 
 The input is a plain-text dense matrix, where the rows correspond to the instances.
 
-You will need CUDA, MPI, and MR-MPI to compile the code. MR-MPI is available at:
-http://www.sandia.gov/~sjplimp/download.html
-
-The code was derived from the MR-MPI SOM implementation by Seung-Jin Sul:
-https://github.com/andreyto/mr-mpi-som
+You will need CUDA and MPI to compile the code.
 
 The GPU setting method for a distributed system is based on GPMR by Jeff Stuart:
 http://code.google.com/p/gpmr/
-
-If you use this code, please cite: 
-Wittek, P., Darányi, S.: A GPU-Accelerated Algorithm for Self-Organizing Maps in a Distributed Environment. Proceedings of ESANN-12, 20th European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning. Bruges, Belgium. April, 2012.

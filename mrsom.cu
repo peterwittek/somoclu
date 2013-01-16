@@ -1,6 +1,6 @@
 /**
- * GPU-Accelerated MapReduce-Based Self-Organizing Maps
- *  Copyright (C) 2012 Peter Wittek
+ * Self-Organizing Maps on a GPU cluster
+ *  Copyright (C) 2013 Peter Wittek
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

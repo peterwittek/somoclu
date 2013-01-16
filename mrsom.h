@@ -1,6 +1,6 @@
 /**
- * GPU-Accelerated MapReduce-Based Self-Organizing Maps
- *  Copyright (C) 2012 Peter Wittek
+ * Self-Organizing Maps on a GPU cluster
+ *  Copyright (C) 2013 Peter Wittek
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,10 @@ int saveUMat(char* fname, float *codebook, unsigned int nSomX,
 void printMatrix(float *A, int nRows, int nCols);
 float *readMatrix(const char *inFileName, 
                   unsigned int &nRows, unsigned int &nCols);
+void train(int itask, float *data, unsigned int nSomX, unsigned int nSomY, 
+           unsigned int nDimensions, unsigned int nVectors, 
+           unsigned int nVectorsPerRank, unsigned int nEpoch, 
+           const char *outPrefix, bool shouldSaveInterim);
 
 extern "C" {
 void setDevice(int commRank, int commSize);

@@ -1,6 +1,6 @@
 /**
- * GPU-Accelerated MapReduce-Based Self-Organizing Maps
- *  Copyright (C) 2012 Peter Wittek
+ * Self-Organizing Maps on a GPU cluster
+ *  Copyright (C) 2013 Peter Wittek
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
  *
  */
  
-#include <cstdio>
 #include <cmath>
 #include <sstream>
 #include <iostream>
@@ -37,7 +36,7 @@ int saveCodebook(char* cbFileName, float *codebook, unsigned int nSomX, unsigned
 	char temp[80];
 	cout << "    Codebook file = " << cbFileName << endl;       
 	ofstream mapFile2(cbFileName);
-	printf("    Saving Codebook...\n");
+	cout << "    Saving Codebook..." << endl;
 	if (mapFile2.is_open()) {
 		for (unsigned int som_y = 0; som_y < nSomY; som_y++) { 
 			for (unsigned int som_x = 0; som_x < nSomX; som_x++) { 
