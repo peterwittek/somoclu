@@ -1,5 +1,5 @@
 /**
- * Self-Organizing Maps on a GPU cluster
+ * Self-Organizing Maps on a cluster
  *  Copyright (C) 2013 Peter Wittek
  *
  * This program is free software: you can redistribute it and/or modify

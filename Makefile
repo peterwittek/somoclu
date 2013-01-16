@@ -7,26 +7,30 @@ CXXFLAGS = -g -Wall
 NVCC=$(CUDA_DIR)/bin/nvcc
 NVCCFLAGS=-arch sm_11 -g --compiler-options -rdynamic
 
-INCLUDE=-I$(MPI_DIR)/include -I$(CUDA_DIR)/include
+INCLUDES=-I$(MPI_DIR)/include -I$(CUDA_DIR)/include
 LIBS=-L $(CUDA_DIR)/lib64 -lcublas
 
-all: mrsom
+OBJDIR=obj
+OBJS := $(addprefix $(OBJDIR)/,io.o denseGpuTraining.o denseGpuKernels.cu.co somoclu.o)
 
-mrsom: obj/mrsom.o obj/mrsom.cu.o obj/io.o obj/train.o
-	$(CXX) obj/mrsom.o obj/mrsom.cu.o obj/io.o obj/train.o $(LIBS) -o mrsom
+TARGETS=somoclu
 
-obj/mrsom.o:
-	mkdir -p obj
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c mrsom.cpp -o obj/mrsom.o
+all: $(TARGETS)
 
-obj/io.o:
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c io.cpp -o obj/io.o
+somoclu: $(OBJS)
+	$(CXX) $(CXXFLAGS) $(LIBS) -o $@ $^
 
-obj/train.o:
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c train.cpp -o obj/train.o
+$(OBJDIR)/%.o: %.cpp
+		$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ -c $<
 
-obj/mrsom.cu.o: 
-	$(NVCC) $(NVCCFLAGS) $(INCLUDE) mrsom.cu -c -o obj/mrsom.cu.o
+$(OBJDIR)/%.cu.co: %.cu
+		$(NVCC) $(NVCCFLAGS) $(INCLUDES) -o $@ -c $<
+	     
+$(OBJS): | $(OBJDIR)
+     
+$(OBJDIR):
+		mkdir $(OBJDIR)
+
 	
 clean:
-	rm -rf obj mrsom
+		rm -f $(OBJS) $(TARGETS)
