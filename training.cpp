@@ -57,7 +57,8 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
  * @param ptr
  */
       
-void train(int itask, float *data, unsigned int nSomX, unsigned int nSomY, 
+void train(int itask, float *data, svm_node **sparseData,
+           unsigned int nSomX, unsigned int nSomY, 
            unsigned int nDimensions, unsigned int nVectors, 
            unsigned int nVectorsPerRank, unsigned int nEpoch, 
            const char *outPrefix, bool shouldSaveInterim, 

@@ -78,6 +78,7 @@ int main(int argc, char** argv)
   MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(inFileName, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
   
   double profile_time = MPI_Wtime();
 
@@ -88,7 +89,7 @@ int main(int argc, char** argv)
       if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
         dataRoot = readMatrix(inFileName, nVectors, nDimensions);
       } else {
-        readSparseMatrix(inFileName, nVectors, nDimensions);
+        readSparseMatrixDimensions(inFileName, nVectors, nDimensions);
       }
   }
   MPI_Barrier(MPI_COMM_WORLD); 
@@ -99,15 +100,25 @@ int main(int argc, char** argv)
 
   // Allocate a buffer on each node
   float* data;
+  svm_node **sparseData;
   if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
     data = new float[nVectorsPerRank*nDimensions];
-  }
- 
-  // Dispatch a portion of the input data to each node
-  MPI_Scatter(dataRoot, nVectorsPerRank*nDimensions, MPI_FLOAT,
+    // Dispatch a portion of the input data to each node
+    MPI_Scatter(dataRoot, nVectorsPerRank*nDimensions, MPI_FLOAT,
               data, nVectorsPerRank*nDimensions, MPI_FLOAT,
               0, MPI_COMM_WORLD);
-
+  } else {
+    int currentRankProcessed = 0;
+    while (currentRankProcessed < nProcs) {
+      if (rank == currentRankProcessed) {
+        sparseData=readSparseMatrixChunk(inFileName, nVectors, nVectorsPerRank, 
+                              rank*nVectorsPerRank);
+      }
+      currentRankProcessed++;
+      MPI_Barrier(MPI_COMM_WORLD); 
+    }
+  }
+  
   if(rank == 0){
       // No need for root data any more
       if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
@@ -129,11 +140,14 @@ int main(int argc, char** argv)
   MPI_Barrier(MPI_COMM_WORLD); 
   
   // TRAINING
-  train(rank, data, nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
+  train(rank, data, sparseData, nSomX, nSomY, 
+        nDimensions, nVectors, nVectorsPerRank,
         nEpoch, outPrefix, enableSnapshots, kernelType);
-
+  
   if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
     delete [] data;
+  } else {
+    delete [] sparseData;
   }
   
   profile_time = MPI_Wtime() - profile_time;

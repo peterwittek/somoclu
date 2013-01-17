@@ -204,47 +204,75 @@ float *readMatrix(const char *inFileName, unsigned int &nRows, unsigned int &nCo
   return data;
 }
 
-svm_node** readSparseMatrix(const char *filename, unsigned int &nRows, 
+void readSparseMatrixDimensions(const char *filename, unsigned int &nRows, 
                             unsigned int &nColumns) {
   ifstream file;
   file.open(filename);
   string line;
-  int elements = 0;
+  int max_index=-1;
   while(getline(file,line)) {
+    stringstream linestream(line);
+    string value;
+    int dummy_index;
+    while(getline(linestream,value,' ')) {
+      int separator=value.find(":");
+      istringstream myStream(value.substr(0,separator));
+      myStream >> dummy_index;
+      if(dummy_index > max_index){
+        max_index = dummy_index;
+      }
+    }
+    ++nRows;
+  }
+  nColumns=max_index+1;
+  file.close();               
+}
+
+svm_node** readSparseMatrixChunk(const char *filename, unsigned int nRows, 
+                                 unsigned int nRowsToRead, 
+                                 unsigned int rowOffset) {
+  ifstream file;
+  file.open(filename);
+  string line;
+  for (unsigned int i=0; i<rowOffset; i++) {
+    getline(file, line);
+  }
+/*  while(getline(file,line)) {
     stringstream linestream(line);
     string value;
     while(getline(linestream,value,' ')) {
       elements++;
     }
+    elements++; // To account for the dummy row-closing element
     ++nRows;
   }
-  cout << elements << " " << nRows << "\n";
-  file.close();file.open(filename);
-  svm_node **x_matrix = new svm_node *[nRows];
-  svm_node *x_space = new svm_node[elements];
-  int max_index=-1;
-  int j=0;
-  for(unsigned int i=0;i<nRows;i++) {	
-	 x_matrix[i] = &x_space[j];
-	 getline(file, line);
-    stringstream linestream(line);
+  file.close();file.open(filename);*/
+  if (rowOffset+nRowsToRead >= nRows) {
+    nRowsToRead = nRows-rowOffset;
+  }
+  svm_node **x_matrix = new svm_node *[nRowsToRead];
+  for(unsigned int i=0;i<nRowsToRead;i++) {	
+    getline(file, line);
+    stringstream tmplinestream(line);
     string value;
+    int elements = 0;
+    while(getline(tmplinestream,value,' ')) {
+      elements++;
+    }
+    elements++; // To account for the closing dummy node in the row
+    x_matrix[i] = new svm_node[elements];
+    stringstream linestream(line);
+    int j=0;
     while(getline(linestream,value,' ')) {
       int separator=value.find(":");
       istringstream myStream(value.substr(0,separator));
-      myStream >> x_space[j].index;
-      if(x_space[j].index > max_index){
-        max_index = x_space[j].index;
-      }
+      myStream >> x_matrix[i][j].index;
       istringstream myStream2(value.substr(separator+1));
-      myStream2 >> x_space[j].value;
-      cout << x_space[j].index << ":" << x_space[j].value << " ";
+      myStream2 >> x_matrix[i][j].value;
       j++;
     }
-    cout << "\n";
-		x_space[j++].index = -1;
+    x_matrix[i][j].index = -1;
   }
-  nColumns=max_index+1;
   file.close();
   return x_matrix;
 }

@@ -41,9 +41,13 @@ int saveUMat(char* fname, float *codebook, unsigned int nSomX,
 void printMatrix(float *A, int nRows, int nCols);
 float *readMatrix(const char *inFileName, 
                   unsigned int &nRows, unsigned int &nCols);
-svm_node** readSparseMatrix(const char *filename, unsigned int &nRows, 
+void readSparseMatrixDimensions(const char *filename, unsigned int &nRows, 
                             unsigned int &nColumns);
-void train(int itask, float *data, unsigned int nSomX, unsigned int nSomY, 
+svm_node** readSparseMatrixChunk(const char *filename, unsigned int nRows, 
+                                 unsigned int nRowsToRead, 
+                                 unsigned int rowOffset);
+void train(int itask, float *data, svm_node **sparseData, 
+           unsigned int nSomX, unsigned int nSomY, 
            unsigned int nDimensions, unsigned int nVectors, 
            unsigned int nVectorsPerRank, unsigned int nEpoch, 
            const char *outPrefix, bool shouldSaveInterim, 
