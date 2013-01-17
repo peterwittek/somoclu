@@ -68,7 +68,7 @@ int main(int argc, char** argv)
                          &nEpoch, &nSomX, &nSomY, 
                          &kernelType, &enableSnapshots);
 #ifndef CUDA
-      if (kernelType == 1){
+      if (kernelType == DENSE_GPU){
           cerr << "Somoclu was compile without GPU support!\n";
           MPI_Abort(MPI_COMM_WORLD, 1);          
       }
@@ -81,11 +81,15 @@ int main(int argc, char** argv)
   
   double profile_time = MPI_Wtime();
 
-  float * dataRoot = NULL;    
+  float * dataRoot = NULL;
   unsigned int nDimensions = 0;    
-  unsigned int nVectors = 0;           /// Total num of feature vectors 
-  if(rank == 0){
-      dataRoot = readMatrix(inFileName, nVectors, nDimensions);
+  unsigned int nVectors = 0;
+  if(rank == 0 ){
+      if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
+        dataRoot = readMatrix(inFileName, nVectors, nDimensions);
+      } else {
+        readSparseMatrix(inFileName, nVectors, nDimensions);
+      }
   }
   MPI_Barrier(MPI_COMM_WORLD); 
 
@@ -94,7 +98,10 @@ int main(int argc, char** argv)
   MPI_Bcast(&nDimensions, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   // Allocate a buffer on each node
-  float* data = new float[nVectorsPerRank*nDimensions];
+  float* data;
+  if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
+    data = new float[nVectorsPerRank*nDimensions];
+  }
  
   // Dispatch a portion of the input data to each node
   MPI_Scatter(dataRoot, nVectorsPerRank*nDimensions, MPI_FLOAT,
@@ -103,7 +110,9 @@ int main(int argc, char** argv)
 
   if(rank == 0){
       // No need for root data any more
-      delete [] dataRoot;
+      if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
+        delete [] dataRoot;
+      }
       cout << "nVectors: " << nVectors << " ";
       cout << "nVectorsPerRank: " << nVectorsPerRank << " ";
       cout << "nDimensions: " << nDimensions << " ";
@@ -111,7 +120,7 @@ int main(int argc, char** argv)
   }
 
 #ifdef CUDA  
-  if (kernelType == 1){
+  if (kernelType == DENSE_GPU){
     setDevice(rank, nProcs);
     initializeGpu(data, nVectorsPerRank, nDimensions);
   }
@@ -123,7 +132,9 @@ int main(int argc, char** argv)
   train(rank, data, nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
         nEpoch, outPrefix, enableSnapshots, kernelType);
 
-  delete [] data;
+  if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
+    delete [] data;
+  }
   
   profile_time = MPI_Wtime() - profile_time;
   if (rank == 0) {
@@ -131,7 +142,7 @@ int main(int argc, char** argv)
   }
 
 #ifdef CUDA  
-  if (kernelType == 1){
+  if (kernelType == DENSE_GPU){
     shutdownGpu();
   }
 #endif  
@@ -147,6 +158,7 @@ void printUsage() {
               "     -k NUMBER     Kernel type (default: " << KERNEL_TYPE << "): \n" \
               "                      0: Dense CPU\n" \
               "                      1: Dense GPU\n" \
+              "                      2: Sparse CPU\n" \
               "     -s            Enable snapshots U-matrix (default: false)\n" \
               "     -x NUMBER     Dimension of SOM in direction x (default: " << N_SOM_X << ")\n" \
               "     -y NUMBER     Dimension of SOM in direction y (default: " << N_SOM_Y << ")\n" \
@@ -184,7 +196,7 @@ void processCommandLine(int argc, char** argv, char* inFileName,
             break;
         case 'k':
             *kernelType = atoi(optarg);
-            if (*kernelType<0||*kernelType>1) {
+            if (*kernelType<DENSE_CPU||*kernelType>SPARSE_CPU) {
                 fprintf (stderr, "The argument of option -k should be a valid kernel.\n");
                 MPI_Abort(MPI_COMM_WORLD, 1);
             }

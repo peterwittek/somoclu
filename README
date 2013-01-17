@@ -10,9 +10,10 @@ Usage:
     [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX
     Arguments:
          -e NUMBER     Maximum number of epochs
-         -k NUMBER     Kernel type (default:
+         -k NUMBER     Kernel type
                           0: Dense CPU
                           1: Dense GPU
+                          2: Sparse CPU
          -s            Enable snapshots U-matrix
          -x NUMBER     Dimension of SOM in direction x
          -y NUMBER     Dimension of SOM in direction y

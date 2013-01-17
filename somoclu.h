@@ -19,6 +19,17 @@
 
 #define DEBUG
 #define CUDA
+
+#define DENSE_CPU 0
+#define DENSE_GPU 1
+#define SPARSE_CPU 2
+
+/// Sparse structures and routines
+struct svm_node
+{
+	int index;
+	float value;
+};
  
 float *loadCodebook(const char *mapFilename, 
                     unsigned int SOM_X, unsigned int SOM_Y, 
@@ -30,6 +41,8 @@ int saveUMat(char* fname, float *codebook, unsigned int nSomX,
 void printMatrix(float *A, int nRows, int nCols);
 float *readMatrix(const char *inFileName, 
                   unsigned int &nRows, unsigned int &nCols);
+svm_node** readSparseMatrix(const char *filename, unsigned int &nRows, 
+                            unsigned int &nColumns);
 void train(int itask, float *data, unsigned int nSomX, unsigned int nSomY, 
            unsigned int nDimensions, unsigned int nVectors, 
            unsigned int nVectorsPerRank, unsigned int nEpoch, 

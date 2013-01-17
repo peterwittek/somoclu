@@ -118,18 +118,21 @@ void train(int itask, float *data, unsigned int nSomX, unsigned int nSomY,
 
     switch (kernelType) {
       default:
-      case 0: /// Dense CPU
+      case DENSE_CPU: 
               trainOneEpochDenseCPU(itask, data, numerator, denominator, codebook,
                             nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
                             radius);
               break;
 #ifdef CUDA              
-      case 1: /// Dense GPU
+      case DENSE_GPU: 
               trainOneEpochDenseGPU(itask, data, numerator, denominator, codebook,
                             nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
                             radius);
               break;              
 #endif
+      case SPARSE_CPU:
+              cout << "Sparse CPU kernel is not implemented yet!\n";
+              break;
     }            
                           
     /// 3. Update codebook using numerator and denominator

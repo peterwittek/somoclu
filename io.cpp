@@ -22,6 +22,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "somoclu.h"
+
 using namespace std;
 
 /** Save a SOM codebook
@@ -200,4 +202,49 @@ float *readMatrix(const char *inFileName, unsigned int &nRows, unsigned int &nCo
   }
   file.close();
   return data;
+}
+
+svm_node** readSparseMatrix(const char *filename, unsigned int &nRows, 
+                            unsigned int &nColumns) {
+  ifstream file;
+  file.open(filename);
+  string line;
+  int elements = 0;
+  while(getline(file,line)) {
+    stringstream linestream(line);
+    string value;
+    while(getline(linestream,value,' ')) {
+      elements++;
+    }
+    ++nRows;
+  }
+  cout << elements << " " << nRows << "\n";
+  file.close();file.open(filename);
+  svm_node **x_matrix = new svm_node *[nRows];
+  svm_node *x_space = new svm_node[elements];
+  int max_index=-1;
+  int j=0;
+  for(unsigned int i=0;i<nRows;i++) {	
+	 x_matrix[i] = &x_space[j];
+	 getline(file, line);
+    stringstream linestream(line);
+    string value;
+    while(getline(linestream,value,' ')) {
+      int separator=value.find(":");
+      istringstream myStream(value.substr(0,separator));
+      myStream >> x_space[j].index;
+      if(x_space[j].index > max_index){
+        max_index = x_space[j].index;
+      }
+      istringstream myStream2(value.substr(separator+1));
+      myStream2 >> x_space[j].value;
+      cout << x_space[j].index << ":" << x_space[j].value << " ";
+      j++;
+    }
+    cout << "\n";
+		x_space[j++].index = -1;
+  }
+  nColumns=max_index+1;
+  file.close();
+  return x_matrix;
 }
