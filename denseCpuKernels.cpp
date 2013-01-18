@@ -29,11 +29,9 @@
 
 float get_distance(float* codebook, float* data, 
                    unsigned int som_y, unsigned int som_x, unsigned int nSomX,
-                   unsigned int nDimensions, unsigned int nVectorsPerRank,
-                   unsigned int r)
+                   unsigned int nDimensions, unsigned int r)
 {
     float distance = 0.0f;
-    //float n1 = 0.0f, n2 = 0.0f;
     for (unsigned int d = 0; d < nDimensions; d++)
         distance += (codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] - 
                     *(data + r*nDimensions + d))
@@ -49,8 +47,7 @@ float get_distance(float* codebook, float* data,
  */
 void get_bmu_coord(float* codebook, float* data, 
                    unsigned int nSomY, unsigned int nSomX, 
-                   unsigned int nDimensions, unsigned int nVectorsPerRank,
-                   int* coords, unsigned int n)
+                   unsigned int nDimensions, int* coords, unsigned int n)
 { 
     float mindist = 9999.99;
     float dist = 0.0f;
@@ -61,7 +58,7 @@ void get_bmu_coord(float* codebook, float* data,
     for (unsigned int som_y = 0; som_y < nSomY; som_y++) { 
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
             dist = get_distance(codebook, data, som_y, som_x, nSomX,
-                                nDimensions, nVectorsPerRank, n);
+                                nDimensions, n);
             if (dist < mindist) { 
                 mindist = dist;
                 coords[0] = som_x;
@@ -69,7 +66,6 @@ void get_bmu_coord(float* codebook, float* data,
             }
         }
     }
-    //std::cout << mindist << "\n";
 }
 
 void trainOneEpochDenseCPU(int itask, float *data, float *numerator, 
@@ -95,7 +91,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
     for (unsigned int n = 0; n < nVectorsPerRank; n++) {
         /// get the best matching unit
         get_bmu_coord(codebook, data, nSomY, nSomX,
-                      nDimensions, nVectorsPerRank, p1, n);
+                      nDimensions, p1, n);
 
         /// Accumulate denoms and numers
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) { 

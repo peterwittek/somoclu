@@ -57,6 +57,11 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nSomX, unsigned int nSomY, 
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius);
+void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator, 
+                           float *denominator, float *codebook, 
+                           unsigned int nSomX, unsigned int nSomY, 
+                           unsigned int nDimensions, unsigned int nVectors,
+                           unsigned int nVectorsPerRank, float radius);                           
 
 extern "C" {
 #ifdef CUDA

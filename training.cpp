@@ -120,19 +120,21 @@ void train(int itask, float *data, svm_node **sparseData,
     switch (kernelType) {
       default:
       case DENSE_CPU: 
-              trainOneEpochDenseCPU(itask, data, numerator, denominator, codebook,
-                            nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
-                            radius);
+              trainOneEpochDenseCPU(itask, data, numerator, denominator, 
+                                    codebook, nSomX, nSomY, nDimensions,
+                                    nVectors, nVectorsPerRank, radius);
               break;
 #ifdef CUDA              
       case DENSE_GPU: 
-              trainOneEpochDenseGPU(itask, data, numerator, denominator, codebook,
-                            nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
-                            radius);
+              trainOneEpochDenseGPU(itask, data, numerator, denominator, 
+                                    codebook, nSomX, nSomY, nDimensions,
+                                    nVectors, nVectorsPerRank, radius);
               break;              
 #endif
       case SPARSE_CPU:
-              cout << "Sparse CPU kernel is not implemented yet!\n";
+              trainOneEpochSparseCPU(itask, sparseData, numerator, denominator,
+                                    codebook, nSomX, nSomY, nDimensions,
+                                    nVectors, nVectorsPerRank, radius);
               break;
     }            
                           
