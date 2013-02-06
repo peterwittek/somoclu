@@ -17,6 +17,8 @@
  *
  */
 
+#ifndef SOMOCLU_H
+#define SOMOCLU_H
 #define DEBUG
 #define CUDA
 
@@ -66,8 +68,8 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
 extern "C" {
 #ifdef CUDA
 void setDevice(int commRank, int commSize);
-void shutdownGpu();
-void initializeGpu(float *hostData, int height, int width);
+void freeGpu();
+void initializeGpu(float *hostData, int nVectorsPerRank, int nDimensions, int nSomX, int nSomY);
 void trainOneEpochDenseGPU(int itask, float *data, float *numerator, 
                            float *denominator, float *codebook, 
                            unsigned int nSomX, unsigned int nSomY, 
@@ -76,3 +78,4 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
 #endif                           
 void my_abort(int err);
 }
+#endif

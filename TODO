@@ -1,4 +1,2 @@
-Argument parsing
-Optimize GPU code:
-  -Transposing the codebook just cannot be right
 Autoconf
+Improve documentation

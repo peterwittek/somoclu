@@ -18,16 +18,21 @@
  */
  
 #undef _GLIBCXX_ATOMIC_BUILTINS
+#undef _GLIBCXX_USE_INT128 
+
 #include <iostream>
 #include <cublas_v2.h>
 #include <vector>
 #include <mpi.h>
+#include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
+#include <thrust/reduce.h>
+#include <thrust/functional.h>
+
 
 #include "somoclu.h"
 
 using namespace std;
-
-#define BLOCK_DIM 16 
 
 // Error handling macro
 #define CUDA_CHECK(call) \
@@ -38,119 +43,133 @@ using namespace std;
 
 //Globals
 cublasHandle_t handle;
-float* data_d = NULL;
-float* dataNorm2_d = NULL;
+thrust::device_vector<float> deviceData;
+thrust::device_vector<float> deviceDataNorms;
+thrust::device_vector<float> deviceCodebook;
+thrust::device_vector<float> deviceCodebookNorms;
 
-__global__ void columnArgMin(float *g_idata, int *g_odata, int height, int width)
+// convert a linear index to a row index
+template <typename T>
+struct linear_index_to_row_index : public thrust::unary_function<T,T>
 {
-  unsigned int i = blockIdx.x*blockDim.x + threadIdx.x;
-  float min=g_idata[i];
-  int argmin=0;
-  if (i<width){
-    for (int j=1; j < height; j++){ 
-      float element=g_idata[j*width+i];
-      if (element<min){
-        argmin=j;
-        min=element;    
-      }
-    } 
-    g_odata[i]=argmin;
-  }
-}
-
-__global__ void columnSquareSum(float *g_idata, float *g_odata, int height, int width)
-{
-  unsigned int i = blockIdx.x*blockDim.x + threadIdx.x;
-  float element= (i < width) ? g_idata[i] : 0;
-  float sum = element*element;
-  float c = 0.0;              
-  for (int j = 1; j < height; j++){
-    element=(i < width) ? g_idata[j*width+i] : 0;
-    float y = element*element - c;  
-    float t = sum + y;      
-    c = (t - sum) - y;  
-    sum = t;            
-  }
-  g_odata[i]=sum;
-}
-
-__global__ void transpose(float *odata, float *idata,  int height, int width)
-{
-  __shared__ float block[BLOCK_DIM][BLOCK_DIM+1];
+  T C; // number of columns
   
-  // read the matrix tile into shared memory
-  unsigned int xIndex = blockIdx.x * BLOCK_DIM + threadIdx.x;
-  unsigned int yIndex = blockIdx.y * BLOCK_DIM + threadIdx.y;
-  if((xIndex < width) && (yIndex < height)){
-    unsigned int index_in = yIndex * width + xIndex;
-    block[threadIdx.y][threadIdx.x] = idata[index_in];
+  __host__ __device__
+  linear_index_to_row_index(T C) : C(C) {}
+
+  __host__ __device__
+  T operator()(T i)
+  {
+    return i / C;
   }
+};
 
-  __syncthreads();
-
-  // write the transposed matrix tile to global memory
-  xIndex = blockIdx.y * BLOCK_DIM + threadIdx.x;
-  yIndex = blockIdx.x * BLOCK_DIM + threadIdx.y;
-  if((xIndex < height) && (yIndex < width)){
-    unsigned int index_out = yIndex * height + xIndex;
-    odata[index_out] = block[threadIdx.x][threadIdx.y];
-  }
-}
-
-void calculateNorm2(float *d_Anorm2, float *d_A, int height, int width)
+// note: functor inherits from unary_function
+template <typename T>
+struct square : public thrust::unary_function<T,T>
 {
-  dim3 grid((width+511)/512, 1, 1);
-  dim3 threads(512, 1, 1);
-  columnSquareSum<<<grid, threads>>>(d_A, d_Anorm2, height, width);
+  __host__ __device__
+  T operator()(T x) const
+  {
+    return x*x;
+  }
+};
+
+typedef thrust::tuple<int,float> argMinType;
+
+struct argMin : public thrust::binary_function<argMinType,argMinType,argMinType>
+{
+    __host__ __device__
+        argMinType operator()(const argMinType& a, const argMinType& b) const
+        {
+          if (thrust::get<1>(a) < thrust::get<1>(b)){
+            return a;
+          } else {
+            return b;
+          }
+        }
+};
+
+template <typename T>
+thrust::device_vector<T> normsOfRowSpace(thrust::device_vector<T> A, int nRows, int nColumns) {
+  // allocate storage for row sums and indices
+  thrust::device_vector<T> row_sums(nRows);
+  thrust::device_vector<int> row_indices(nRows);          
+          
+  // compute row sums by summing values with equal row indices
+  thrust::reduce_by_key
+    (thrust::make_transform_iterator(thrust::counting_iterator<int>(0), linear_index_to_row_index<int>(nColumns)),
+     thrust::make_transform_iterator(thrust::counting_iterator<int>(0), linear_index_to_row_index<int>(nColumns)) + (nRows*nColumns),
+     thrust::make_transform_iterator(A.begin(), square<T>()),
+     row_indices.begin(),
+     row_sums.begin(),
+     thrust::equal_to<int>(),
+     thrust::plus<T>());
+     
+  return row_sums;
 }
 
-void checkMatrix(float *d, int height, int width){
-  float *data=new float[height*width];
-  CUDA_CHECK( cudaMemcpy(data, d, height*width*sizeof(float), cudaMemcpyDeviceToHost) );
-  for (int i=0; i<height; ++i){
-    for (int j=0; j<width; ++j){
-      cout << data[i*width+j] << " ";
+thrust::device_vector<argMinType> minsOfRowSpace(thrust::device_vector<float> A, int nRows, int nColumns) {
+  // allocate storage for row sums and indices
+  thrust::device_vector<argMinType> row_sums(nRows);
+  thrust::device_vector<int> row_indices(nRows);          
+      
+  // compute row sums by summing values with equal row indices
+  thrust::reduce_by_key
+    (thrust::make_transform_iterator(thrust::counting_iterator<int>(0), linear_index_to_row_index<int>(nColumns)),
+     thrust::make_transform_iterator(thrust::counting_iterator<int>(0), linear_index_to_row_index<int>(nColumns)) + (nRows*nColumns),
+     thrust::make_zip_iterator(thrust::make_tuple(thrust::counting_iterator<int>(0),A.begin())),
+     row_indices.begin(),
+     row_sums.begin(),
+     thrust::equal_to<int>(),
+     argMin());
+  return row_sums;
+}
+
+template <int BLOCK_DIM> 
+__global__ void euclidean(float *anorm2, float *bnorm2, float *M, int height, int width)
+{
+  unsigned int xIndex = blockIdx.x * BLOCK_DIM + threadIdx.x;
+  unsigned int yStartIndex = blockIdx.y * BLOCK_DIM;
+  if (xIndex < width) {
+    float bNormForX = bnorm2[xIndex];
+    unsigned int yEndIndex=(yStartIndex+BLOCK_DIM < height ? yStartIndex+BLOCK_DIM : height);
+    for (unsigned int yIndex=yStartIndex; yIndex<yEndIndex; yIndex++){
+      unsigned int index=yIndex*width+xIndex;
+      M[index] = anorm2[yIndex]-2*M[index]+bNormForX;
     }
-    cout << endl;
   }
-  delete [] data;
+}
+
+template <typename T>
+void printMatrix(thrust::device_vector<T> A, int nRows, int nColumns) {
+  for (size_t i = 0; i < nRows; i++){
+    for (size_t j = 0; j < nColumns; j++){
+      std::cout << A[i*nColumns+j] << " ";
+    }
+    std::cout << "\n";
+  }
+  std::cout << "\n";
 }
 
 /** Clear the device memory and shut down CUBLAS
  * 
  */
-void shutdownGpu()
-{
-  CUDA_CHECK(cudaFree(data_d)); 
-  CUDA_CHECK(cudaFree(dataNorm2_d));  
-  // Shut down CUBLAS
+void freeGpu()
+{ 
+  deviceData.clear();
+  deviceDataNorms.clear();
+  deviceCodebook.clear();
+  deviceCodebookNorms.clear();
+  thrust::device_vector<float>().swap(deviceData);
+  thrust::device_vector<float>().swap(deviceDataNorms);
+  thrust::device_vector<float>().swap(deviceCodebook);
+  thrust::device_vector<float>().swap(deviceCodebookNorms);
   cublasStatus_t status = cublasDestroy(handle);
   if (status != CUBLAS_STATUS_SUCCESS) {
     cerr << "!!!! shutdown error (A)\n";
     my_abort(-1);
   }
-}
-
-//M is not transposed after CUBLAS matrix multiplication
-__global__ void euclidean(float *odata, float *anorm2, float *bnorm2, float *M, int height, int width)
-{
-  // read the matrix tile into shared memory
-  unsigned int xIndex = blockIdx.x * BLOCK_DIM + threadIdx.x;
-  unsigned int yIndex = blockIdx.y * BLOCK_DIM + threadIdx.y;
-  if((xIndex < width) && (yIndex < height))
-  {
-    unsigned int index=yIndex*width+xIndex;
-    odata[index] = anorm2[xIndex]-2*M[index]+bnorm2[yIndex];
-  }
-}
-
-void setCodebookOnDevice(float *hostData, float *deviceData, int nSomX, int nSomY, int nDimensions){
-  float *tmpCodebook=NULL;
-  CUDA_CHECK(cudaMalloc((void**)&tmpCodebook, nSomX*nSomY*nDimensions * sizeof(float)));
-  CUDA_CHECK(cudaMemcpy(tmpCodebook, hostData, nSomX*nSomY*nDimensions * sizeof(float), cudaMemcpyHostToDevice));
-  dim3 grid((nDimensions+BLOCK_DIM-1)/BLOCK_DIM, (nSomX*nSomY+BLOCK_DIM-1)/BLOCK_DIM,1), threads(BLOCK_DIM,BLOCK_DIM,1);
-  transpose<<<grid, threads>>>(deviceData, tmpCodebook, nSomX*nSomY, nDimensions);
-  CUDA_CHECK(cudaFree(tmpCodebook));  
 }
 
 /** Find the best matching units -- called from the map function
@@ -159,63 +178,54 @@ void setCodebookOnDevice(float *hostData, float *deviceData, int nSomX, int nSom
  * @param nSomX - dimensions of SOM map in the x direction
  * @param nSomY - dimensions of SOM map in the y direction
  * @param nDimensions - dimensions of a data instance
- * @param nVecsPerRank - the number of data points assigned to this GPU
+ * @param nVectorsPerRank - the number of data points assigned to this GPU
  */
 
-void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensions, int nVecsPerRank)
+void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensions, int nVectorsPerRank)
 {
-  float *deviceCodebook=NULL;
-  float *codebookNorm2;
-  float *d_C;
-  float *d_D;
-
-  CUDA_CHECK(cudaMalloc((void**)&deviceCodebook, nSomX*nSomY*nDimensions * sizeof(float)));    
-  setCodebookOnDevice(codebook, deviceCodebook, nSomX, nSomY, nDimensions);
-
-  //Calculate the norms of the codebook weight vectors
-  CUDA_CHECK(cudaMalloc((void**)&codebookNorm2, nSomX*nSomY * sizeof(float)));
-  dim3 grid((nSomX*nSomY+511)/512, 1, 1); 
-  dim3 threads(512, 1, 1);
-  columnSquareSum<<<grid, threads>>>(deviceCodebook, codebookNorm2, nDimensions, nSomX*nSomY);
-
+  deviceCodebook = thrust::device_vector<float>(codebook, codebook+nSomX*nSomY*nDimensions);
+  deviceDataNorms = normsOfRowSpace<float>(deviceData, nSomX*nSomY, nDimensions);
+  thrust::device_vector<float> deviceGramMatrix(nSomX*nSomY*nVectorsPerRank, 0);
+  
   //Calculate the inner products of the data vectors and the weight vectors
-  CUDA_CHECK( cudaMalloc((void**)&d_C, nVecsPerRank*nSomX*nSomY*sizeof(float)) );    
+
   float alpha = 1.0f;float beta = 0.0f;
-  cublasStatus_t status = cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, 
-                                      nVecsPerRank, nSomX*nSomY, nDimensions, 
-                                      &alpha, data_d, nVecsPerRank, 
-                                              deviceCodebook, nSomX*nSomY, 
-                                      &beta, d_C, nVecsPerRank);
+  
+  cublasStatus_t status = cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, 
+                               nSomX*nSomY, nVectorsPerRank, nDimensions, 
+                               &alpha, thrust::raw_pointer_cast(&deviceCodebook[0]), nDimensions, 
+                                       thrust::raw_pointer_cast(&deviceData[0]), nDimensions, 
+                               &beta,  thrust::raw_pointer_cast(&deviceGramMatrix[0]), nSomX*nSomY);
+
   if (status != CUBLAS_STATUS_SUCCESS) {
     cerr << "!!!! kernel execution error.\n";
     my_abort(-1);
   }
 
   //All components of the vectorized Euclidean distance are available
-  CUDA_CHECK( cudaMalloc((void**)&d_D, nVecsPerRank*nSomX*nSomY*sizeof(float)) );
-  dim3 grid2((nVecsPerRank+BLOCK_DIM-1)/BLOCK_DIM, (nSomX*nSomY+BLOCK_DIM-1)/BLOCK_DIM,1);
-  dim3 threads2(BLOCK_DIM,BLOCK_DIM,1);
-  euclidean<<<grid2, threads2>>>(d_D, dataNorm2_d, codebookNorm2, d_C, nSomX*nSomY, nVecsPerRank);
+  // 32 is a magic number, this is the block size that works best on Tesla C2050
+  int BLOCK_DIM=32;
+  dim3 grid((nSomX*nSomY+BLOCK_DIM-1)/BLOCK_DIM, (nVectorsPerRank+BLOCK_DIM-1)/BLOCK_DIM,1);
+  dim3 threads(BLOCK_DIM,1,1);
+  if (BLOCK_DIM==32) {
+    euclidean<32><<<grid, threads>>>(thrust::raw_pointer_cast(&deviceDataNorms[0]), 
+                             thrust::raw_pointer_cast(&deviceCodebookNorms[0]), 
+                             thrust::raw_pointer_cast(&deviceGramMatrix[0]), 
+                             nVectorsPerRank, nSomX*nSomY);
+  }
     
   //Finding minimums
-  int *d_mins;
-  CUDA_CHECK( cudaMalloc((void**)&d_mins, nVecsPerRank*sizeof(int)) );
-  dim3 grid3((nVecsPerRank+511)/512, 1, 1);
-  dim3 threads3(512, 1, 1);
-  columnArgMin<<<grid3, threads3>>>(d_D, d_mins, nSomX*nSomY, nVecsPerRank);
-  int *mins=new int[nVecsPerRank];
-  CUDA_CHECK( cudaMemcpy(mins, d_mins, nVecsPerRank*sizeof(int), cudaMemcpyDeviceToHost) );
-  CUDA_CHECK(cudaFree(d_mins)); 
-    
+  thrust::host_vector<argMinType> minsOfA=minsOfRowSpace(deviceGramMatrix, nVectorsPerRank, nSomX*nSomY);
+      
   //Getting back SOM coordinates from minimums
-  for (int i=0; i<nVecsPerRank; i++){
-    bmus[i*2] = mins[i] % nSomX;
-    bmus[i*2+1] = mins[i] / nSomX;
+  for (int i=0; i<nVectorsPerRank; i++){
+    argMinType tmp=minsOfA[i];
+    bmus[i*2] = thrust::get<0>(tmp) % nSomX;
+    bmus[i*2+1] = thrust::get<0>(tmp) / nSomX;
   }        
-  CUDA_CHECK(cudaFree(d_C));  
-  CUDA_CHECK(cudaFree(d_D));  
-  CUDA_CHECK(cudaFree(deviceCodebook)); 
-  CUDA_CHECK(cudaFree(codebookNorm2));  
+//  CUDA_CHECK(cudaFree(d_C));  
+//  CUDA_CHECK(cudaFree(d_D));  
+//  CUDA_CHECK(cudaFree(codebookNorm2));  
 }
 
 /** Initialize CUBLAS and device data
@@ -224,7 +234,7 @@ void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensi
  * @param width - dimensions of a data instance
  */
 
-void initializeGpu(float *hostData, int height, int width)
+void initializeGpu(float *hostData, int nVectorsPerRank, int nDimensions, int nSomX, int nSomY)
 {   
     /* Initialize CUBLAS */
   cublasStatus_t status = cublasCreate(&handle);
@@ -232,16 +242,10 @@ void initializeGpu(float *hostData, int height, int width)
       cerr << "!!!! CUBLAS initialization error\n";
       my_abort(-1);
   }
-  CUDA_CHECK(cudaMalloc((void**)&data_d, height*width*sizeof(float)));
-  CUDA_CHECK(cudaMalloc((void**)&dataNorm2_d, height*sizeof(float)));
-
-  float *tmpDeviceData;
-  CUDA_CHECK(cudaMalloc((void**)&tmpDeviceData, height*width* sizeof(float)));
-  CUDA_CHECK(cudaMemcpy(tmpDeviceData, hostData, height*width * sizeof(float), cudaMemcpyHostToDevice));
-  dim3 grid((width+BLOCK_DIM-1)/BLOCK_DIM, (height+BLOCK_DIM-1)/BLOCK_DIM,1), threads(BLOCK_DIM,BLOCK_DIM,1);
-  transpose<<<grid, threads>>>(data_d, tmpDeviceData, height, width);
-  CUDA_CHECK(cudaFree(tmpDeviceData));  
-  calculateNorm2(dataNorm2_d, data_d, width, height);
+  deviceData = thrust::device_vector<float>(hostData, hostData+nVectorsPerRank*nDimensions);
+  deviceDataNorms = normsOfRowSpace<float>(deviceData, nVectorsPerRank, nDimensions);
+  deviceCodebook = thrust::device_vector<float>(nSomX*nSomY*nDimensions,0);
+  deviceCodebookNorms = thrust::device_vector<float>(nSomX*nSomY,0);
 }
 
 /** Check and initialize a device attached to a node

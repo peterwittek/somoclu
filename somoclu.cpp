@@ -133,7 +133,7 @@ int main(int argc, char** argv)
 #ifdef CUDA  
   if (kernelType == DENSE_GPU){
     setDevice(rank, nProcs);
-    initializeGpu(data, nVectorsPerRank, nDimensions);
+    initializeGpu(data, nVectorsPerRank, nDimensions, nSomX, nSomY);
   }
 #endif
   
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 
 #ifdef CUDA  
   if (kernelType == DENSE_GPU){
-    shutdownGpu();
+    freeGpu();
   }
 #endif  
   MPI_Finalize();
