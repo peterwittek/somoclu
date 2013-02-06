@@ -59,6 +59,7 @@ void get_bmu_coord(float* codebook, float* data,
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
             dist = get_distance(codebook, data, som_y, som_x, nSomX,
                                 nDimensions, n);
+//            std::cout << dist << " ";
             if (dist < mindist) { 
                 mindist = dist;
                 coords[0] = som_x;
@@ -66,6 +67,8 @@ void get_bmu_coord(float* codebook, float* data,
             }
         }
     }
+//    std::cout << "\n";
+//    std::cout << "SomX: " << coords[0] << " SomY: " << coords[1] << "\n";
 }
 
 void trainOneEpochDenseCPU(int itask, float *data, float *numerator, 
