@@ -184,9 +184,9 @@ void freeGpu()
 void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensions, int nVectorsPerRank)
 {
   deviceCodebook = thrust::device_vector<float>(codebook, codebook+nSomX*nSomY*nDimensions);
-  deviceDataNorms = normsOfRowSpace<float>(deviceData, nSomX*nSomY, nDimensions);
+  deviceCodebookNorms = normsOfRowSpace<float>(deviceCodebook, nSomX*nSomY, nDimensions);
   thrust::device_vector<float> deviceGramMatrix(nSomX*nSomY*nVectorsPerRank, 0);
-  printMatrix(deviceCodebook, nSomX*nSomY, nDimensions);
+
   //Calculate the inner products of the data vectors and the weight vectors
 
   float alpha = 1.0f;float beta = 0.0f;
@@ -196,7 +196,6 @@ void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensi
                                &alpha, thrust::raw_pointer_cast(&deviceCodebook[0]), nDimensions, 
                                        thrust::raw_pointer_cast(&deviceData[0]), nDimensions, 
                                &beta,  thrust::raw_pointer_cast(&deviceGramMatrix[0]), nSomX*nSomY);
-  printMatrix(deviceGramMatrix, nVectorsPerRank, nSomX*nSomY);
   if (status != CUBLAS_STATUS_SUCCESS) {
     cerr << "!!!! kernel execution error.\n";
     my_abort(-1);
@@ -213,7 +212,6 @@ void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensi
                              thrust::raw_pointer_cast(&deviceGramMatrix[0]), 
                              nVectorsPerRank, nSomX*nSomY);
   }
-
   //Finding minimums
   thrust::host_vector<argMinType> minsOfA=minsOfRowSpace(deviceGramMatrix, nVectorsPerRank, nSomX*nSomY);
       
@@ -223,7 +221,6 @@ void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensi
     int somCoordinate=thrust::get<0>(tmp) % (nSomX*nSomY);
     bmus[i*2] = somCoordinate % nSomX;
     bmus[i*2+1] = somCoordinate / nSomX;
-    std::cout << "SomX: " << bmus[i*2] << " SomY: " << bmus[i*2+1] << "\n";
   }        
 //  CUDA_CHECK(cudaFree(d_C));  
 //  CUDA_CHECK(cudaFree(d_D));  

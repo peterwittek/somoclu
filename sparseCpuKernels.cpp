@@ -47,7 +47,7 @@ float get_distance(float* codebook, svm_node **sparseData,
                   codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d];
 		}
 	}
-   return sqrt(distance);
+   return distance;
 }
 
 /** Get node coords for the best matching unit (BMU)
