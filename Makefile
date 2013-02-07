@@ -5,10 +5,10 @@ CXX=$(MPI_DIR)/bin/mpicxx
 CXXFLAGS = -g -Wall
 
 NVCC=$(CUDA_DIR)/bin/nvcc
-NVCCFLAGS=-arch sm_11 -g --compiler-options -rdynamic
+NVCCFLAGS=-arch sm_20 -g --compiler-options -rdynamic
 
 INCLUDES=-I$(MPI_DIR)/include -I$(CUDA_DIR)/include
-LIBS=-L $(CUDA_DIR)/lib64 -lcublas
+LIBS=-L $(CUDA_DIR)/lib64 -lcublas -lcudart
 
 OBJDIR=obj
 OBJS := $(addprefix $(OBJDIR)/,sparseCpuKernels.o somoclu.o io.o denseCpuKernels.o denseGpuKernels.cu.co training.o)
@@ -18,7 +18,7 @@ TARGETS=somoclu
 all: $(TARGETS)
 
 somoclu: $(OBJS)
-	$(CXX) $(CXXFLAGS) $(LIBS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
 $(OBJDIR)/%.o: %.cpp
 		$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ -c $<
