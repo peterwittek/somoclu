@@ -37,19 +37,19 @@ int saveCodebook(char* cbFileName, float *codebook, unsigned int nSomX, unsigned
 {
 	char temp[80];
 	cout << "    Codebook file = " << cbFileName << endl;       
-	ofstream mapFile2(cbFileName);
+	ofstream mapFile(cbFileName);
 	cout << "    Saving Codebook..." << endl;
-	if (mapFile2.is_open()) {
+	if (mapFile.is_open()) {
 		for (unsigned int som_y = 0; som_y < nSomY; som_y++) { 
 			for (unsigned int som_x = 0; som_x < nSomX; som_x++) { 
 				for (unsigned int d = 0; d < nDimensions; d++) {
 					sprintf(temp, "%0.10f", codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d]);
-					mapFile2 << temp << "\t";
+					mapFile << temp << " ";
 				}                    
 			}
-			mapFile2 << endl;
+			mapFile << endl;
 		}
-		mapFile2.close();
+		mapFile.close();
 		return 0;
 	}
 	else 
