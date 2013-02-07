@@ -34,7 +34,7 @@ $(distdir):
 	mkdir -p $(distdir)/src
 	cp Makefile $(distdir)
 	cp src/Makefile $(distdir)/src
-	cp src/main.c $(distdir)/src
+	cp src/*.c* src/*.h $(distdir)/src
 
 distcheck: $(distdir).tar.gz
 	gzip -cd $+ | tar xvf -
