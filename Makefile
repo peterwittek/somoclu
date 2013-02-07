@@ -1,36 +1,51 @@
-CUDA_DIR=/usr/local/cuda
-MPI_DIR=/usr
+export CUDA_DIR=/usr/local/cuda
+export MPI_DIR=/usr
+export INCLUDES=-I$(MPI_DIR)/include -I$(CUDA_DIR)/include
+export LIBS=-L $(CUDA_DIR)/lib64 -lcublas -lcudart
 
-CXX=$(MPI_DIR)/bin/mpicxx
-CXXFLAGS = -g -Wall
+# Package-related substitution variables
+export package     = somoclu
+export version     = 1.0
+export tarname     = $(package)
+export distdir     = $(tarname)-$(version)
 
-NVCC=$(CUDA_DIR)/bin/nvcc
-NVCCFLAGS=-arch sm_20 -g --compiler-options -rdynamic
+# Prefix-related substitution variables
+export prefix      = /usr/local
+export exec_prefix = $(prefix)
+export bindir      = $(prefix)/bin
 
-INCLUDES=-I$(MPI_DIR)/include -I$(CUDA_DIR)/include
-LIBS=-L $(CUDA_DIR)/lib64 -lcublas -lcudart
+# Tool-related substitution variables
+export CXX          = mpicxx
+export CXXFLAGS     = -g -O2 -Wall
 
-OBJDIR=obj
-OBJS := $(addprefix $(OBJDIR)/,sparseCpuKernels.o somoclu.o io.o denseCpuKernels.o denseGpuKernels.cu.co training.o)
+export NVCC=$(CUDA_DIR)/bin/nvcc
+export NVCCFLAGS=-arch sm_20 -g --compiler-options -rdynamic
 
-TARGETS=somoclu
+all clean install uninstall somoclu:
+	$(MAKE) -C src $@
 
-all: $(TARGETS)
+dist: $(distdir).tar.gz
 
-somoclu: $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
+$(distdir).tar.gz: FORCE $(distdir)
+	tar chof - $(distdir) | gzip -9 -c >$(distdir).tar.gz
+	rm -rf $(distdir)
 
-$(OBJDIR)/%.o: %.cpp
-		$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ -c $<
+$(distdir):
+	mkdir -p $(distdir)/src
+	cp Makefile $(distdir)
+	cp src/Makefile $(distdir)/src
+	cp src/main.c $(distdir)/src
 
-$(OBJDIR)/%.cu.co: %.cu
-		$(NVCC) $(NVCCFLAGS) $(INCLUDES) -o $@ -c $<
-	     
-$(OBJS): | $(OBJDIR)
-     
-$(OBJDIR):
-		mkdir $(OBJDIR)
+distcheck: $(distdir).tar.gz
+	gzip -cd $+ | tar xvf -
+	$(MAKE) -C $(distdir) all check
+	$(MAKE) -C $(distdir) DESTDIR=$${PWD}/$(distdir)/_inst install uninstall
+	$(MAKE) -C $(distdir) clean
+	rm -rf $(distdir)
+	@echo "*** Package $(distdir).tar.gz is ready for distribution."
 
-	
-clean:
-		rm -f $(OBJS) $(TARGETS)
+FORCE:
+	-rm -rf $(distdir) &>/dev/null
+	-rm $(distdir).tar.gz &>/dev/null
+
+.PHONY: FORCE all clean check dist distcheck install uninstall
