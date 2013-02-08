@@ -29,7 +29,6 @@
 #include <thrust/reduce.h>
 #include <thrust/functional.h>
 
-
 #include "somoclu.h"
 
 using namespace std;

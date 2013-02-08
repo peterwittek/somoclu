@@ -19,8 +19,10 @@
 
 #ifndef SOMOCLU_H
 #define SOMOCLU_H
-#define DEBUG
-#define CUDA
+
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #define DENSE_CPU 0
 #define DENSE_GPU 1

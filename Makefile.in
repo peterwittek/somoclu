@@ -1,25 +1,19 @@
-export CUDA_DIR=/usr/local/cuda
-export MPI_DIR=/usr
-export INCLUDES=-I$(MPI_DIR)/include -I$(CUDA_DIR)/include
-export LIBS=-L $(CUDA_DIR)/lib64 -lcublas -lcudart
+# @configure_input@
 
 # Package-related substitution variables
-export package     = somoclu
-export version     = 1.0
-export tarname     = $(package)
-export distdir     = $(tarname)-$(version)
+package	= @PACKAGE_NAME@
+version	= @PACKAGE_VERSION@
+tarname	= @PACKAGE_TARNAME@
+distdir	= $(tarname)-$(version)
 
 # Prefix-related substitution variables
-export prefix      = /usr/local
-export exec_prefix = $(prefix)
-export bindir      = $(prefix)/bin
+prefix	 = @prefix@
+exec_prefix    = @exec_prefix@
+bindir	 = @bindir@
 
-# Tool-related substitution variables
-export CXX          = mpicxx
-export CXXFLAGS     = -g -O2 -Wall
-
-export NVCC=$(CUDA_DIR)/bin/nvcc
-export NVCCFLAGS=-arch sm_20 -g --compiler-options -rdynamic
+# VPATH-related substitution variables
+srcdir         = @srcdir@
+VPATH          = @srcdir@
 
 all clean install uninstall somoclu:
 	$(MAKE) -C src $@
@@ -32,8 +26,11 @@ $(distdir).tar.gz: FORCE $(distdir)
 
 $(distdir):
 	mkdir -p $(distdir)/src
-	cp Makefile $(distdir)
-	cp src/Makefile $(distdir)/src
+	cp $(srcdir)/configure $(distdir)
+	cp $(srcdir)/config.h.in $(distdir)
+	cp $(srcdir)/install-sh $(distdir)
+	cp $(srcdir)/Makefile.in $(distdir)
+	cp $(srcdir)/src/Makefile.in $(distdir)/src
 	cp src/*.c* src/*.h $(distdir)/src
 
 distcheck: $(distdir).tar.gz
@@ -43,6 +40,12 @@ distcheck: $(distdir).tar.gz
 	$(MAKE) -C $(distdir) clean
 	rm -rf $(distdir)
 	@echo "*** Package $(distdir).tar.gz is ready for distribution."
+
+Makefile: Makefile.in config.status
+	./config.status $@
+
+config.status: configure
+	./config.status --recheck
 
 FORCE:
 	-rm -rf $(distdir) &>/dev/null
