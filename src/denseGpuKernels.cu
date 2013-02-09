@@ -250,6 +250,7 @@ void initializeGpu(float *hostData, int nVectorsPerRank, int nDimensions, int nS
  * @param commSize - the size of MPI comm world
  */
 
+/// Note that this function was lifted from http://code.google.com/p/gpmr/
 void setDevice(int commRank, int commSize)
 {
   FILE * fp = popen("/bin/hostname", "r");

@@ -173,7 +173,7 @@ void printUsage() {
               "                      0: Dense CPU\n" \
               "                      1: Dense GPU\n" \
               "                      2: Sparse CPU\n" \
-              "     -s            Enable snapshots U-matrix (default: false)\n" \
+              "     -s            Enable snapshots of U-matrix (default: false)\n" \
               "     -x NUMBER     Dimension of SOM in direction x (default: " << N_SOM_X << ")\n" \
               "     -y NUMBER     Dimension of SOM in direction y (default: " << N_SOM_Y << ")\n" \
               "Examples:\n" \
