@@ -1,7 +1,5 @@
 # @configure_input@
 
-OBJS=sparseCpuKernels.o somoclu.o io.o denseCpuKernels.o denseGpuKernels.cu.co training.o
-
 # Package-related substitution variables
 package	= @PACKAGE_NAME@
 version	= @PACKAGE_VERSION@
@@ -31,6 +29,12 @@ NVCC       	   = @NVCC@
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
+OBJS=sparseCpuKernels.o somoclu.o io.o denseCpuKernels.o training.o
+
+ifdef CUDA_LIBS
+	OBJS+=denseGpuKernels.cu.co
+endif
+
 all: somoclu
 
 somoclu: $(OBJS)
@@ -43,7 +47,7 @@ somoclu: $(OBJS)
 		$(NVCC) $(DEFS) $(CUDA_CFLAGS) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
 clean:
-	-rm somoclu $(OBJS) &>/dev/null
+	-rm somoclu $(OBJS) 1>/dev/null
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)/somoclu
