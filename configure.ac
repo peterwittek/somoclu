@@ -8,8 +8,12 @@ AC_CONFIG_SRCDIR([src/somoclu.cpp])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
+CXXFLAGS="-O3"
 AC_PROG_CXX
 AC_PROG_INSTALL
+
+AC_OPENMP
+CXXFLAGS="${CXXFLAGS} ${OPENMP_CFLAGS}"
 
 #find out what version we are running
 ARCH=`uname -m`
@@ -36,7 +40,7 @@ if test x"$with_cuda" != x"no" ; then
   AC_CHECK_PROG(NVCC_CHECK,nvcc,yes,no,$CUDA_PATH/bin)
   if test x"$NVCC_CHECK" = x"yes" ; then
      cuda_enabled=yes
-     CUDA_CFLAGS="-I$CUDA_PATH/include"
+     CUDA_CFLAGS="-I$CUDA_PATH/include -Xcompiler \"${CXXFLAGS}\""
      CUDA_LIBS="-lcudart -lcublas"
      CUDA_LDFLAGS="-L$CUDA_PATH/lib$SUFFIX"
      NVCC="$CUDA_PATH/bin/nvcc"
@@ -81,7 +85,7 @@ echo \
  ${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 
  Prefix: '${prefix}'.
- Compiler: '${CXX} ${CFLAGS} ${CXXFLAGS}'
+ Compiler: '${CXX} ${CXXFLAGS}'
 
  Package features:
    CUDA enabled: ${cuda_enabled}

@@ -189,12 +189,13 @@ void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensi
   //Calculate the inner products of the data vectors and the weight vectors
 
   float alpha = 1.0f;float beta = 0.0f;
-  
+
   cublasStatus_t status = cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, 
                                nSomX*nSomY, nVectorsPerRank, nDimensions, 
                                &alpha, thrust::raw_pointer_cast(&deviceCodebook[0]), nDimensions, 
                                        thrust::raw_pointer_cast(&deviceData[0]), nDimensions, 
                                &beta,  thrust::raw_pointer_cast(&deviceGramMatrix[0]), nSomX*nSomY);
+  
   if (status != CUBLAS_STATUS_SUCCESS) {
     cerr << "!!!! kernel execution error.\n";
     my_abort(-1);
@@ -212,7 +213,8 @@ void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensi
                              nVectorsPerRank, nSomX*nSomY);
   }
   //Finding minimums
-  thrust::host_vector<argMinType> minsOfA=minsOfRowSpace(deviceGramMatrix, nVectorsPerRank, nSomX*nSomY);
+  thrust::host_vector<argMinType> minsOfA=minsOfRowSpace(deviceGramMatrix, nVectorsPerRank, nSomX*nSomY); 
+  CUDA_CHECK(cudaDeviceSynchronize());
       
   //Getting back SOM coordinates from minimums
   for (int i=0; i<nVectorsPerRank; i++){
@@ -221,9 +223,6 @@ void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensi
     bmus[i*2] = somCoordinate % nSomX;
     bmus[i*2+1] = somCoordinate / nSomX;
   }        
-//  CUDA_CHECK(cudaFree(d_C));  
-//  CUDA_CHECK(cudaFree(d_D));  
-//  CUDA_CHECK(cudaFree(codebookNorm2));  
 }
 
 /** Initialize CUBLAS and device data
@@ -348,12 +347,13 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
   }
   int bmus[nVectorsPerRank*2];
   getBmusOnGpu(bmus, codebook, nSomX, nSomY, nDimensions, nVectorsPerRank);
+	#pragma omp parallel for
   for (unsigned int n = 0; n < nVectorsPerRank; n++) {
     if (itask*nVectorsPerRank+n<nVectors){    
       /// get the best matching unit
       p1[0]=bmus[n*2];
       p1[1]=bmus[n*2+1];
-          
+
       /// Accumulate denoms and numers
       for (unsigned int som_y = 0; som_y < nSomY; som_y++) { 
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
@@ -370,14 +370,14 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
           for (unsigned int d = 0; d < nDimensions; d++) {
             localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] += 
               1.0f * neighbor_fuct 
-              * (*((data) + n*nDimensions + d));
+              * (*(data + n*nDimensions + d));
           }
           localDenominator[som_y*nSomX + som_x] += neighbor_fuct;
         }
       }
     }
   }     
-      
+  
   MPI_Reduce(localNumerator, numerator, 
           nSomY*nSomX*nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce(localDenominator, denominator, 

@@ -141,6 +141,7 @@ void train(int itask, float *data, svm_node **sparseData,
     /// 3. Update codebook using numerator and denominator
     MPI_Barrier(MPI_COMM_WORLD);  
     if (itask == 0) {
+	    #pragma omp parallel for
       for (unsigned int som_y = 0; som_y < nSomY; som_y++) { 
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
           float denom = denominator[som_y*nSomX + som_x];
