@@ -1,14 +1,14 @@
-This project is a fork of 
+### Somoclu
+Somoclu is a cluster-oriented implementation of self-organizing maps. It relies on MPI for distributing the workload, and it can be accelerated by CUDA on a GPU cluster. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes.
 
-https://github.com/peterwittek/mr-mpi-som-gpu
+### Usage
+Somoclu takes a plain text input file. The dense format should include an instance in one row. The sparse format follows the libsvm sparse matrix format. Example files are included.
 
-The input is a plain-text dense matrix, where the rows correspond to the instances.
-
-You will need CUDA and MPI to compile the code.
-
-Usage:
+```
 [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX
+```
 Arguments:
+```
      -e NUMBER     Maximum number of epochs
      -k NUMBER     Kernel type
                       0: Dense CPU
@@ -17,6 +17,11 @@ Arguments:
      -s            Enable snapshots of U-matrix
      -x NUMBER     Dimension of SOM in direction x
      -y NUMBER     Dimension of SOM in direction y
+```
 Examples:
+```
      somoclu data/rgbs.txt data/rgbs
      mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs
+```
+### Install
+Run ./configure and make to compile the program. Note that MPI is required. CUDA support is optional. See also ./configure --help.
