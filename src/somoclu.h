@@ -28,6 +28,10 @@
 #define DENSE_GPU 1
 #define SPARSE_CPU 2
 
+/// The neighbor_fuct value below which we consider 
+/// the impact zero for a given node in the map
+#define NEIGHBOR_THRESHOLD 0.05
+
 /// Sparse structures and routines
 struct svm_node
 {

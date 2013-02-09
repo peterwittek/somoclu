@@ -89,6 +89,7 @@ void train(int itask, float *data, svm_node **sparseData,
   ///
   /// Training
   ///
+  double training_time = MPI_Wtime();
   while (nEpoch && radius > 1.0) {
     double epoch_time = MPI_Wtime();
     if (itask == 0) {
@@ -170,6 +171,10 @@ void train(int itask, float *data, svm_node **sparseData,
   }  
   
   MPI_Barrier(MPI_COMM_WORLD);
+  training_time = MPI_Wtime() - training_time;
+  if (itask == 0) {
+    cerr << "Total training Time: " << training_time << endl;
+  }
   
   ///
   /// Save SOM map and u-mat
