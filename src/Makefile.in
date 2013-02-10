@@ -24,7 +24,6 @@ CUDA_CFLAGS    = @CUDA_CFLAGS@
 CUDA_LIBS      = @CUDA_LIBS@
 CUDA_LDFLAGS   = @CUDA_LDFLAGS@
 NVCC       	   = @NVCC@
-MPI_INC        = @MPI_INC@
 MPI_LIBDIR     = @MPI_LIBDIR@
 MPI_LIBS       = @MPI_LIBS@
 
@@ -44,10 +43,10 @@ somoclu: $(OBJS)
 	$(CXX) $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -o $@ $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 
 %.o: %.cpp
-		$(CXX) $(DEFS) $(CXXFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
+		$(CXX) $(DEFS) $(CXXFLAGS) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
 %.cu.co: %.cu
-		$(NVCC) $(DEFS) $(CUDA_CFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
+		$(NVCC) $(DEFS) $(CUDA_CFLAGS) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
 clean:
 	-rm somoclu $(OBJS) 1>/dev/null

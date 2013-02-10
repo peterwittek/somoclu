@@ -18,7 +18,7 @@ dnl
 if test -n "${MPI_DIR}" && test -z "${MPI_INC}"; then
   MPI_INC="${MPI_DIR}/include"
 fi
-
+CXXFLAGS="${CXXFLAGS} ${MPI_INC}"
 
 AC_LANG([C++])
 AC_MSG_CHECKING(whether we can preprocess mpi.h)
@@ -50,13 +50,6 @@ AC_COMPILE_IFELSE(
   AC_MSG_ERROR(invalid mpi.h)
 ])
 
-AC_SUBST([MPI_INC])
-
-dnl
-dnl Link check
-dnl
-
-  
 if test -n "${MPI_DIR}" && test -z "${MPI_LIBDIR}"; then
   MPI_LIBDIR="${MPI_DIR}/lib"
 fi
