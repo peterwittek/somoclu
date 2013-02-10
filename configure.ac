@@ -3,7 +3,8 @@
 
 AC_PREREQ([2.61])
 AC_INIT([Somoclu], [1.0])
-m4_include([m4/ax_prog_cxx_mpi.m4])
+#m4_include([m4/ax_prog_cxx_mpi.m4])
+m4_include([m4/ax_mpi_options.m4])
 AC_CONFIG_SRCDIR([src/somoclu.cpp])
 AC_CONFIG_HEADERS([config.h])
 
@@ -70,15 +71,18 @@ fi
 
 #Setup MPI Paths
 # ------------------------------------------------------------------------------
-with_mpi=yes
-AX_PROG_CXX_MPI([test x"$with_mpi" != xno],[
-  CXX=mpicxx
-  ],[
-  AC_MSG_ERROR([No MPI compiler found.])
-])
+#with_mpi=yes
+#AX_PROG_CXX_MPI([test x"$with_mpi" != xno],[
+#  CXX=mpicxx
+#  ],[
+#  AC_MSG_ERROR([No MPI compiler found.])
+#])
 # Checks for libraries.
 # Checks for typedefs, structures, and compiler characteristics.
 # Checks for library functions.
+
+AX_MPI_OPTIONS
+CXX=$MPI_CXX
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
