@@ -26,7 +26,9 @@ Examples:
 
 Dependencies
 ==
-Note that MPI is required. CUDA support is optional.
+You need a working MPI installation on your system to compile Somoclu. A single-core or a single-GPU variant will run without the MPI runtime. The package was tested with OpenMPI, but it should work with other MPI flavours. 
+
+CUDA support is optional. CUDA 4.1 and 5.0 versions are known to work.
 
 Compilation & Installation
 ==
@@ -42,7 +44,6 @@ Then follow the standard POSIX procedure:
 
 
 Options for configure
---
 
     --prefix=PATH           Set directory prefix for installation
 
