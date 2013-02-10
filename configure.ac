@@ -45,7 +45,7 @@ if test x"$with_cuda" != x"no" ; then
      if test `nvcc --version|grep release|awk '{print $5}'|cut -d. -f1` -ge 5 ; then
       GENCODE_SM30="-gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35"
      fi
-     CUDA_CFLAGS="-I$CUDA_PATH/include ${GENCODE_SM10} ${GENCODE_SM20} ${GENCODE_SM30} -Xcompiler \"${CXXFLAGS}\""
+     CUDA_CFLAGS="-I$CUDA_PATH/include -use_fast_math ${GENCODE_SM10} ${GENCODE_SM20} ${GENCODE_SM30} -Xcompiler \"${CXXFLAGS}\""
      CUDA_LIBS="-lcudart -lcublas"
      CUDA_LDFLAGS="-L$CUDA_PATH/lib$SUFFIX"
      NVCC="$CUDA_PATH/bin/nvcc"
