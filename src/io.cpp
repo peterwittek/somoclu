@@ -248,16 +248,6 @@ svm_node** readSparseMatrixChunk(const char *filename, unsigned int nRows,
   for (unsigned int i=0; i<rowOffset; i++) {
     getline(file, line);
   }
-/*  while(getline(file,line)) {
-    stringstream linestream(line);
-    string value;
-    while(getline(linestream,value,' ')) {
-      elements++;
-    }
-    elements++; // To account for the dummy row-closing element
-    ++nRows;
-  }
-  file.close();file.open(filename);*/
   if (rowOffset+nRowsToRead >= nRows) {
     nRowsToRead = nRows-rowOffset;
   }
