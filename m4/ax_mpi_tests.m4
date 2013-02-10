@@ -1,19 +1,11 @@
 dnl MPI tests
 dnl
 dnl   AX_MPI_TESTS(subpackage)
-dnl
-dnl     Use "subpackage" option to omit tests and just set
-dnl     makefile conditionals and variables.  Also avoids
-dnl     repeating MPI paths in CPPFLAGS and LDFLAGS.
 
 AC_DEFUN([AX_MPI_TESTS],[
   dnl
   dnl Test to see if MPI compilers work properly
   dnl 
-
-dnl
-dnl Preprocess and compile check
-dnl
 
 if test -n "${MPI_DIR}" && test -z "${MPI_INC}"; then
   MPI_INC="-I${MPI_DIR}/include"
@@ -30,7 +22,7 @@ if test -z "${MPI_INC}"; then
     AC_MSG_RESULT(no)
     echo "---"
     echo "Cannot find header file mpi.h."
-    echo "Either compile without mpi, or view the mpi options with \"configure --help\"."
+    echo "View the mpi options with \"configure --help\", and provide a valid MPI."
     echo "---"
     AC_MSG_ERROR(cannot find mpi.h)
   ])
