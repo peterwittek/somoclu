@@ -163,44 +163,50 @@ float *readMatrix(const char *inFileName, unsigned int &nRows, unsigned int &nCo
 {
   ifstream file;
   file.open(inFileName);
-  string line;
-  int elements = 0;
-  float tmp;
-  while(getline(file,line)){
-    stringstream linestream(line);
-    string value;
-    while(getline(linestream,value,' ')){
-      //&& EOF != sscanf(str_float, "%f", &tmp)
-      if(value.length()>0){
-        istringstream myStream(value);
-        myStream >> tmp;
-        if (!myStream.fail()){
-          elements++;
+  float *data=NULL;
+  if (file.is_open()){
+    string line;
+    int elements = 0;
+    float tmp;
+    while(getline(file,line)){
+      stringstream linestream(line);
+      string value;
+      while(getline(linestream,value,' ')){
+        //&& EOF != sscanf(str_float, "%f", &tmp)
+        if(value.length()>0){
+          istringstream myStream(value);
+          myStream >> tmp;
+          if (!myStream.fail()){
+            elements++;
+          }
+        }
+      }
+      if (nRows==0){
+        nColumns=elements;
+      }
+      nRows++;
+    }
+    data=new float[elements];
+    file.close();file.open(inFileName);
+    int j=0;
+    while(getline(file,line)){
+      stringstream linestream(line);
+      string value;
+      while(getline(linestream,value,' ')){
+        if (value.length()>0){
+          istringstream myStream(value);
+          myStream >> tmp;
+          if (!myStream.fail()){
+            data[j++]=tmp;
+          }
         }
       }
     }
-    if (nRows==0){
-      nColumns=elements;
-    }
-    nRows++;
+    file.close();
+  } else {
+    std::cerr << "Input file could not be opened!\n";
+    my_abort(-1);
   }
-  float *data=new float[elements];
-  file.close();file.open(inFileName);
-  int j=0;
-  while(getline(file,line)){
-    stringstream linestream(line);
-    string value;
-    while(getline(linestream,value,' ')){
-      if (value.length()>0){
-        istringstream myStream(value);
-        myStream >> tmp;
-        if (!myStream.fail()){
-          data[j++]=tmp;
-        }
-      }
-    }
-  }
-  file.close();
   return data;
 }
 
@@ -208,24 +214,29 @@ void readSparseMatrixDimensions(const char *filename, unsigned int &nRows,
                             unsigned int &nColumns) {
   ifstream file;
   file.open(filename);
-  string line;
-  int max_index=-1;
-  while(getline(file,line)) {
-    stringstream linestream(line);
-    string value;
-    int dummy_index;
-    while(getline(linestream,value,' ')) {
-      int separator=value.find(":");
-      istringstream myStream(value.substr(0,separator));
-      myStream >> dummy_index;
-      if(dummy_index > max_index){
-        max_index = dummy_index;
+  if (file.is_open()){  
+    string line;
+    int max_index=-1;
+    while(getline(file,line)) {
+      stringstream linestream(line);
+      string value;
+      int dummy_index;
+      while(getline(linestream,value,' ')) {
+        int separator=value.find(":");
+        istringstream myStream(value.substr(0,separator));
+        myStream >> dummy_index;
+        if(dummy_index > max_index){
+          max_index = dummy_index;
+        }
       }
+      ++nRows;
     }
-    ++nRows;
+    nColumns=max_index+1;
+    file.close();               
+  } else {
+    std::cerr << "Input file could not be opened!\n";
+    my_abort(-1);
   }
-  nColumns=max_index+1;
-  file.close();               
 }
 
 svm_node** readSparseMatrixChunk(const char *filename, unsigned int nRows, 
