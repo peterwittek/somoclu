@@ -31,38 +31,68 @@
         <hr>
 
         <section id="main_content">
-          <h3>Somoclu</h3>
+          <h1>Somoclu</h1>
 
 <p>Somoclu is a cluster-oriented implementation of self-organizing maps. It relies on MPI for distributing the workload, and it can be accelerated by CUDA on a GPU cluster. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes.</p>
 
-<h3>Usage</h3>
+<h1>Usage</h1>
 
 <p>Somoclu takes a plain text input file. The dense format should include an instance in one row. The sparse format follows the libsvm sparse matrix format. Example files are included.</p>
 
-<pre><code>[mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX
+<pre><code>$ [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX
 </code></pre>
 
 <p>Arguments:</p>
 
-<pre><code>     -e NUMBER     Maximum number of epochs
-     -k NUMBER     Kernel type
-                      0: Dense CPU
-                      1: Dense GPU
-                      2: Sparse CPU
-     -s            Enable snapshots of U-matrix
-     -x NUMBER     Dimension of SOM in direction x
-     -y NUMBER     Dimension of SOM in direction y
+<pre><code>-e NUMBER     Maximum number of epochs
+-k NUMBER     Kernel type
+                 0: Dense CPU
+                 1: Dense GPU
+                 2: Sparse CPU
+-s            Enable snapshots of U-matrix
+-x NUMBER     Dimension of SOM in direction x
+-y NUMBER     Dimension of SOM in direction y
 </code></pre>
 
 <p>Examples:</p>
 
-<pre><code> somoclu data/rgbs.txt data/rgbs
- mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs
+<pre><code>$ somoclu data/rgbs.txt data/rgbs
+$ mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs
 </code></pre>
 
-<h3>Install</h3>
+<h1>Dependencies</h1>
 
-<p>Run ./configure and make to compile the program. Note that MPI is required. CUDA support is optional. See also ./configure --help.</p>
+<p>You need a working MPI installation on your system to compile Somoclu. A single-core or a single-GPU variant will run without the MPI runtime. The package was tested with OpenMPI, but it should work with other MPI flavours. </p>
+
+<p>CUDA support is optional. CUDA 4.1 and 5.0 versions are known to work.</p>
+
+<h1>Compilation &amp; Installation</h1>
+
+<p>From GIT repository first run</p>
+
+<pre><code>$ ./autogen.sh
+</code></pre>
+
+<p>Then follow the standard POSIX procedure:</p>
+
+<pre><code>$ ./configure [options]
+$ make
+$ make install
+</code></pre>
+
+<p>Options for configure</p>
+
+<pre><code>--prefix=PATH           Set directory prefix for installation
+</code></pre>
+
+<p>By default Somoclu is installed into /usr/local. If you prefer a
+different location, use this option to select an installation
+directory.</p>
+
+<pre><code>--with-cuda=/path/to/cuda           Set path for CUDA
+</code></pre>
+
+<p>Somoclu looks for CUDA in /usr/local/cuda. If your installation is not there, then specify the path with this parameter. If you do not want CUDA enabled, set the parameter to <code>--without-cuda</code>.</p>
         </section>
 
         <footer>
