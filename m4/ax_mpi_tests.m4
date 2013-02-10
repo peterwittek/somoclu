@@ -18,38 +18,41 @@ dnl
 if test -n "${MPI_DIR}" && test -z "${MPI_INC}"; then
   MPI_INC="${MPI_DIR}/include"
 fi
-CXXFLAGS="${CXXFLAGS} ${MPI_INC}"
 
-AC_LANG([C++])
-AC_MSG_CHECKING(whether we can preprocess mpi.h)
-AC_PREPROC_IFELSE(
-[AC_LANG_SOURCE([[#include "mpi.h"]])],
-[
-  AC_MSG_RESULT(yes)
-],[
-  AC_MSG_RESULT(no)
-  echo "---"
-  echo "Cannot find header file mpi.h."
-  echo "Either compile without mpi, or view the mpi options with \"configure --help\"."
-  echo "---"
-  AC_MSG_ERROR(cannot find mpi.h)
-])
+if test -z "${MPI_INC}"; then
+  AC_LANG([C++])
+  AC_MSG_CHECKING(whether we can preprocess mpi.h)
+  AC_PREPROC_IFELSE(
+  [AC_LANG_SOURCE([[#include "mpi.h"]])],
+  [
+    AC_MSG_RESULT(yes)
+  ],[
+    AC_MSG_RESULT(no)
+    echo "---"
+    echo "Cannot find header file mpi.h."
+    echo "Either compile without mpi, or view the mpi options with \"configure --help\"."
+    echo "---"
+    AC_MSG_ERROR(cannot find mpi.h)
+  ])
 
-AC_MSG_CHECKING(whether we can compile mpi.h)
-AC_COMPILE_IFELSE(
-[AC_LANG_SOURCE([[#include "mpi.h"]],[[int c; char** v; MPI_Init(&c,&v);]])],
-[
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(HAVE_MPI,,[define that mpi is being used])
-],[
-  AC_MSG_RESULT(no)
-  echo "---"
-  echo "mpi.h has compile errors"
-  echo "View the mpi options with \"configure --help\", and provide a valid MPI."
-  echo "---"
-  AC_MSG_ERROR(invalid mpi.h)
-])
+  AC_MSG_CHECKING(whether we can compile mpi.h)
+  AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE([[#include "mpi.h"]],[[int c; char** v; MPI_Init(&c,&v);]])],
+  [
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(HAVE_MPI,,[define that mpi is being used])
+  ],[
+    AC_MSG_RESULT(no)
+    echo "---"
+    echo "mpi.h has compile errors"
+    echo "View the mpi options with \"configure --help\", and provide a valid MPI."
+    echo "---"
+    AC_MSG_ERROR(invalid mpi.h)
+  ])
+fi
 
+AC_SUBST([MPI_INC])
+  
 if test -n "${MPI_DIR}" && test -z "${MPI_LIBDIR}"; then
   MPI_LIBDIR="${MPI_DIR}/lib"
 fi

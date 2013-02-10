@@ -85,7 +85,7 @@ echo \
  ${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 
  Prefix: '${prefix}'.
- Compiler: '${CXX} ${CXXFLAGS} ${MPI_LIBDIR} ${MPI_LIBS}'
+ Compiler: '${CXX} ${CXXFLAGS} ${MPI_INC} ${MPI_LIBDIR} ${MPI_LIBS}'
 
  Package features:
    CUDA enabled: ${cuda_enabled}
