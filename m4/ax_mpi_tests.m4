@@ -16,7 +16,7 @@ dnl Preprocess and compile check
 dnl
 
 if test -n "${MPI_DIR}" && test -z "${MPI_INC}"; then
-  MPI_INC="${MPI_DIR}/include"
+  MPI_INC="-I${MPI_DIR}/include"
 fi
 
 if test -z "${MPI_INC}"; then
@@ -54,7 +54,7 @@ fi
 AC_SUBST([MPI_INC])
   
 if test -n "${MPI_DIR}" && test -z "${MPI_LIBDIR}"; then
-  MPI_LIBDIR="${MPI_DIR}/lib"
+  MPI_LIBDIR="-L${MPI_DIR}/lib"
 fi
 AC_SUBST([MPI_LIBDIR])
 
