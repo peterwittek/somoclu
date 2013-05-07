@@ -30,6 +30,8 @@ $(distdir):
 	cp $(srcdir)/config.h.in $(distdir)
 	cp $(srcdir)/install-sh $(distdir)
 	cp $(srcdir)/Makefile.in $(distdir)
+	cp $(srcdir)/README.md $(distdir)
+	cp $(srcdir)/LICENSE $(distdir)  
 	cp $(srcdir)/src/Makefile.in $(distdir)/src
 	cp src/*.c* src/*.h $(distdir)/src
 

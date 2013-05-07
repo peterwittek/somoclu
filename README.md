@@ -24,6 +24,12 @@ Examples:
     $ somoclu data/rgbs.txt data/rgbs
     $ mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs
 
+Visualisation
+==
+The primary purpose of generating a map is visualisation. Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures. The generated U-matrix is the data to be plotted. 
+
+A gnuplot script is provided with the source code as plot_som.gp. This script takes a U-matrix (umat.txt), and outputs a plot (som.png).
+
 Dependencies
 ==
 You need a working MPI installation on your system to compile Somoclu. A single-core or a single-GPU variant will run without the MPI runtime. The package was tested with OpenMPI, but it should work with other MPI flavours. 
