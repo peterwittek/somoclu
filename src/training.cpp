@@ -61,6 +61,7 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int nSomX, unsigned int nSomY, 
            unsigned int nDimensions, unsigned int nVectors, 
            unsigned int nVectorsPerRank, unsigned int nEpoch, 
+           unsigned int radius0,
            const char *outPrefix, bool shouldSaveInterim, 
            unsigned int kernelType, unsigned int mapType)
 {
@@ -81,9 +82,12 @@ void train(int itask, float *data, svm_node **sparseData,
   /// Parameters for SOM
   ///
   float N = (float)nEpoch;       /// iterations
-  float radius0;
-  radius0 = nSomX / 2.0f;              /// init radius for updating neighbors
-  float radius = radius0;
+  float radius;
+  if (radius0 == 0) {
+    radius = nSomX / 2.0f;              /// init radius for updating neighbors
+  } else {
+    radius = radius0 / 1.0f;
+  }
   unsigned int x = 0;             /// 0...N-1
       
   ///

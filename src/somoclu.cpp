@@ -40,6 +40,7 @@ using namespace std;
 
 void processCommandLine(int argc, char** argv, char* inFileName, 
                         char* outPrefix, unsigned int *nEpoch, 
+                        unsigned int *radius, 
                         unsigned int *nSomX, unsigned int *nSomY, 
                         unsigned int *kernelType, unsigned int *mapType,
                         bool *enableSnapshots);
@@ -62,13 +63,14 @@ int main(int argc, char** argv)
   unsigned int nSomY = 0;
   unsigned int kernelType = 0;
   unsigned int mapType = 0;
+  unsigned int radius = 0;
   bool enableSnapshots = false;
   char *inFileName = new char[255];
   char *outPrefix = new char[255];
 
   if (rank==0) {
       processCommandLine(argc, argv, inFileName, outPrefix, 
-                         &nEpoch, &nSomX, &nSomY, 
+                         &nEpoch, &radius, &nSomX, &nSomY, 
                          &kernelType, &mapType, &enableSnapshots);
 #ifndef CUDA
       if (kernelType == DENSE_GPU){
@@ -77,7 +79,8 @@ int main(int argc, char** argv)
       }
 #endif
   }
-  MPI_Bcast(&nEpoch, 1, MPI_INT, 0, MPI_COMM_WORLD);  
+  MPI_Bcast(&nEpoch, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&radius, 1, MPI_INT, 0, MPI_COMM_WORLD);  
   MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -146,7 +149,7 @@ int main(int argc, char** argv)
   // TRAINING
   train(rank, data, sparseData, nSomX, nSomY, 
         nDimensions, nVectors, nVectorsPerRank,
-        nEpoch, outPrefix, enableSnapshots, kernelType, mapType);
+        nEpoch, radius, outPrefix, enableSnapshots, kernelType, mapType);
   
   if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
     delete [] data;
@@ -180,6 +183,7 @@ void printUsage() {
               "     -m NUMBER     Map type (default: " << MAP_TYPE << "): \n" \
               "                      0: Planar\n" \
               "                      1: Toroid\n" \
+              "     -r NUMBER     Initial radius (default: half of the map in direction x)\n" \
               "     -s            Enable snapshots of U-matrix (default: false)\n" \
               "     -x NUMBER     Dimension of SOM in direction x (default: " << N_SOM_X << ")\n" \
               "     -y NUMBER     Dimension of SOM in direction y (default: " << N_SOM_Y << ")\n" \
@@ -189,9 +193,11 @@ void printUsage() {
 }
 
 void processCommandLine(int argc, char** argv, char* inFileName, 
-                        char* outPrefix, unsigned int *nEpoch, 
+                        char* outPrefix, unsigned int *nEpoch,
+                        unsigned int *radius,
                         unsigned int *nSomX, unsigned int *nSomY, 
-                        unsigned int *kernelType, unsigned int *mapType, bool *enableSnapshots) {
+                        unsigned int *kernelType, unsigned int *mapType, 
+                        bool *enableSnapshots) {
   
     // Setting default values
     *nEpoch = N_EPOCH;
@@ -200,10 +206,10 @@ void processCommandLine(int argc, char** argv, char* inFileName,
     *kernelType = KERNEL_TYPE;
     *enableSnapshots = ENABLE_SNAPSHOTS;
     *mapType = MAP_TYPE;
-    
+    *radius = 0;
     int c;
     extern int optind, optopt;
-    while ((c = getopt (argc, argv, "hsx:y:e:k:m:")) != -1) {
+    while ((c = getopt (argc, argv, "hsx:y:e:k:m:r:")) != -1) {
         switch (c) {
         case 'e':
             *nEpoch = atoi(optarg);
@@ -229,7 +235,14 @@ void processCommandLine(int argc, char** argv, char* inFileName,
                 fprintf (stderr, "The argument of option -m should be a valid map type.\n");
                 MPI_Abort(MPI_COMM_WORLD, 1);
             }
-            break;            
+            break;
+        case 'r':
+            *radius = atoi(optarg);
+            if (*radius<=0) {
+                fprintf (stderr, "The argument of option -r should be a positive integer.\n");
+                MPI_Abort(MPI_COMM_WORLD, 1);
+            }
+            break;
         case 's':
               *enableSnapshots = true;
               break;

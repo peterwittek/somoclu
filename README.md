@@ -18,6 +18,7 @@ Arguments:
     -m NUMBER     Map type
                      0: Planar
                      1: Toroid
+    -r NUMBER     Initial radius (default: half of the map in direction x)                     
     -s            Enable snapshots of U-matrix
     -x NUMBER     Dimension of SOM in direction x
     -y NUMBER     Dimension of SOM in direction y
