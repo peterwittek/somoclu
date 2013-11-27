@@ -73,7 +73,8 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            float *denominator, float *codebook, 
                            unsigned int nSomX, unsigned int nSomY, 
                            unsigned int nDimensions, unsigned int nVectors,
-                           unsigned int nVectorsPerRank, float radius)
+                           unsigned int nVectorsPerRank, float radius,
+                           unsigned int mapType)
 {           
   int p1[2];
   int p2[2];
@@ -98,13 +99,12 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
       /// Accumulate denoms and numers
       for (unsigned int som_y = 0; som_y < nSomY; som_y++) { 
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-          p2[0] = som_x;
-          p2[1] = som_y;
           float dist = 0.0f;
-          for (unsigned int p = 0; p < 2; p++)
-            dist += (p1[p] - p2[p]) * (p1[p] - p2[p]);
-          dist = sqrt(dist);
-    
+          if (mapType == PLANAR) {
+              dist = euclideanDistanceOnPlanarMap(som_x, som_y, p1[0], p1[1]);
+          } else if (mapType == TOROID) {
+              dist = euclideanDistanceOnToroidMap(som_x, som_y, p1[0], p1[1], nSomX, nSomY);
+          }
           float neighbor_fuct = 0.0f;
           neighbor_fuct = exp(-(1.0f * dist * dist) / (radius * radius));
           for (unsigned int d = 0; d < nDimensions; d++) {

@@ -35,12 +35,14 @@ using namespace std;
 #define N_SOM_X 50 
 #define N_SOM_Y 50
 #define KERNEL_TYPE 0
+#define MAP_TYPE 0
 #define ENABLE_SNAPSHOTS false
 
 void processCommandLine(int argc, char** argv, char* inFileName, 
                         char* outPrefix, unsigned int *nEpoch, 
                         unsigned int *nSomX, unsigned int *nSomY, 
-                        unsigned int *kernelType, bool *enableSnapshots);
+                        unsigned int *kernelType, unsigned int *mapType,
+                        bool *enableSnapshots);
 
 /* -------------------------------------------------------------------------- */
 int main(int argc, char** argv)
@@ -59,6 +61,7 @@ int main(int argc, char** argv)
   unsigned int nSomX = 0;
   unsigned int nSomY = 0;
   unsigned int kernelType = 0;
+  unsigned int mapType = 0;
   bool enableSnapshots = false;
   char *inFileName = new char[255];
   char *outPrefix = new char[255];
@@ -66,7 +69,7 @@ int main(int argc, char** argv)
   if (rank==0) {
       processCommandLine(argc, argv, inFileName, outPrefix, 
                          &nEpoch, &nSomX, &nSomY, 
-                         &kernelType, &enableSnapshots);
+                         &kernelType, &mapType, &enableSnapshots);
 #ifndef CUDA
       if (kernelType == DENSE_GPU){
           cerr << "Somoclu was compile without GPU support!\n";
@@ -78,6 +81,7 @@ int main(int argc, char** argv)
   MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&mapType, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(inFileName, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
   
   double profile_time = MPI_Wtime();
@@ -142,7 +146,7 @@ int main(int argc, char** argv)
   // TRAINING
   train(rank, data, sparseData, nSomX, nSomY, 
         nDimensions, nVectors, nVectorsPerRank,
-        nEpoch, outPrefix, enableSnapshots, kernelType);
+        nEpoch, outPrefix, enableSnapshots, kernelType, mapType);
   
   if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
     delete [] data;
@@ -173,6 +177,9 @@ void printUsage() {
               "                      0: Dense CPU\n" \
               "                      1: Dense GPU\n" \
               "                      2: Sparse CPU\n" \
+              "     -m NUMBER     Map type (default: " << MAP_TYPE << "): \n" \
+              "                      0: Planar\n" \
+              "                      1: Toroid\n" \
               "     -s            Enable snapshots of U-matrix (default: false)\n" \
               "     -x NUMBER     Dimension of SOM in direction x (default: " << N_SOM_X << ")\n" \
               "     -y NUMBER     Dimension of SOM in direction y (default: " << N_SOM_Y << ")\n" \
@@ -184,7 +191,7 @@ void printUsage() {
 void processCommandLine(int argc, char** argv, char* inFileName, 
                         char* outPrefix, unsigned int *nEpoch, 
                         unsigned int *nSomX, unsigned int *nSomY, 
-                        unsigned int *kernelType, bool *enableSnapshots) {
+                        unsigned int *kernelType, unsigned int *mapType, bool *enableSnapshots) {
   
     // Setting default values
     *nEpoch = N_EPOCH;
@@ -192,10 +199,11 @@ void processCommandLine(int argc, char** argv, char* inFileName,
     *nSomY = N_SOM_Y;
     *kernelType = KERNEL_TYPE;
     *enableSnapshots = ENABLE_SNAPSHOTS;
+    *mapType = MAP_TYPE;
     
     int c;
     extern int optind, optopt;
-    while ((c = getopt (argc, argv, "hsx:y:e:k:")) != -1) {
+    while ((c = getopt (argc, argv, "hsx:y:e:k:m:")) != -1) {
         switch (c) {
         case 'e':
             *nEpoch = atoi(optarg);
@@ -215,6 +223,13 @@ void processCommandLine(int argc, char** argv, char* inFileName,
                 MPI_Abort(MPI_COMM_WORLD, 1);
             }
             break;
+        case 'm':
+            *mapType = atoi(optarg);
+            if (*mapType<PLANAR||*mapType>TOROID) {
+                fprintf (stderr, "The argument of option -m should be a valid map type.\n");
+                MPI_Abort(MPI_COMM_WORLD, 1);
+            }
+            break;            
         case 's':
               *enableSnapshots = true;
               break;

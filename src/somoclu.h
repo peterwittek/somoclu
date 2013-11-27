@@ -28,6 +28,9 @@
 #define DENSE_GPU 1
 #define SPARSE_CPU 2
 
+#define PLANAR 0
+#define TOROID 1
+
 /// The neighbor_fuct value below which we consider 
 /// the impact zero for a given node in the map
 #define NEIGHBOR_THRESHOLD 0.05
@@ -38,14 +41,16 @@ struct svm_node
 	int index;
 	float value;
 };
- 
+
+float euclideanDistanceOnToroidMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y, const unsigned int nSomX, const unsigned int nSomY);
+float euclideanDistanceOnPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y); 
 float *loadCodebook(const char *mapFilename, 
                     unsigned int SOM_X, unsigned int SOM_Y, 
                     unsigned int NDIMEN);
 int saveCodebook(char* cbFileName, float *codebook, 
                 unsigned int SOM_X, unsigned int SOM_Y, unsigned int NDIMEN);
 int saveUMat(char* fname, float *codebook, unsigned int nSomX, 
-              unsigned int nSomY, unsigned int nDimensions);
+              unsigned int nSomY, unsigned int nDimensions, unsigned int mapType);
 void printMatrix(float *A, int nRows, int nCols);
 float *readMatrix(const char *inFileName, 
                   unsigned int &nRows, unsigned int &nCols);
@@ -59,17 +64,19 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int nDimensions, unsigned int nVectors, 
            unsigned int nVectorsPerRank, unsigned int nEpoch, 
            const char *outPrefix, bool shouldSaveInterim, 
-           unsigned int kernelType);
+           unsigned int kernelType, unsigned int mapType);
 void trainOneEpochDenseCPU(int itask, float *data, float *numerator, 
                            float *denominator, float *codebook, 
                            unsigned int nSomX, unsigned int nSomY, 
                            unsigned int nDimensions, unsigned int nVectors,
-                           unsigned int nVectorsPerRank, float radius);
+                           unsigned int nVectorsPerRank, float radius, 
+                           unsigned int mapType);
 void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator, 
                            float *denominator, float *codebook, 
                            unsigned int nSomX, unsigned int nSomY, 
                            unsigned int nDimensions, unsigned int nVectors,
-                           unsigned int nVectorsPerRank, float radius);                           
+                           unsigned int nVectorsPerRank, float radius, 
+                           unsigned int mapType);
 
 extern "C" {
 #ifdef CUDA
@@ -80,7 +87,8 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                            float *denominator, float *codebook, 
                            unsigned int nSomX, unsigned int nSomY, 
                            unsigned int nDimensions, unsigned int nVectors,
-                           unsigned int nVectorsPerRank, float radius);
+                           unsigned int nVectorsPerRank, float radius,
+                           unsigned int mapType);
 #endif                           
 void my_abort(int err);
 }

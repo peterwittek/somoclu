@@ -15,6 +15,9 @@ Arguments:
                      0: Dense CPU
                      1: Dense GPU
                      2: Sparse CPU
+    -m NUMBER     Map type
+                     0: Planar
+                     1: Toroid
     -s            Enable snapshots of U-matrix
     -x NUMBER     Dimension of SOM in direction x
     -y NUMBER     Dimension of SOM in direction y

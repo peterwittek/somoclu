@@ -62,7 +62,7 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int nDimensions, unsigned int nVectors, 
            unsigned int nVectorsPerRank, unsigned int nEpoch, 
            const char *outPrefix, bool shouldSaveInterim, 
-           unsigned int kernelType)
+           unsigned int kernelType, unsigned int mapType)
 {
   /// 
   /// Codebook
@@ -123,19 +123,19 @@ void train(int itask, float *data, svm_node **sparseData,
       case DENSE_CPU: 
               trainOneEpochDenseCPU(itask, data, numerator, denominator, 
                                     codebook, nSomX, nSomY, nDimensions,
-                                    nVectors, nVectorsPerRank, radius);
+                                    nVectors, nVectorsPerRank, radius, mapType);
               break;
 #ifdef CUDA              
       case DENSE_GPU: 
               trainOneEpochDenseGPU(itask, data, numerator, denominator, 
                                     codebook, nSomX, nSomY, nDimensions,
-                                    nVectors, nVectorsPerRank, radius);
+                                    nVectors, nVectorsPerRank, radius, mapType);
               break;              
 #endif
       case SPARSE_CPU:
               trainOneEpochSparseCPU(itask, sparseData, numerator, denominator,
                                     codebook, nSomX, nSomY, nDimensions,
-                                    nVectors, nVectorsPerRank, radius);
+                                    nVectors, nVectorsPerRank, radius, mapType);
               break;
     }            
                           
@@ -161,7 +161,7 @@ void train(int itask, float *data, svm_node **sparseData,
       cout << "Saving interim U-Matrix..." << endl;      
       char umatInterimFileName[50];
       sprintf(umatInterimFileName, "%s-umat-%03d.txt", outPrefix,  x);
-      saveUMat(umatInterimFileName, codebook, nSomX, nSomY, nDimensions);
+      saveUMat(umatInterimFileName, codebook, nSomX, nSomY, nDimensions, mapType);
     }
     nEpoch--;
     epoch_time = MPI_Wtime() - epoch_time;
@@ -185,7 +185,7 @@ void train(int itask, float *data, svm_node **sparseData,
     ///
     char umatFileName[50];
     sprintf(umatFileName, "%s-umat.txt", outPrefix);
-    int ret = saveUMat(umatFileName, codebook, nSomX, nSomY, nDimensions);
+    int ret = saveUMat(umatFileName, codebook, nSomX, nSomY, nDimensions, mapType);
     if (ret < 0) 
         cout << "    Failed to save u-matrix. !" << endl; 
     else {

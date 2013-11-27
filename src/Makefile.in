@@ -32,7 +32,7 @@ MPI_LIBS       = @MPI_LIBS@
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
-OBJS=sparseCpuKernels.o somoclu.o io.o denseCpuKernels.o training.o
+OBJS=sparseCpuKernels.o somoclu.o io.o denseCpuKernels.o mapDistanceFunctions.o training.o
 
 ifdef CUDA_LIBS
 	OBJS+=denseGpuKernels.cu.co

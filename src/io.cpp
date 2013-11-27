@@ -64,16 +64,19 @@ int saveCodebook(char* cbFileName, float *codebook, unsigned int nSomX, unsigned
  * @param nDimensions
  * @return distance 
  */
- 
+
 float get_distance(const float* vec1, const float* vec2, 
-                   unsigned int nDimensions)
-{
+                   unsigned int nDimensions) {
   float distance = 0.0f;
-  for (unsigned int d = 0; d < nDimensions; d++)
-    distance += (vec1[d] - vec2[d]) * (vec1[d] - vec2[d]);
+  float x1 = 0.0f;
+  float x2 = 0.0f;
+  for (unsigned int d = 0; d < nDimensions; d++) {
+    x1 = std::min(vec1[d], vec2[d]);
+    x2 = std::max(vec1[d], vec2[d]);
+    distance += std::abs(x1-x2)*std::abs(x1-x2);
+  }
   return sqrt(distance);
 }
-
   
 /** Get weight vector from a codebook using x, y index
  * @param codebook - the codebook to save
@@ -93,7 +96,7 @@ float* get_wvec(float *codebook, unsigned int som_y, unsigned int som_x,
       wvec[d] = codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d]; /// CAUTION: (y,x) order
   return wvec;
 }
-     
+
 /** Save u-matrix
  * @param fname
  * @param codebook - the codebook to save
@@ -103,7 +106,7 @@ float* get_wvec(float *codebook, unsigned int som_y, unsigned int som_x,
  */
  
 int saveUMat(char* fname, float *codebook, unsigned int nSomX, 
-              unsigned int nSomY, unsigned int nDimensions)
+              unsigned int nSomY, unsigned int nDimensions, unsigned int mapType)
 {
   unsigned int D = 2;
   float min_dist = 1.5f;
@@ -124,12 +127,12 @@ int saveUMat(char* fname, float *codebook, unsigned int nSomX,
               coords2[1] = som_y2;    
 
               if (som_x1 == som_x2 && som_y1 == som_y2) continue;
-                  
-              float tmp = 0.0;
-              for (unsigned int d = 0; d < D; d++) {
-                  tmp += pow(coords1[d] - coords2[d], 2.0f);                            
+              float tmp = 0.0f;
+              if (mapType == PLANAR) {
+                  tmp = euclideanDistanceOnPlanarMap(som_x1, som_y1, som_x2, som_y2);
+              } else if (mapType == TOROID) {
+                  tmp = euclideanDistanceOnToroidMap(som_x1, som_y1, som_x2, som_y2, nSomX, nSomY);
               }
-              tmp = sqrt(tmp);
               if (tmp <= min_dist) {
                   nodes_number++;
                   float* vec1 = get_wvec(codebook, som_y1, som_x1, nSomX, nSomY, nDimensions);
