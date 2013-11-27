@@ -367,14 +367,12 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
           
           float neighbor_fuct = 0.0f;
           neighbor_fuct = exp(-(1.0f * dist * dist) / (radius * radius));
-          if (neighbor_fuct > NEIGHBOR_THRESHOLD) {
-            for (unsigned int d = 0; d < nDimensions; d++) {
-              localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] += 
-                1.0f * neighbor_fuct 
-                * (*(data + n*nDimensions + d));
-            }
-            localDenominator[som_y*nSomX + som_x] += neighbor_fuct;
+          for (unsigned int d = 0; d < nDimensions; d++) {
+            localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] += 
+              1.0f * neighbor_fuct 
+              * (*(data + n*nDimensions + d));
           }
+          localDenominator[som_y*nSomX + som_x] += neighbor_fuct;
         }
       }
     }

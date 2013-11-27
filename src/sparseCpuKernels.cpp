@@ -115,17 +115,15 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
     
           float neighbor_fuct = 0.0f;
           neighbor_fuct = exp(-(1.0f * dist * dist) / (radius * radius));
-          if (neighbor_fuct > NEIGHBOR_THRESHOLD) {          
-            unsigned int j=0;
-            while ( sparseData[n][j].index!=-1 ){
-              localNumerator[som_y*nSomX*nDimensions + 
-                     som_x*nDimensions + 
-                     sparseData[n][j].index] += 
-                  1.0f * neighbor_fuct * sparseData[n][j].value;
-                j++;
-            }
-            localDenominator[som_y*nSomX + som_x] += neighbor_fuct;
+          unsigned int j=0;
+          while ( sparseData[n][j].index!=-1 ){
+            localNumerator[som_y*nSomX*nDimensions + 
+                   som_x*nDimensions + 
+                   sparseData[n][j].index] += 
+                1.0f * neighbor_fuct * sparseData[n][j].value;
+              j++;
           }
+          localDenominator[som_y*nSomX + som_x] += neighbor_fuct;
         }
       }    
     }
