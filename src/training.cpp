@@ -162,7 +162,7 @@ void train(int itask, float *data, svm_node **sparseData,
     if (shouldSaveInterim && itask == 0) {
       cout << "Saving interim U-Matrix..." << endl;      
       char umatInterimFileName[50];
-      sprintf(umatInterimFileName, "%s-umat-%03d.txt", outPrefix,  x);
+      sprintf(umatInterimFileName, "%s-umat-%03d.umx", outPrefix,  x);
       saveUMat(umatInterimFileName, codebook, nSomX, nSomY, nDimensions, mapType);
     }
     nEpoch--;
@@ -186,7 +186,7 @@ void train(int itask, float *data, svm_node **sparseData,
     /// Save U-mat
     ///
     char umatFileName[50];
-    sprintf(umatFileName, "%s-umat.txt", outPrefix);
+    sprintf(umatFileName, "%s-umat.umx", outPrefix);
     int ret = saveUMat(umatFileName, codebook, nSomX, nSomY, nDimensions, mapType);
     if (ret < 0) 
         cout << "    Failed to save u-matrix. !" << endl; 

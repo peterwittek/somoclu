@@ -111,6 +111,9 @@ int saveUMat(char* fname, float *codebook, unsigned int nSomX,
   unsigned int D = 2;
   float min_dist = 1.5f;
   FILE* fp = fopen(fname, "wt");
+  fprintf(fp, "%%");
+  fprintf(fp, "%d %d", nSomY, nSomX);
+  fprintf(fp, "\n");
   if (fp != 0) {
     for (unsigned int som_y1 = 0; som_y1 < nSomY; som_y1++) {
       for (unsigned int som_x1 = 0; som_x1 < nSomX; som_x1++) {
