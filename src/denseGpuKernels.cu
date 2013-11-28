@@ -335,7 +335,6 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                            unsigned int nVectorsPerRank, float radius,
                            unsigned int mapType)
 {           
-  int p1[2];
   float *localNumerator = new float[nSomY*nSomX*nDimensions];
   float *localDenominator = new float[nSomY*nSomX];
     
@@ -352,6 +351,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
   for (unsigned int n = 0; n < nVectorsPerRank; n++) {
     if (itask*nVectorsPerRank+n<nVectors){    
       /// get the best matching unit
+      int p1[2];
       p1[0]=bmus[n*2];
       p1[1]=bmus[n*2+1];
 
@@ -367,10 +367,12 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
           float neighbor_fuct = 0.0f;
           neighbor_fuct = exp(-(1.0f * dist * dist) / (radius * radius));
           for (unsigned int d = 0; d < nDimensions; d++) {
+            #pragma omp atomic
             localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] += 
               1.0f * neighbor_fuct 
               * (*(data + n*nDimensions + d));
           }
+          #pragma omp atomic
           localDenominator[som_y*nSomX + som_x] += neighbor_fuct;
         }
       }
