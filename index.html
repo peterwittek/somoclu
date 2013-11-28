@@ -69,9 +69,9 @@ $ mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs
 <h1>
 <a name="visualisation" class="anchor" href="#visualisation"><span class="octicon octicon-link"></span></a>Visualisation</h1>
 
-<p>The primary purpose of generating a map is visualisation. Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures. The generated U-matrix is the data to be plotted. </p>
+<p>The primary purpose of generating a map is visualisation. Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures. A simplot gnuplot script is provided with the source code as plot_som.gp. This script takes a U-matrix (umat.umx), and outputs a plot (som.png).</p>
 
-<p>A gnuplot script is provided with the source code as plot_som.gp. This script takes a U-matrix (umat.txt), and outputs a plot (som.png).</p>
+<p>The output formats of the U-matrix and the codebook are compatible with <a href="http://databionic-esom.sourceforge.net/">Databionic ESOM Tools</a> for more advanced visualisation.</p>
 
 <h1>
 <a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h1>
