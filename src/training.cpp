@@ -198,7 +198,7 @@ void train(int itask, float *data, svm_node **sparseData,
     /// Save codebook
     ///
     char codebookInterimFileName[50];
-    sprintf(codebookInterimFileName, "%s-codebook.txt", outPrefix);
+    sprintf(codebookInterimFileName, "%s-codebook.wts", outPrefix);
     saveCodebook(codebookInterimFileName, codebook, nSomX, nSomY, nDimensions);
   }
   
