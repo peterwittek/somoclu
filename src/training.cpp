@@ -82,12 +82,10 @@ void train(int itask, float *data, svm_node **sparseData,
   /// Parameters for SOM
   ///
   float N = (float)nEpoch;       /// iterations
-  float radius;
   if (radius0 == 0) {
-    radius = nSomX / 2.0f;              /// init radius for updating neighbors
-  } else {
-    radius = radius0 / 1.0f;
+    radius0 = nSomX / 2.0f;              /// init radius for updating neighbors
   }
+  float radius = radius0;
   unsigned int x = 0;             /// 0...N-1
       
   ///
