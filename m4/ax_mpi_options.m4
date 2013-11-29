@@ -89,7 +89,7 @@ AC_ARG_WITH(mpi-incdir,
 AS_HELP_STRING([--with-mpi-incdir=DIR],[MPI include directory @<:@default MPIROOT/include@:>@]),
 [
   if test "X${withval}" = "Xno"; then :; else
-    MPI_INC=${withval}
+    MPI_INC="-I${withval}"
     AC_MSG_CHECKING(user-defined MPI includes)
     AC_MSG_RESULT([${MPI_INC}])
   fi
@@ -100,7 +100,7 @@ AC_ARG_WITH(mpi-libdir,
 AS_HELP_STRING([--with-mpi-libdir=DIR],[MPI library directory @<:@default MPIROOT/lib@:>@]),
 [
   if test "X${withval}" = "Xno"; then :; else
-    MPI_LIBDIR=${withval}
+    MPI_LIBDIR="-L${withval}"
     AC_MSG_CHECKING(user-defined MPI library directory)
     AC_MSG_RESULT([${MPI_LIBDIR}])
 
