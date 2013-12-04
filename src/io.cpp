@@ -287,6 +287,9 @@ void readSparseMatrixDimensions(const char *filename, unsigned int &nRows,
     string line;
     int max_index=-1;
     while(getline(file,line)) {
+      if (line.substr(0,1) == "#"){
+        continue;
+      }
       stringstream linestream(line);
       string value;
       int dummy_index;
@@ -323,6 +326,10 @@ svm_node** readSparseMatrixChunk(const char *filename, unsigned int nRows,
   svm_node **x_matrix = new svm_node *[nRowsToRead];
   for(unsigned int i=0;i<nRowsToRead;i++) {	
     getline(file, line);
+    if (line.substr(0,1) == "#"){
+       --i;
+       continue;
+    }
     stringstream tmplinestream(line);
     string value;
     int elements = 0;

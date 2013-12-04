@@ -4,7 +4,7 @@ Somoclu is a cluster-oriented implementation of self-organizing maps. It relies 
 
 Usage
 ==
-Somoclu takes a plain text input file. The dense format should include an instance in one row. The sparse format follows the libsvm sparse matrix format. Example files are included.
+Somoclu takes a plain text input file -- either dense or sparse data. Example files are included.
 
     $ [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX
 
@@ -27,6 +27,14 @@ Examples:
 
     $ somoclu data/rgbs.txt data/rgbs
     $ mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs
+
+Input File Formats
+==
+One sparse and two dense data formats are supported. All of them are plain text files.
+
+The sparse format follows the [libsvm](http://www.csie.ntu.edu.tw/~cjlin/libsvm/)  s
+
+ The dense format should include an instance in one row. The sparse format follows the libsvm sparse matrix format.
 
 Visualisation
 ==
