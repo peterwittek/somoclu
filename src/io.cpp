@@ -21,6 +21,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <string.h>
 
 #include "somoclu.h"
 
@@ -160,6 +161,74 @@ int saveUMat(char* fname, float *codebook, unsigned int nSomX,
     return -2;
 }
 
+bool isLrnFile(const char *inFileName) {
+  unsigned int size = 0;
+  while(inFileName[size++]!='\0') {}
+  unsigned int testResult = strcmp("lrn\0", inFileName + size - 4);
+  if (testResult == 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/** Reads an ESOM lrn file
+ * @param inFileNae
+ * @param nRows - returns the number of rows
+ * @param nColumns - returns the number of columns
+ * @return the matrix
+ */
+
+float *readLrnFile(const char *inFileName, unsigned int &nRows, unsigned int &nColumns)
+{
+  unsigned int nAllColumns = 0;
+  float *data = NULL;
+  ifstream file;
+  file.open(inFileName);
+  string line;
+  float tmp;  
+  unsigned int j = 0;
+  unsigned int currentColumn = 0;
+  unsigned int *columnMap = NULL;
+  while(getline(file,line)){
+    if (line.substr(0,1) == "#"){
+      continue;
+    }
+    if (line.substr(0,1) == "%"){
+      std::istringstream iss(line.substr(1,line.length()));
+      if (nRows == 0) {
+        iss >> nRows;
+      } else if (nAllColumns == 0) {
+        iss >> nAllColumns;
+      } else if (columnMap == NULL) {
+        columnMap = new unsigned int[nAllColumns];
+        unsigned int itmp = 0;
+        currentColumn = 0;
+        while (iss >> itmp){    
+          columnMap[currentColumn++] = itmp;
+          if (itmp == 1){
+            ++nColumns;
+          }
+        }
+      }
+      continue;
+    }
+    if (data == NULL) {
+      data = new float[nRows*nColumns];
+    }
+    std::istringstream iss(line);
+    currentColumn = 0;
+    while (iss >> tmp){
+      if (columnMap[currentColumn++] != 1) {
+        continue;
+      }
+      data[j++] = tmp;
+    }
+  }
+  file.close();
+  return data;
+}
+
 /** Reads a matrix
  * @param inFileNae
  * @param nRows - returns the number of rows
@@ -169,14 +238,19 @@ int saveUMat(char* fname, float *codebook, unsigned int nSomX,
 
 float *readMatrix(const char *inFileName, unsigned int &nRows, unsigned int &nColumns)
 {
+  if (isLrnFile(inFileName)) {
+    return readLrnFile(inFileName, nRows, nColumns);
+  }
   ifstream file;
   file.open(inFileName);
   float *data=NULL;
-  nRows = 0;
   if (file.is_open()){
     string line;
     float tmp;
     while(getline(file,line)){
+      if (line.substr(0,1) == "#"){
+        continue;
+      }
       std::istringstream iss(line);
       if (nRows == 0){
         while (iss >> tmp){
@@ -189,6 +263,9 @@ float *readMatrix(const char *inFileName, unsigned int &nRows, unsigned int &nCo
     file.close();file.open(inFileName);
     int j=0;
     while(getline(file,line)){
+      if (line.substr(0,1) == "#"){
+        continue;
+      }
       std::istringstream iss(line);
       while (iss >> tmp){
         data[j++] = tmp;
