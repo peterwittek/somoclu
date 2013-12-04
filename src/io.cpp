@@ -172,42 +172,26 @@ float *readMatrix(const char *inFileName, unsigned int &nRows, unsigned int &nCo
   ifstream file;
   file.open(inFileName);
   float *data=NULL;
+  nRows = 0;
   if (file.is_open()){
     string line;
-    int elements = 0;
     float tmp;
     while(getline(file,line)){
-      stringstream linestream(line);
-      string value;
-      while(getline(linestream,value,' ')){
-        //&& EOF != sscanf(str_float, "%f", &tmp)
-        if(value.length()>0){
-          istringstream myStream(value);
-          myStream >> tmp;
-          if (!myStream.fail()){
-            elements++;
-          }
+      std::istringstream iss(line);
+      if (nRows == 0){
+        while (iss >> tmp){
+          nColumns++;
         }
-      }
-      if (nRows==0){
-        nColumns=elements;
       }
       nRows++;
     }
-    data=new float[elements];
+    data=new float[nRows*nColumns];
     file.close();file.open(inFileName);
     int j=0;
     while(getline(file,line)){
-      stringstream linestream(line);
-      string value;
-      while(getline(linestream,value,' ')){
-        if (value.length()>0){
-          istringstream myStream(value);
-          myStream >> tmp;
-          if (!myStream.fail()){
-            data[j++]=tmp;
-          }
-        }
+      std::istringstream iss(line);
+      while (iss >> tmp){
+        data[j++] = tmp;
       }
     }
     file.close();
