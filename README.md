@@ -30,11 +30,28 @@ Examples:
 
 Input File Formats
 ==
-One sparse and two dense data formats are supported. All of them are plain text files.
+One sparse and two dense data formats are supported. All of them are plain text files. The entries can be separated by any white-space character. One row represents one data instance across all formats. Comment lines starting with a hash mark are ignored.
 
-The sparse format follows the [libsvm](http://www.csie.ntu.edu.tw/~cjlin/libsvm/)  s
+The sparse format follows the [libsvm](http://www.csie.ntu.edu.tw/~cjlin/libsvm/) guidelines. The first feature is zero-indexed. For instance, the vector [ 1.2 0 0 3.4] is represented as the following line in the file:
+0:1.2 3:3.4. The file is parsed twice: once to get the number of instances and features, and the second time to read the data in the individual threads.
 
- The dense format should include an instance in one row. The sparse format follows the libsvm sparse matrix format.
+The basic dense format includes the coordinates of the data vectors, separated by a white-space. Just like the sparse format, this file is parsed twice to get the basic dimensions right. 
+
+The .lrn file of [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/) is also accepted and it is parsed only once. The format is described as follows:
+
+% n
+% m
+% s1		s2			..		sm
+% var_name1	var_name2		..		var_namem	
+x11		x12			..		x1m
+x21		x22			..		x2m
+.		.			.		.
+.		.			.		.
+xn1		xn2			..		xnm
+
+Here n is the number of rows in the file, that is, the number of data instances. Parameter m defines the number of columns in the file. The next row defines the column mask: the value 1 for a column means the column should be used in the training. Note that the first column in this format is always a unique key, so this should have the value 9 in the column mask. The row with the variable names is ignore by Somoclu. The elements of the matrix follow -- from here, the file is identical to the basic dense format, with the addition of the first column as the unique key.
+
+If the input file is sparse, but a dense kernel is invoked, Somoclu will execute and results will be incorrect. Invoking a sparse kernel on a dense input file is likely to lead to a segmentation fault.
 
 Visualisation
 ==
