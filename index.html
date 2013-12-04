@@ -39,7 +39,7 @@
 <h1>
 <a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h1>
 
-<p>Somoclu takes a plain text input file. The dense format should include an instance in one row. The sparse format follows the libsvm sparse matrix format. Example files are included.</p>
+<p>Somoclu takes a plain text input file -- either dense or sparse data. Example files are included.</p>
 
 <pre><code>$ [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX
 </code></pre>
@@ -65,6 +65,40 @@
 <pre><code>$ somoclu data/rgbs.txt data/rgbs
 $ mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs
 </code></pre>
+
+<h1>
+<a name="input-file-formats" class="anchor" href="#input-file-formats"><span class="octicon octicon-link"></span></a>Input File Formats</h1>
+
+<p>One sparse and two dense data formats are supported. All of them are plain text files. The entries can be separated by any white-space character. One row represents one data instance across all formats. Comment lines starting with a hash mark are ignored.</p>
+
+<p>The sparse format follows the <a href="http://www.csie.ntu.edu.tw/%7Ecjlin/libsvm/">libsvm</a> guidelines. The first feature is zero-indexed. For instance, the vector [ 1.2 0 0 3.4] is represented as the following line in the file:
+0:1.2 3:3.4. The file is parsed twice: once to get the number of instances and features, and the second time to read the data in the individual threads.</p>
+
+<p>The basic dense format includes the coordinates of the data vectors, separated by a white-space. Just like the sparse format, this file is parsed twice to get the basic dimensions right. </p>
+
+<p>The .lrn file of <a href="http://databionic-esom.sourceforge.net/">Databionic ESOM Tools</a> is also accepted and it is parsed only once. The format is described as follows:</p>
+
+<p>% n</p>
+
+<p>% m</p>
+
+<p>% s1        s2          ..      sm</p>
+
+<p>% var_name1 var_name2       ..      var_namem   </p>
+
+<p>x11     x12         ..      x1m</p>
+
+<p>x21     x22         ..      x2m</p>
+
+<p>.       .           .       .</p>
+
+<p>.       .           .       .</p>
+
+<p>xn1     xn2         ..      xnm</p>
+
+<p>Here n is the number of rows in the file, that is, the number of data instances. Parameter m defines the number of columns in the file. The next row defines the column mask: the value 1 for a column means the column should be used in the training. Note that the first column in this format is always a unique key, so this should have the value 9 in the column mask. The row with the variable names is ignore by Somoclu. The elements of the matrix follow -- from here, the file is identical to the basic dense format, with the addition of the first column as the unique key.</p>
+
+<p>If the input file is sparse, but a dense kernel is invoked, Somoclu will execute and results will be incorrect. Invoking a sparse kernel on a dense input file is likely to lead to a segmentation fault.</p>
 
 <h1>
 <a name="visualisation" class="anchor" href="#visualisation"><span class="octicon octicon-link"></span></a>Visualisation</h1>
