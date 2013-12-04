@@ -1,0 +1,15 @@
+Since 1.1.2
+
+  - ESOM .lrn input format added.
+  - Parsing of white-space characters corrected.
+  - Long options for specifying SOM dimensions.
+
+Version 1.1.2: 2013-11-28
+
+  - Toroid maps were added. 
+  - Initial radius is exposed as a parameter via the command line interface. 
+  - Formats of codebook and U-matrix export are compatible with Databionic ESOM Tools for advanced visualisation.
+  - Bug fixes: codebook update with a compact support was removed, NaN entry no longer appears in U-matrices. 
+
+Version 1.0: 2013-05-14
+  - Initial release.
