@@ -10,23 +10,23 @@ Somoclu takes a plain text input file -- either dense or sparse data. Example fi
 
 Arguments:
 
-    -e NUMBER     Maximum number of epochs
-    -k NUMBER     Kernel type
-                     0: Dense CPU
-                     1: Dense GPU
-                     2: Sparse CPU
-    -m NUMBER     Map type
-                     0: Planar
-                     1: Toroid
-    -r NUMBER     Initial radius (default: half of the map in direction x)                     
-    -s            Enable snapshots of U-matrix
-    -x NUMBER     Dimension of SOM in direction x
-    -y NUMBER     Dimension of SOM in direction y
+    -e NUMBER                Maximum number of epochs
+    -k NUMBER                Kernel type
+                                0: Dense CPU
+                                1: Dense GPU
+                                2: Sparse CPU
+    -m NUMBER                Map type
+                                0: Planar
+                                1: Toroid
+    -r NUMBER                Initial radius (default: half the number of columns)
+    -s                       Enable snapshots of U-matrix
+    -x, --columns NUMBER     Number of columns in map (size of SOM in direction x)
+    -y, --rows    NUMBER     Number of rows in map (size of SOM in direction y)
 
 Examples:
 
     $ somoclu data/rgbs.txt data/rgbs
-    $ mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs
+    $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 
 Input File Formats
 ==

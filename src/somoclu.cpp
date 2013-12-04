@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <mpi.h>
 #include <unistd.h>
+ #include <getopt.h>
 
 #include "somoclu.h"
  
@@ -175,18 +176,18 @@ void printUsage() {
     cout << "Usage:\n" \
               "     [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX\n" \
               "Arguments:\n" \
-              "     -e NUMBER     Maximum number of epochs (default: " << N_EPOCH << ")\n" \
-              "     -k NUMBER     Kernel type (default: " << KERNEL_TYPE << "): \n" \
-              "                      0: Dense CPU\n" \
-              "                      1: Dense GPU\n" \
-              "                      2: Sparse CPU\n" \
-              "     -m NUMBER     Map type (default: " << MAP_TYPE << "): \n" \
-              "                      0: Planar\n" \
-              "                      1: Toroid\n" \
-              "     -r NUMBER     Initial radius (default: half of the map in direction x)\n" \
-              "     -s            Enable snapshots of U-matrix (default: false)\n" \
-              "     -x NUMBER     Dimension of SOM in direction x (default: " << N_SOM_X << ")\n" \
-              "     -y NUMBER     Dimension of SOM in direction y (default: " << N_SOM_Y << ")\n" \
+              "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
+              "     -k NUMBER             Kernel type (default: " << KERNEL_TYPE << "): \n" \
+              "                              0: Dense CPU\n" \
+              "                              1: Dense GPU\n" \
+              "                              2: Sparse CPU\n" \
+              "     -m NUMBER             Map type (default: " << MAP_TYPE << "): \n" \
+              "                              0: Planar\n" \
+              "                              1: Toroid\n" \
+              "     -r NUMBER             Initial radius (default: half of the map in direction x)\n" \
+              "     -s                    Enable snapshots of U-matrix (default: false)\n" \
+              "     -x, --columns NUMBER  Number of columns in map (size of SOM in direction x) (default: " << N_SOM_X << ")\n" \
+              "     -y, --rows NUMBER     Number of rows in map (size of SOM in direction y) (default: " << N_SOM_Y << ")\n" \
               "Examples:\n" \
               "     somoclu data/rgbs.txt data/rgbs\n"
               "     mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs\n";
@@ -207,9 +208,17 @@ void processCommandLine(int argc, char** argv, char* inFileName,
     *enableSnapshots = ENABLE_SNAPSHOTS;
     *mapType = MAP_TYPE;
     *radius = 0;
+    static struct option long_options[] =
+             {
+               {"rows",  required_argument, 0, 'y'},
+               {"columns",    required_argument, 0, 'x'},
+               {0, 0, 0, 0}
+             };    
     int c;
     extern int optind, optopt;
-    while ((c = getopt (argc, argv, "hsx:y:e:k:m:r:")) != -1) {
+    int option_index = 0;
+    while ((c = getopt_long (argc, argv, "hsx:y:e:k:m:r:",
+                            long_options, &option_index)) != -1) {
         switch (c) {
         case 'e':
             *nEpoch = atoi(optarg);
