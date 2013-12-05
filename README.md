@@ -70,9 +70,11 @@ The output formats of the U-matrix and the codebook are compatible with [Databio
 
 Dependencies
 ==
-You need a working MPI installation on your system to compile Somoclu. A single-core or a single-GPU variant will run without the MPI runtime. The package was tested with OpenMPI, but it should work with other MPI flavours. 
+The only dependency is GCC, albeit other compiler chains might also work.
 
-CUDA support is optional. CUDA 4.1 and 5.0 versions are known to work.
+Distributed systems and single-machine multicore execution is supported through MPI. The package was tested with OpenMPI, versions 1.3.2 and 1.6.5 were tested. It should also work with other MPI flavours. 
+
+CUDA support is optional. CUDA versions 4.1, 5.0 and 5.5 are known to work.
 
 Compilation & Installation
 ==
@@ -96,10 +98,11 @@ By default Somoclu is installed into /usr/local. If you prefer a
 different location, use this option to select an installation
 directory.
 
+    --without-mpi           Disregard any MPI installation found.
+    --with-mpi=MPIROOT      Use MPI root directory.
     --with-mpi-compilers=DIR or --with-mpi-compilers=yes
                               use MPI compiler (mpicxx) found in directory DIR, or
                               in your PATH if =yes
-    --with-mpi=MPIROOT      use MPI root directory.
     --with-mpi-libs="LIBS"  MPI libraries [default "-lmpi"]
     --with-mpi-incdir=DIR   MPI include directory [default MPIROOT/include]
     --with-mpi-libdir=DIR   MPI library directory [default MPIROOT/lib]
