@@ -6,7 +6,8 @@ Key features:
 
 * Fast execution by parallelization: MPI and CUDA are supported.
 * Planar and toroid maps.
-* Dense and sparse input data.
+* Both dense and sparse input data are supported.
+* Large maps of several hundred thousand neurons are feasible.
 * Integration with Databionic ESOM Tools.
 
 Usage
