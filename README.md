@@ -10,6 +10,11 @@ Key features:
 * Large maps of several hundred thousand neurons are feasible.
 * Integration with Databionic ESOM Tools.
 
+For more information, refer to the following paper:
+
+Peter Wittek (2013). Somoclu: An Efficient Distributed Library for Self-Organizing Maps. [arXiv:1305.1422](http://arxiv.org/abs/1305.1422).
+
+
 Usage
 ==
 Somoclu takes a plain text input file -- either dense or sparse data. Example files are included.
