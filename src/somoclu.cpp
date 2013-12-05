@@ -107,8 +107,9 @@ int main(int argc, char** argv)
   MPI_Bcast(&nDimensions, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   // Allocate a buffer on each node
-  float* data;
+  float* data = NULL;
   svm_node **sparseData;
+  sparseData = NULL;
   if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
     data = new float[nVectorsPerRank*nDimensions];
     // Dispatch a portion of the input data to each node

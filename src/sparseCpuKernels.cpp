@@ -84,8 +84,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                            unsigned int nVectorsPerRank, float radius,
                            unsigned int mapType)
 {           
-  int p1[2];
-  int p2[2];
+  int p1[2] = {0, 0};
   float *localNumerator = new float[nSomY*nSomX*nDimensions];
   float *localDenominator = new float[nSomY*nSomX];
 

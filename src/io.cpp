@@ -111,7 +111,7 @@ float* get_wvec(float *codebook, unsigned int som_y, unsigned int som_x,
 int saveUMat(char* fname, float *codebook, unsigned int nSomX, 
               unsigned int nSomY, unsigned int nDimensions, unsigned int mapType)
 {
-  unsigned int D = 2;
+
   float min_dist = 1.5f;
   FILE* fp = fopen(fname, "wt");
   fprintf(fp, "%%");
@@ -122,15 +122,9 @@ int saveUMat(char* fname, float *codebook, unsigned int nSomX,
       for (unsigned int som_x1 = 0; som_x1 < nSomX; som_x1++) {
         float dist = 0.0f;
         unsigned int nodes_number = 0;
-        int coords1[2];
-        coords1[0] = som_x1;
-        coords1[1] = som_y1;               
            
         for (unsigned int som_y2 = 0; som_y2 < nSomY; som_y2++) {   
             for (unsigned int som_x2 = 0; som_x2 < nSomX; som_x2++) {
-              unsigned int coords2[2];
-              coords2[0] = som_x2;
-              coords2[1] = som_y2;    
 
               if (som_x1 == som_x2 && som_y1 == som_y2) continue;
               float tmp = 0.0f;
