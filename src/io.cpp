@@ -34,29 +34,24 @@ using namespace std;
  * @param nSomY - dimensions of SOM map in the y direction
  * @param nDimensions - dimensions of a data instance
  */
-int saveCodebook(string cbFileName, float *codebook, unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions)
+int saveCodebook(string cbFilename, float *codebook, unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions)
 {
-    char temp[80];
-    cout << "    Codebook file = " << cbFileName << endl;
-    ofstream mapFile(cbFileName.c_str());
-    cout << "    Saving Codebook..." << endl;
-    mapFile << "%" << nSomY << " " << nSomX << endl;
-    mapFile << "%" << nDimensions << endl;
-    if (mapFile.is_open()) {
+    FILE* file = fopen(cbFilename.c_str(), "wt");
+    cout << "    Saving Codebook " << cbFilename << endl;
+    fprintf(file, "%%%d %d\n", nSomY, nSomX);
+    fprintf(file, "%%%d\n", nDimensions);
+    if (file!=0) {
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 for (unsigned int d = 0; d < nDimensions; d++) {
-                    sprintf(temp, "%0.10f", codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d]);
-                    mapFile << temp << " ";
+                    fprintf(file, "%0.10f ", codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d]);
                 }
-                mapFile << endl;
+                fprintf(file, "\n");
             }
         }
-        mapFile.close();
+        fclose(file);
         return 0;
-    }
-    else
-    {
+    } else {
         return 1;
     }
 }
