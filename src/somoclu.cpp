@@ -156,7 +156,8 @@ int main(int argc, char** argv)
     // TRAINING
     train(rank, data, sparseData, nSomX, nSomY,
           nDimensions, nVectors, nVectorsPerRank,
-          nEpoch, radius, outPrefix, enableSnapshots, kernelType, mapType);
+          nEpoch, radius, outPrefix, enableSnapshots, kernelType, mapType,
+          initialCodebookFilename);
 
     if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
         delete [] data;
@@ -182,6 +183,7 @@ void printUsage() {
     cout << "Usage:\n" \
          "     [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX\n" \
          "Arguments:\n" \
+         "     -c FILENAME           Specify an initial codebook for the map." \
          "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
          "     -k NUMBER             Kernel type (default: " << KERNEL_TYPE << "): \n" \
          "                              0: Dense CPU\n" \

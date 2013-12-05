@@ -64,18 +64,34 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int nVectorsPerRank, unsigned int nEpoch,
            unsigned int radius0,
            string outPrefix, bool shouldSaveInterim,
-           unsigned int kernelType, unsigned int mapType)
+           unsigned int kernelType, unsigned int mapType,
+           string initialCodebookFilename)
 {
     ///
     /// Codebook
     ///
-    float *codebook= new float[nSomY*nSomX*nDimensions];
+    float *codebook = NULL;
     float *numerator;
     float *denominator;
     if (itask == 0) {
         numerator = new float[nSomY*nSomX*nDimensions];
         denominator = new float[nSomY*nSomX];
-        initializeCodebook(0, codebook, nSomX, nSomY, nDimensions);
+        if (initialCodebookFilename.empty()){
+            codebook = new float[nSomY*nSomX*nDimensions];
+            initializeCodebook(0, codebook, nSomX, nSomY, nDimensions);
+        } else {
+            unsigned int nSomXY = 0;
+            unsigned int tmpNDimensions = 0;
+            codebook = readMatrix(initialCodebookFilename, nSomXY, tmpNDimensions);
+            if (tmpNDimensions != nDimensions) {
+                cerr << "Dimension of initial codebook does not match data!\n";
+                my_abort(5);
+            } else if (nSomXY / nSomY != nSomX) {
+                cerr << "Dimension of initial codebook does not match specified SOM grid!\n";
+                my_abort(6);
+            }
+            cout << "Read initial codebook: " << initialCodebookFilename << "\n";
+        }
     }
     MPI_Barrier(MPI_COMM_WORLD);
 

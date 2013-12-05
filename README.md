@@ -10,6 +10,7 @@ Somoclu takes a plain text input file -- either dense or sparse data. Example fi
 
 Arguments:
 
+    -c FILENAME              Specify an initial codebook for the map.
     -e NUMBER                Maximum number of epochs
     -k NUMBER                Kernel type
                                 0: Dense CPU
