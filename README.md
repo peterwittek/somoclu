@@ -2,6 +2,13 @@ Somoclu
 ==
 Somoclu is a cluster-oriented implementation of self-organizing maps. It relies on MPI for distributing the workload, and it can be accelerated by CUDA on a GPU cluster. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes.
 
+Key features:
+
+* Fast execution by parallelization: MPI and CUDA are supported.
+* Planar and toroid maps.
+* Dense and sparse input data.
+* Integration with Databionic ESOM Tools.
+
 Usage
 ==
 Somoclu takes a plain text input file -- either dense or sparse data. Example files are included.
