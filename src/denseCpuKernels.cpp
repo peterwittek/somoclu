@@ -28,17 +28,17 @@
  * @param r - row number in the input feature file
   */
 
-float get_distance(float* codebook, float* data, 
+float get_distance(float* codebook, float* data,
                    unsigned int som_y, unsigned int som_x, unsigned int nSomX,
                    unsigned int nDimensions, unsigned int r)
 {
     float distance = 0.0f;
     for (unsigned int d = 0; d < nDimensions; d++)
-        distance += (codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] - 
-                    *(data + r*nDimensions + d))
+        distance += (codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] -
+                     *(data + r*nDimensions + d))
                     *
-                    (codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] - 
-                    *(data + r*nDimensions + d));
+                    (codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] -
+                     *(data + r*nDimensions + d));
     return distance;
 }
 
@@ -46,21 +46,21 @@ float get_distance(float* codebook, float* data,
  * @param coords - BMU coords
  * @param n - row num in the input feature file
  */
-void get_bmu_coord(float* codebook, float* data, 
-                   unsigned int nSomY, unsigned int nSomX, 
+void get_bmu_coord(float* codebook, float* data,
+                   unsigned int nSomY, unsigned int nSomX,
                    unsigned int nDimensions, int* coords, unsigned int n)
-{ 
+{
     float mindist = 9999.99;
     float dist = 0.0f;
-    
-    /// Check nSomX * nSomY nodes one by one and compute the distance 
+
+    /// Check nSomX * nSomY nodes one by one and compute the distance
     /// D(W_K, Fvec) and get the mindist and get the coords for the BMU.
     ///
-    for (unsigned int som_y = 0; som_y < nSomY; som_y++) { 
+    for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
             dist = get_distance(codebook, data, som_y, som_x, nSomX,
                                 nDimensions, n);
-            if (dist < mindist) { 
+            if (dist < mindist) {
                 mindist = dist;
                 coords[0] = som_x;
                 coords[1] = som_y;
@@ -69,57 +69,57 @@ void get_bmu_coord(float* codebook, float* data,
     }
 }
 
-void trainOneEpochDenseCPU(int itask, float *data, float *numerator, 
-                           float *denominator, float *codebook, 
-                           unsigned int nSomX, unsigned int nSomY, 
+void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
+                           float *denominator, float *codebook,
+                           unsigned int nSomX, unsigned int nSomY,
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius,
                            unsigned int mapType)
-{           
-  int p1[2] = {0, 0};
+{
+    int p1[2] = {0, 0};
 
-  float *localNumerator = new float[nSomY*nSomX*nDimensions];
-  float *localDenominator = new float[nSomY*nSomX];
+    float *localNumerator = new float[nSomY*nSomX*nDimensions];
+    float *localDenominator = new float[nSomY*nSomX];
 
-  /// v2
-  for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-      for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-          localDenominator[som_y*nSomX + som_x] = 0.0;
-          for (unsigned int d = 0; d < nDimensions; d++) 
-              localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] = 0.0;
-      }
-  }
-      
-  for (unsigned int n = 0; n < nVectorsPerRank; n++) {
-    if (itask*nVectorsPerRank+n<nVectors){    
-      /// get the best matching unit
-      get_bmu_coord(codebook, data, nSomY, nSomX,
-                    nDimensions, p1, n);
-
-      /// Accumulate denoms and numers
-      for (unsigned int som_y = 0; som_y < nSomY; som_y++) { 
+    /// v2
+    for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-          float dist = 0.0f;
-          if (mapType == PLANAR) {
-              dist = euclideanDistanceOnPlanarMap(som_x, som_y, p1[0], p1[1]);
-          } else if (mapType == TOROID) {
-              dist = euclideanDistanceOnToroidMap(som_x, som_y, p1[0], p1[1], nSomX, nSomY);
-          }
-          float neighbor_fuct = 0.0f;
-          neighbor_fuct = exp(-(1.0f * dist * dist) / (radius * radius));
-          for (unsigned int d = 0; d < nDimensions; d++) {
-            localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] += 
-              1.0f * neighbor_fuct 
-              * (*(data + n*nDimensions + d));
-          }
-          localDenominator[som_y*nSomX + som_x] += neighbor_fuct;
+            localDenominator[som_y*nSomX + som_x] = 0.0;
+            for (unsigned int d = 0; d < nDimensions; d++)
+                localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] = 0.0;
         }
-      }
     }
-  }     
 
-  MPI_Reduce(localNumerator, numerator, 
-          nSomY*nSomX*nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-  MPI_Reduce(localDenominator, denominator, 
-          nSomY*nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);         
+    for (unsigned int n = 0; n < nVectorsPerRank; n++) {
+        if (itask*nVectorsPerRank+n<nVectors) {
+            /// get the best matching unit
+            get_bmu_coord(codebook, data, nSomY, nSomX,
+                          nDimensions, p1, n);
+
+            /// Accumulate denoms and numers
+            for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+                for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
+                    float dist = 0.0f;
+                    if (mapType == PLANAR) {
+                        dist = euclideanDistanceOnPlanarMap(som_x, som_y, p1[0], p1[1]);
+                    } else if (mapType == TOROID) {
+                        dist = euclideanDistanceOnToroidMap(som_x, som_y, p1[0], p1[1], nSomX, nSomY);
+                    }
+                    float neighbor_fuct = 0.0f;
+                    neighbor_fuct = exp(-(1.0f * dist * dist) / (radius * radius));
+                    for (unsigned int d = 0; d < nDimensions; d++) {
+                        localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] +=
+                            1.0f * neighbor_fuct
+                            * (*(data + n*nDimensions + d));
+                    }
+                    localDenominator[som_y*nSomX + som_x] += neighbor_fuct;
+                }
+            }
+        }
+    }
+
+    MPI_Reduce(localNumerator, numerator,
+               nSomY*nSomX*nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(localDenominator, denominator,
+               nSomY*nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
 }

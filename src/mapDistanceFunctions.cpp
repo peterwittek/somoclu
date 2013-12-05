@@ -22,24 +22,24 @@
 #include "somoclu.h"
 
 float euclideanDistanceOnToroidMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y, const unsigned int nSomX, const unsigned int nSomY) {
-  unsigned int x1 = std::min(som_x, x);
-  unsigned int y1 = std::min(som_y, y);
-  unsigned int x2 = std::max(som_x, x);
-  unsigned int y2 = std::max(som_y, y);
-  unsigned int xdist = std::min(x2-x1, x1+nSomX-x2);
-  unsigned int ydist = std::min(y2-y1, y1+nSomY-y2);
- 
-  //unsigned int xdist = std::min(std::abs(x1-x2), std::abs(x1+nSomX-x2));
-  //unsigned int ydist = std::min(std::abs(y1-y2), std::abs(y1+nSomY-y2));
-  return sqrt(float(xdist*xdist+ydist*ydist));
+    unsigned int x1 = std::min(som_x, x);
+    unsigned int y1 = std::min(som_y, y);
+    unsigned int x2 = std::max(som_x, x);
+    unsigned int y2 = std::max(som_y, y);
+    unsigned int xdist = std::min(x2-x1, x1+nSomX-x2);
+    unsigned int ydist = std::min(y2-y1, y1+nSomY-y2);
+
+    //unsigned int xdist = std::min(std::abs(x1-x2), std::abs(x1+nSomX-x2));
+    //unsigned int ydist = std::min(std::abs(y1-y2), std::abs(y1+nSomY-y2));
+    return sqrt(float(xdist*xdist+ydist*ydist));
 }
 
 float euclideanDistanceOnPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y) {
-  unsigned int x1 = std::min(som_x, x);
-  unsigned int y1 = std::min(som_y, y);
-  unsigned int x2 = std::max(som_x, x);
-  unsigned int y2 = std::max(som_y, y);
-  unsigned int xdist = x2-x1;
-  unsigned int ydist = y2-y1;
-  return sqrt(float(xdist*xdist+ydist*ydist));
+    unsigned int x1 = std::min(som_x, x);
+    unsigned int y1 = std::min(som_y, y);
+    unsigned int x2 = std::max(som_x, x);
+    unsigned int y2 = std::max(som_y, y);
+    unsigned int xdist = x2-x1;
+    unsigned int ydist = y2-y1;
+    return sqrt(float(xdist*xdist+ydist*ydist));
 }

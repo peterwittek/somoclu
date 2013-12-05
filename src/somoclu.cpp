@@ -16,14 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include <cmath> 
+#include <cmath>
 #include <cstdlib>
 #include <mpi.h>
 #include <unistd.h>
- #include <getopt.h>
+#include <getopt.h>
 
 #include "somoclu.h"
- 
+
 using namespace std;
 
 /// For syncronized timing
@@ -33,174 +33,174 @@ using namespace std;
 
 // Default parameters
 #define N_EPOCH 10
-#define N_SOM_X 50 
+#define N_SOM_X 50
 #define N_SOM_Y 50
 #define KERNEL_TYPE 0
 #define MAP_TYPE 0
 #define ENABLE_SNAPSHOTS false
 
-void processCommandLine(int argc, char** argv, char* inFileName, 
-                        char* outPrefix, unsigned int *nEpoch, 
-                        unsigned int *radius, 
-                        unsigned int *nSomX, unsigned int *nSomY, 
+void processCommandLine(int argc, char** argv, char* inFileName,
+                        char* outPrefix, unsigned int *nEpoch,
+                        unsigned int *radius,
+                        unsigned int *nSomX, unsigned int *nSomY,
                         unsigned int *kernelType, unsigned int *mapType,
                         bool *enableSnapshots);
 
 /* -------------------------------------------------------------------------- */
 int main(int argc, char** argv)
 /* -------------------------------------------------------------------------- */
-{    
-  ///
-  /// MPI init
-  ///
-  MPI_Init(&argc, &argv);
-  int rank, nProcs;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
-  MPI_Barrier(MPI_COMM_WORLD); 
-  
-  unsigned int nEpoch = 0;
-  unsigned int nSomX = 0;
-  unsigned int nSomY = 0;
-  unsigned int kernelType = 0;
-  unsigned int mapType = 0;
-  unsigned int radius = 0;
-  bool enableSnapshots = false;
-  char *inFileName = new char[255];
-  char *outPrefix = new char[255];
+{
+    ///
+    /// MPI init
+    ///
+    MPI_Init(&argc, &argv);
+    int rank, nProcs;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+    MPI_Barrier(MPI_COMM_WORLD);
 
-  if (rank==0) {
-      processCommandLine(argc, argv, inFileName, outPrefix, 
-                         &nEpoch, &radius, &nSomX, &nSomY, 
-                         &kernelType, &mapType, &enableSnapshots);
+    unsigned int nEpoch = 0;
+    unsigned int nSomX = 0;
+    unsigned int nSomY = 0;
+    unsigned int kernelType = 0;
+    unsigned int mapType = 0;
+    unsigned int radius = 0;
+    bool enableSnapshots = false;
+    char *inFileName = new char[255];
+    char *outPrefix = new char[255];
+
+    if (rank==0) {
+        processCommandLine(argc, argv, inFileName, outPrefix,
+                           &nEpoch, &radius, &nSomX, &nSomY,
+                           &kernelType, &mapType, &enableSnapshots);
 #ifndef CUDA
-      if (kernelType == DENSE_GPU){
-          cerr << "Somoclu was compile without GPU support!\n";
-          MPI_Abort(MPI_COMM_WORLD, 1);          
-      }
+        if (kernelType == DENSE_GPU) {
+            cerr << "Somoclu was compile without GPU support!\n";
+            MPI_Abort(MPI_COMM_WORLD, 1);
+        }
 #endif
-  }
-  MPI_Bcast(&nEpoch, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&radius, 1, MPI_INT, 0, MPI_COMM_WORLD);  
-  MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&mapType, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(inFileName, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
-  
-  double profile_time = MPI_Wtime();
-
-  float * dataRoot = NULL;
-  unsigned int nDimensions = 0;    
-  unsigned int nVectors = 0;
-  if(rank == 0 ){
-      if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
-        dataRoot = readMatrix(inFileName, nVectors, nDimensions);
-      } else {
-        readSparseMatrixDimensions(inFileName, nVectors, nDimensions);
-      }
-  }
-  MPI_Barrier(MPI_COMM_WORLD); 
-
-  MPI_Bcast(&nVectors, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  unsigned int nVectorsPerRank = ceil(nVectors / (1.0*nProcs));    
-  MPI_Bcast(&nDimensions, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-  // Allocate a buffer on each node
-  float* data = NULL;
-  svm_node **sparseData;
-  sparseData = NULL;
-  if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
-    data = new float[nVectorsPerRank*nDimensions];
-    // Dispatch a portion of the input data to each node
-    MPI_Scatter(dataRoot, nVectorsPerRank*nDimensions, MPI_FLOAT,
-              data, nVectorsPerRank*nDimensions, MPI_FLOAT,
-              0, MPI_COMM_WORLD);
-  } else {
-    int currentRankProcessed = 0;
-    while (currentRankProcessed < nProcs) {
-      if (rank == currentRankProcessed) {
-        sparseData=readSparseMatrixChunk(inFileName, nVectors, nVectorsPerRank, 
-                              rank*nVectorsPerRank);
-      }
-      currentRankProcessed++;
-      MPI_Barrier(MPI_COMM_WORLD); 
     }
-  }
-  
-  if(rank == 0){
-      // No need for root data any more
-      if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
-        delete [] dataRoot;
-      }
-      cout << "nVectors: " << nVectors << " ";
-      cout << "nVectorsPerRank: " << nVectorsPerRank << " ";
-      cout << "nDimensions: " << nDimensions << " ";
-      cout << endl;
-  }
+    MPI_Bcast(&nEpoch, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&radius, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&mapType, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(inFileName, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
 
-#ifdef CUDA  
-  if (kernelType == DENSE_GPU){
-    setDevice(rank, nProcs);
-    initializeGpu(data, nVectorsPerRank, nDimensions, nSomX, nSomY);
-  }
+    double profile_time = MPI_Wtime();
+
+    float * dataRoot = NULL;
+    unsigned int nDimensions = 0;
+    unsigned int nVectors = 0;
+    if(rank == 0 ) {
+        if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
+            dataRoot = readMatrix(inFileName, nVectors, nDimensions);
+        } else {
+            readSparseMatrixDimensions(inFileName, nVectors, nDimensions);
+        }
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    MPI_Bcast(&nVectors, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    unsigned int nVectorsPerRank = ceil(nVectors / (1.0*nProcs));
+    MPI_Bcast(&nDimensions, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    // Allocate a buffer on each node
+    float* data = NULL;
+    svm_node **sparseData;
+    sparseData = NULL;
+    if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
+        data = new float[nVectorsPerRank*nDimensions];
+        // Dispatch a portion of the input data to each node
+        MPI_Scatter(dataRoot, nVectorsPerRank*nDimensions, MPI_FLOAT,
+                    data, nVectorsPerRank*nDimensions, MPI_FLOAT,
+                    0, MPI_COMM_WORLD);
+    } else {
+        int currentRankProcessed = 0;
+        while (currentRankProcessed < nProcs) {
+            if (rank == currentRankProcessed) {
+                sparseData=readSparseMatrixChunk(inFileName, nVectors, nVectorsPerRank,
+                                                 rank*nVectorsPerRank);
+            }
+            currentRankProcessed++;
+            MPI_Barrier(MPI_COMM_WORLD);
+        }
+    }
+
+    if(rank == 0) {
+        // No need for root data any more
+        if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
+            delete [] dataRoot;
+        }
+        cout << "nVectors: " << nVectors << " ";
+        cout << "nVectorsPerRank: " << nVectorsPerRank << " ";
+        cout << "nDimensions: " << nDimensions << " ";
+        cout << endl;
+    }
+
+#ifdef CUDA
+    if (kernelType == DENSE_GPU) {
+        setDevice(rank, nProcs);
+        initializeGpu(data, nVectorsPerRank, nDimensions, nSomX, nSomY);
+    }
 #endif
-  
-  MPI_Barrier(MPI_COMM_WORLD); 
-  
-  // TRAINING
-  train(rank, data, sparseData, nSomX, nSomY, 
-        nDimensions, nVectors, nVectorsPerRank,
-        nEpoch, radius, outPrefix, enableSnapshots, kernelType, mapType);
-  
-  if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
-    delete [] data;
-  } else {
-    delete [] sparseData;
-  }
-  
-  profile_time = MPI_Wtime() - profile_time;
-  if (rank == 0) {
-    cerr << "Total Execution Time: " << profile_time << endl;
-  }
 
-#ifdef CUDA  
-  if (kernelType == DENSE_GPU){
-    freeGpu();
-  }
-#endif  
-  MPI_Finalize();
-  return 0;
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    // TRAINING
+    train(rank, data, sparseData, nSomX, nSomY,
+          nDimensions, nVectors, nVectorsPerRank,
+          nEpoch, radius, outPrefix, enableSnapshots, kernelType, mapType);
+
+    if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
+        delete [] data;
+    } else {
+        delete [] sparseData;
+    }
+
+    profile_time = MPI_Wtime() - profile_time;
+    if (rank == 0) {
+        cerr << "Total Execution Time: " << profile_time << endl;
+    }
+
+#ifdef CUDA
+    if (kernelType == DENSE_GPU) {
+        freeGpu();
+    }
+#endif
+    MPI_Finalize();
+    return 0;
 }
 
 void printUsage() {
     cout << "Usage:\n" \
-              "     [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX\n" \
-              "Arguments:\n" \
-              "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
-              "     -k NUMBER             Kernel type (default: " << KERNEL_TYPE << "): \n" \
-              "                              0: Dense CPU\n" \
-              "                              1: Dense GPU\n" \
-              "                              2: Sparse CPU\n" \
-              "     -m NUMBER             Map type (default: " << MAP_TYPE << "): \n" \
-              "                              0: Planar\n" \
-              "                              1: Toroid\n" \
-              "     -r NUMBER             Initial radius (default: half of the map in direction x)\n" \
-              "     -s                    Enable snapshots of U-matrix (default: false)\n" \
-              "     -x, --columns NUMBER  Number of columns in map (size of SOM in direction x) (default: " << N_SOM_X << ")\n" \
-              "     -y, --rows NUMBER     Number of rows in map (size of SOM in direction y) (default: " << N_SOM_Y << ")\n" \
-              "Examples:\n" \
-              "     somoclu data/rgbs.txt data/rgbs\n"
-              "     mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs\n";
+         "     [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX\n" \
+         "Arguments:\n" \
+         "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
+         "     -k NUMBER             Kernel type (default: " << KERNEL_TYPE << "): \n" \
+         "                              0: Dense CPU\n" \
+         "                              1: Dense GPU\n" \
+         "                              2: Sparse CPU\n" \
+         "     -m NUMBER             Map type (default: " << MAP_TYPE << "): \n" \
+         "                              0: Planar\n" \
+         "                              1: Toroid\n" \
+         "     -r NUMBER             Initial radius (default: half of the map in direction x)\n" \
+         "     -s                    Enable snapshots of U-matrix (default: false)\n" \
+         "     -x, --columns NUMBER  Number of columns in map (size of SOM in direction x) (default: " << N_SOM_X << ")\n" \
+         "     -y, --rows NUMBER     Number of rows in map (size of SOM in direction y) (default: " << N_SOM_Y << ")\n" \
+         "Examples:\n" \
+         "     somoclu data/rgbs.txt data/rgbs\n"
+         "     mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs\n";
 }
 
-void processCommandLine(int argc, char** argv, char* inFileName, 
+void processCommandLine(int argc, char** argv, char* inFileName,
                         char* outPrefix, unsigned int *nEpoch,
                         unsigned int *radius,
-                        unsigned int *nSomX, unsigned int *nSomY, 
-                        unsigned int *kernelType, unsigned int *mapType, 
+                        unsigned int *nSomX, unsigned int *nSomY,
+                        unsigned int *kernelType, unsigned int *mapType,
                         bool *enableSnapshots) {
-  
+
     // Setting default values
     *nEpoch = N_EPOCH;
     *nSomX = N_SOM_X;
@@ -210,16 +210,16 @@ void processCommandLine(int argc, char** argv, char* inFileName,
     *mapType = MAP_TYPE;
     *radius = 0;
     static struct option long_options[] =
-             {
-               {"rows",  required_argument, 0, 'y'},
-               {"columns",    required_argument, 0, 'x'},
-               {0, 0, 0, 0}
-             };    
+    {
+        {"rows",  required_argument, 0, 'y'},
+        {"columns",    required_argument, 0, 'x'},
+        {0, 0, 0, 0}
+    };
     int c;
     extern int optind, optopt;
     int option_index = 0;
     while ((c = getopt_long (argc, argv, "hsx:y:e:k:m:r:",
-                            long_options, &option_index)) != -1) {
+                             long_options, &option_index)) != -1) {
         switch (c) {
         case 'e':
             *nEpoch = atoi(optarg);
@@ -254,8 +254,8 @@ void processCommandLine(int argc, char** argv, char* inFileName,
             }
             break;
         case 's':
-              *enableSnapshots = true;
-              break;
+            *enableSnapshots = true;
+            break;
         case 'x':
             *nSomX = atoi(optarg);
             if (*nSomX<=0) {
@@ -271,8 +271,8 @@ void processCommandLine(int argc, char** argv, char* inFileName,
             }
             break;
         case '?':
-            if (optopt == 'e' || optopt == 'k' || optopt == 's' || 
-                optopt == 'x'    || optopt == 'y') {
+            if (optopt == 'e' || optopt == 'k' || optopt == 's' ||
+                    optopt == 'x'    || optopt == 'y') {
                 fprintf (stderr, "Option -%c requires an argument.\n", optopt);
                 printUsage();
                 MPI_Abort(MPI_COMM_WORLD, 1);
@@ -290,9 +290,9 @@ void processCommandLine(int argc, char** argv, char* inFileName,
         }
     }
     if (argc-optind!=2) {
-                fprintf(stderr, "Incorrect number of mandatory parameters");
-                printUsage();
-                MPI_Abort(MPI_COMM_WORLD, 1);
+        fprintf(stderr, "Incorrect number of mandatory parameters");
+        printUsage();
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
     strcpy(inFileName, argv[optind++]);
     strcpy(outPrefix, argv[optind++]);
@@ -303,8 +303,8 @@ void processCommandLine(int argc, char** argv, char* inFileName,
  */
 void my_abort(int err)
 {
-  cout << "Test FAILED\n";
-  MPI_Abort(MPI_COMM_WORLD, err);
+    cout << "Test FAILED\n";
+    MPI_Abort(MPI_COMM_WORLD, err);
 }
 
 /// EOF
