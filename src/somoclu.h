@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 #include <string>
 
 using namespace std;
@@ -27,6 +26,11 @@ using namespace std;
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
+
+#ifdef HAVE_MPI         
+#include <mpi.h>
+#endif
+
 
 #define DENSE_CPU 0
 #define DENSE_GPU 1

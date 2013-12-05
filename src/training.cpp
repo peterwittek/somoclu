@@ -18,8 +18,8 @@
  */
 
 #include <cmath>
-#include <mpi.h>
 #include <cstdlib>
+#include <iostream>
 #include <sstream>
 
 #include "somoclu.h"
@@ -52,7 +52,7 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
     }
 }
 
-/** MR-MPI user-defined map function - batch training with MPI_reduce()
+/** Main training loop
  * @param itask - number of work items
  * @param kv
  * @param ptr
@@ -70,18 +70,18 @@ void train(int itask, float *data, svm_node **sparseData,
     ///
     /// Codebook
     ///
-    float *codebook = NULL;
+    float *codebook = new float[nSomY*nSomX*nDimensions];
     float *numerator;
     float *denominator;
     if (itask == 0) {
         numerator = new float[nSomY*nSomX*nDimensions];
         denominator = new float[nSomY*nSomX];
         if (initialCodebookFilename.empty()){
-            codebook = new float[nSomY*nSomX*nDimensions];
             initializeCodebook(0, codebook, nSomX, nSomY, nDimensions);
         } else {
             unsigned int nSomXY = 0;
             unsigned int tmpNDimensions = 0;
+            delete [] codebook;
             codebook = readMatrix(initialCodebookFilename, nSomXY, tmpNDimensions);
             if (tmpNDimensions != nDimensions) {
                 cerr << "Dimension of initial codebook does not match data!\n";
@@ -93,8 +93,6 @@ void train(int itask, float *data, svm_node **sparseData,
             cout << "Read initial codebook: " << initialCodebookFilename << "\n";
         }
     }
-    MPI_Barrier(MPI_COMM_WORLD);
-
     ///
     /// Parameters for SOM
     ///
@@ -108,20 +106,23 @@ void train(int itask, float *data, svm_node **sparseData,
     ///
     /// Training
     ///
+#ifdef HAVE_MPI    
     double training_time = MPI_Wtime();
+#endif    
     while (nEpoch && radius > 1.0) {
+#ifdef HAVE_MPI      
         double epoch_time = MPI_Wtime();
+#endif        
         if (itask == 0) {
             radius = radius0 * exp(-10.0f * (x * x) / (N * N));
             x++;
             cout << "Epoch: " << (nEpoch-1) << " Radius: " << radius << endl;
         }
-
+#ifdef HAVE_MPI
         MPI_Bcast(&radius, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
-
         MPI_Bcast(codebook, nSomY*nSomX*nDimensions, MPI_FLOAT,
                   0, MPI_COMM_WORLD);
-
+#endif
         if (itask == 0) {
             for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
                 for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
@@ -136,7 +137,6 @@ void train(int itask, float *data, svm_node **sparseData,
         /// 1. Each task fills localNumerator and localDenominator
         /// 2. MPI_reduce sums up each tasks localNumerator and localDenominator to the root's
         ///    numerator and denominator.
-
         switch (kernelType) {
         default:
         case DENSE_CPU:
@@ -159,7 +159,9 @@ void train(int itask, float *data, svm_node **sparseData,
         }
 
         /// 3. Update codebook using numerator and denominator
+#ifdef HAVE_MPI        
         MPI_Barrier(MPI_COMM_WORLD);
+#endif        
         if (itask == 0) {
             #pragma omp parallel for
             for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
@@ -183,18 +185,20 @@ void train(int itask, float *data, svm_node **sparseData,
             saveUMat(sstm.str(), codebook, nSomX, nSomY, nDimensions, mapType);
         }
         nEpoch--;
-        epoch_time = MPI_Wtime() - epoch_time;
+#ifdef HAVE_MPI        
         if (itask == 0) {
+            epoch_time = MPI_Wtime() - epoch_time;
             cerr << "Epoch Time: " << epoch_time << endl;
         }
+#endif        
     }
-
+#ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
     training_time = MPI_Wtime() - training_time;
     if (itask == 0) {
         cerr << "Total training Time: " << training_time << endl;
     }
-
+#endif
     ///
     /// Save SOM map and u-mat
     ///
@@ -214,9 +218,9 @@ void train(int itask, float *data, svm_node **sparseData,
         ///
         saveCodebook(outPrefix + string(".wts"), codebook, nSomX, nSomY, nDimensions);
     }
-
+#ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
-
+#endif
     delete [] codebook;
     if (itask == 0) {
         delete [] numerator;

@@ -18,7 +18,6 @@
  */
 
 #include <cmath>
-#include <mpi.h>
 
 #include "somoclu.h"
 
@@ -127,8 +126,12 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
             }
         }
     }
+#ifdef HAVE_MPI
     MPI_Reduce(localNumerator, numerator,
                nSomY*nSomX*nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(localDenominator, denominator,
                nSomY*nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+#endif
+    delete [] localNumerator;
+    delete [] localDenominator;
 }

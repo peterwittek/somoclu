@@ -18,7 +18,7 @@
  */
 #include <cmath>
 #include <cstdlib>
-#include <mpi.h>
+#include <iostream>
 #include <unistd.h>
 #include <getopt.h>
 
@@ -26,7 +26,7 @@
 
 using namespace std;
 
-/// For syncronized timing
+/// For synchronized timing
 #ifndef MPI_WTIME_IS_GLOBAL
 #define MPI_WTIME_IS_GLOBAL 1
 #endif
@@ -50,14 +50,18 @@ void processCommandLine(int argc, char** argv, string *inFilename,
 int main(int argc, char** argv)
 /* -------------------------------------------------------------------------- */
 {
+    int rank = 0;
+    int nProcs = 1;
+    
+#ifdef HAVE_MPI  
     ///
     /// MPI init
     ///
     MPI_Init(&argc, &argv);
-    int rank, nProcs;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
     MPI_Barrier(MPI_COMM_WORLD);
+#endif
 
     unsigned int nEpoch = 0;
     unsigned int nSomX = 0;
@@ -78,22 +82,26 @@ int main(int argc, char** argv)
 #ifndef CUDA
         if (kernelType == DENSE_GPU) {
             cerr << "Somoclu was compile without GPU support!\n";
-            MPI_Abort(MPI_COMM_WORLD, 1);
+            my_abort(1);
         }
 #endif
     }
+#ifdef HAVE_MPI 
     MPI_Bcast(&nEpoch, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&radius, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&mapType, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    char *inFilenameCStr = new char[inFilename.size()];
-    strcpy(inFilenameCStr,inFilename.c_str());
-    MPI_Bcast(inFilenameCStr, inFilename.size(), MPI_CHAR, 0, MPI_COMM_WORLD);
+    char *inFilenameCStr = new char[255];
+    if (rank == 0) {
+        strcpy(inFilenameCStr,inFilename.c_str());
+    }
+    MPI_Bcast(inFilenameCStr, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
     inFilename = inFilenameCStr;
-    
+
     double profile_time = MPI_Wtime();
+#endif
 
     float * dataRoot = NULL;
     unsigned int nDimensions = 0;
@@ -105,22 +113,28 @@ int main(int argc, char** argv)
             readSparseMatrixDimensions(inFilename, nVectors, nDimensions);
         }
     }
+#ifdef HAVE_MPI 
     MPI_Barrier(MPI_COMM_WORLD);
-
     MPI_Bcast(&nVectors, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    unsigned int nVectorsPerRank = ceil(nVectors / (1.0*nProcs));
     MPI_Bcast(&nDimensions, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
+#endif
+    unsigned int nVectorsPerRank = ceil(nVectors / (1.0*nProcs));
+    
     // Allocate a buffer on each node
     float* data = NULL;
     svm_node **sparseData;
     sparseData = NULL;
+
     if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
-        data = new float[nVectorsPerRank*nDimensions];
+#ifdef HAVE_MPI         
         // Dispatch a portion of the input data to each node
+        data = new float[nVectorsPerRank*nDimensions];        
         MPI_Scatter(dataRoot, nVectorsPerRank*nDimensions, MPI_FLOAT,
                     data, nVectorsPerRank*nDimensions, MPI_FLOAT,
                     0, MPI_COMM_WORLD);
+#else
+        data = dataRoot;
+#endif                    
     } else {
         int currentRankProcessed = 0;
         while (currentRankProcessed < nProcs) {
@@ -129,15 +143,19 @@ int main(int argc, char** argv)
                                                  rank*nVectorsPerRank);
             }
             currentRankProcessed++;
+#ifdef HAVE_MPI             
             MPI_Barrier(MPI_COMM_WORLD);
+#endif            
         }
     }
 
     if(rank == 0) {
-        // No need for root data any more
+        // No need for root data any more if compiled with MPI
+#ifdef HAVE_MPI                 
         if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
             delete [] dataRoot;
         }
+#endif
         cout << "nVectors: " << nVectors << " ";
         cout << "nVectorsPerRank: " << nVectorsPerRank << " ";
         cout << "nDimensions: " << nDimensions << " ";
@@ -151,8 +169,9 @@ int main(int argc, char** argv)
     }
 #endif
 
+#ifdef HAVE_MPI 
     MPI_Barrier(MPI_COMM_WORLD);
-
+#endif
     // TRAINING
     train(rank, data, sparseData, nSomX, nSomY,
           nDimensions, nVectors, nVectorsPerRank,
@@ -164,18 +183,20 @@ int main(int argc, char** argv)
     } else {
         delete [] sparseData;
     }
-
+#ifdef HAVE_MPI 
     profile_time = MPI_Wtime() - profile_time;
     if (rank == 0) {
         cerr << "Total Execution Time: " << profile_time << endl;
     }
-
+#endif
 #ifdef CUDA
     if (kernelType == DENSE_GPU) {
         freeGpu();
     }
 #endif
+#ifdef HAVE_MPI 
     MPI_Finalize();
+#endif
     return 0;
 }
 
@@ -234,33 +255,33 @@ void processCommandLine(int argc, char** argv, string *inFilename,
         case 'e':
             *nEpoch = atoi(optarg);
             if (*nEpoch<=0) {
-                fprintf (stderr, "The argument of option -e should be a positive integer.\n");
-                MPI_Abort(MPI_COMM_WORLD, 1);
+                cerr << "The argument of option -e should be a positive integer.\n";
+                my_abort(1);
             }
             break;
         case 'h':
             printUsage();
-            MPI_Abort(MPI_COMM_WORLD, 0);
+            my_abort(0);
             break;
         case 'k':
             *kernelType = atoi(optarg);
             if (*kernelType<DENSE_CPU||*kernelType>SPARSE_CPU) {
-                fprintf (stderr, "The argument of option -k should be a valid kernel.\n");
-                MPI_Abort(MPI_COMM_WORLD, 1);
+                cerr << "The argument of option -k should be a valid kernel.\n";
+                my_abort(1);
             }
             break;
         case 'm':
             *mapType = atoi(optarg);
             if (*mapType<PLANAR||*mapType>TOROID) {
-                fprintf (stderr, "The argument of option -m should be a valid map type.\n");
-                MPI_Abort(MPI_COMM_WORLD, 1);
+                cerr << "The argument of option -m should be a valid map type.\n";
+                my_abort(1);
             }
             break;
         case 'r':
             *radius = atoi(optarg);
             if (*radius<=0) {
-                fprintf (stderr, "The argument of option -r should be a positive integer.\n");
-                MPI_Abort(MPI_COMM_WORLD, 1);
+                cerr << "The argument of option -r should be a positive integer.\n";
+                my_abort(1);
             }
             break;
         case 's':
@@ -269,40 +290,40 @@ void processCommandLine(int argc, char** argv, string *inFilename,
         case 'x':
             *nSomX = atoi(optarg);
             if (*nSomX<=0) {
-                fprintf (stderr, "The argument of option -x should be a positive integer.\n");
-                MPI_Abort(MPI_COMM_WORLD, 1);
+                cerr << "The argument of option -x should be a positive integer.\n";
+                my_abort(1);
             }
             break;
         case 'y':
             *nSomY = atoi(optarg);
             if (*nSomY<=0) {
-                fprintf (stderr, "The argument of option -y should be a positive integer.\n");
-                MPI_Abort(MPI_COMM_WORLD, 1);
+                cerr << "The argument of option -y should be a positive integer.\n";
+                my_abort(1);
             }
             break;
         case '?':
             if (optopt == 'e' || optopt == 'k' || optopt == 's' ||
                     optopt == 'x'    || optopt == 'y') {
-                fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+                cerr << "Option -" <<  optopt << " requires an argument.\n";
                 printUsage();
-                MPI_Abort(MPI_COMM_WORLD, 1);
+                my_abort(1);
             } else if (isprint (optopt)) {
-                fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+                cerr << "Unknown option `-" << optopt << "'.\n";
                 printUsage();
-                MPI_Abort(MPI_COMM_WORLD, 1);
+                my_abort(1);
             } else {
-                fprintf (stderr, "Unknown option character `\\x%x'.\n",  optopt);
+                cerr << "Unknown option character `\\x" << optopt << "'.\n";
                 printUsage();
-                MPI_Abort(MPI_COMM_WORLD, 1);
+                my_abort(1);
             }
         default:
             abort ();
         }
     }
     if (argc-optind!=2) {
-        fprintf(stderr, "Incorrect number of mandatory parameters");
+        cerr << "Incorrect number of mandatory parameters\n";
         printUsage();
-        MPI_Abort(MPI_COMM_WORLD, 1);
+        my_abort(1);
     }
     *inFilename = argv[optind++];
     *outPrefix = argv[optind++];
@@ -313,8 +334,12 @@ void processCommandLine(int argc, char** argv, string *inFilename,
  */
 void my_abort(int err)
 {
-    cout << "Test FAILED\n";
-    MPI_Abort(MPI_COMM_WORLD, err);
+    cerr << "Aborted\n";
+#ifdef HAVE_MPI    
+    my_abort(err);
+#else
+    exit(err);
+#endif
 }
 
 /// EOF

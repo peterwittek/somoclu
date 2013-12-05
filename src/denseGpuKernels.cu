@@ -21,17 +21,14 @@
 #undef _GLIBCXX_USE_INT128
 
 #include <iostream>
-#include <cublas_v2.h>
 #include <vector>
-#include <mpi.h>
+#include <cublas_v2.h>
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 #include <thrust/reduce.h>
 #include <thrust/functional.h>
 
 #include "somoclu.h"
-
-using namespace std;
 
 // Error handling macro
 #define CUDA_CHECK(call) \
@@ -251,6 +248,7 @@ void initializeGpu(float *hostData, int nVectorsPerRank, int nDimensions, int nS
  * @param commSize - the size of MPI comm world
  */
 
+#ifdef HAVE_MPI         
 /// Note that this function was lifted from http://code.google.com/p/gpmr/
 void setDevice(int commRank, int commSize)
 {
@@ -327,6 +325,7 @@ void setDevice(int commRank, int commSize)
     CUDA_CHECK(cudaSetDevice(deviceNum));
     MPI_Barrier(MPI_COMM_WORLD);
 }
+#endif
 
 /** One epoch on the GPU, dense variant
  */
@@ -380,11 +379,12 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
             }
         }
     }
-
+#ifdef HAVE_MPI         
     MPI_Reduce(localNumerator, numerator,
                nSomY*nSomX*nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(localDenominator, denominator,
                nSomY*nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+#endif               
     delete [] localNumerator;
     delete [] localDenominator;
 }

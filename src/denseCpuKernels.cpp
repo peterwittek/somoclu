@@ -18,7 +18,8 @@
  */
 
 #include <cmath>
-#include <mpi.h>
+#include <iostream>
+
 #include "somoclu.h"
 
 /** Distance b/w a feature vector and a weight vector
@@ -117,9 +118,20 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
             }
         }
     }
-
+#ifdef HAVE_MPI         
     MPI_Reduce(localNumerator, numerator,
                nSomY*nSomX*nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(localDenominator, denominator,
                nSomY*nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+               
+#else
+    for (unsigned int i=0; i < nSomY*nSomX*nDimensions; ++i) {
+        numerator[i] = localNumerator[i];
+    }
+    for (unsigned int i=0; i < nSomY*nSomX; ++i) {
+        denominator[i] = localDenominator[i];
+    }
+#endif
+    delete [] localNumerator;
+    delete [] localDenominator;
 }
