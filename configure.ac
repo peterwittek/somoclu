@@ -71,9 +71,17 @@ fi
 
 #Setup MPI Paths
 # ------------------------------------------------------------------------------
-AX_MPI_OPTIONS
-AX_MPI_TESTS
-CXX=$MPI_CXX
+AC_ARG_WITH([mpi],
+   [  --with-mpi=PATH    prefix where MPI is installed])
+
+if test x"$with_mpi" != x"no" ; then
+    AX_MPI_OPTIONS
+    AX_MPI_TESTS
+    CXX=$MPI_CXX
+    mpi_enabled=yes
+else
+    mpi_enabled=no
+fi
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
@@ -88,6 +96,7 @@ echo \
  Compiler: '${CXX} ${CXXFLAGS} ${MPI_INC} ${MPI_LIBDIR} ${MPI_LIBS}'
 
  Package features:
+   MPI enabled: ${mpi_enabled}
    CUDA enabled: ${cuda_enabled}
 
  Now type 'make @<:@<target>@:>@'
