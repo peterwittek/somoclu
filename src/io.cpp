@@ -155,10 +155,10 @@ int saveUMat(char* fname, float *codebook, unsigned int nSomX,
         return -2;
 }
 
-bool isLrnFile(const char *inFileName) {
+bool isFileType(const char *inFileName, const char *fileType) {
     unsigned int size = 0;
     while(inFileName[size++]!='\0') {}
-    unsigned int testResult = strcmp("lrn\0", inFileName + size - 4);
+    unsigned int testResult = strcmp(fileType, inFileName + size - 4);
     if (testResult == 0) {
         return true;
     } else {
@@ -166,23 +166,40 @@ bool isLrnFile(const char *inFileName) {
     }
 }
 
-/** Reads an ESOM lrn file
- * @param inFileNae
- * @param nRows - returns the number of rows
- * @param nColumns - returns the number of columns
- * @return the matrix
- */
-
-float *readLrnFile(const char *inFileName, unsigned int &nRows, unsigned int &nColumns)
+void getMatrixDimensions(const char *inFileName, unsigned int &nRows, unsigned int &nColumns) 
 {
-    unsigned int nAllColumns = 0;
-    float *data = NULL;
+    ifstream file;
+    file.open(inFileName);
+    float *data=NULL;
+    if (file.is_open()) {
+        string line;
+        float tmp;
+        while(getline(file,line)) {
+            if (line.substr(0,1) == "#") {
+                continue;
+            }
+            std::istringstream iss(line);
+            if (nRows == 0) {
+                while (iss >> tmp) {
+                    nColumns++;
+                }
+            }
+            nRows++;
+        }
+        file.close();
+    } else {
+        std::cerr << "Input file could not be opened!\n";
+        my_abort(-1);
+    }
+}
+
+unsigned int *readLrnHeader(const char *inFileName, unsigned int &nRows, unsigned int &nColumns)
+{
     ifstream file;
     file.open(inFileName);
     string line;
-    float tmp;
-    unsigned int j = 0;
     unsigned int currentColumn = 0;
+    unsigned int nAllColumns = 0;
     unsigned int *columnMap = NULL;
     while(getline(file,line)) {
         if (line.substr(0,1) == "#") {
@@ -204,7 +221,77 @@ float *readLrnFile(const char *inFileName, unsigned int &nRows, unsigned int &nC
                         ++nColumns;
                     }
                 }
+            } else {
+                break;
             }
+        }
+    }
+    file.close();
+    return columnMap;
+}
+
+unsigned int *readWtsHeader(const char *inFileName, unsigned int &nRows, unsigned int &nColumns)
+{
+    ifstream file;
+    file.open(inFileName);
+    string line;
+    unsigned int currentColumn = 0;
+    while(getline(file,line)) {
+        if (line.substr(0,1) == "#") {
+            continue;
+        }
+        if (line.substr(0,1) == "%") {
+            std::istringstream iss(line.substr(1,line.length()));
+            if (nRows == 0) {
+                iss >> nRows;
+                unsigned int nSomY = 0;
+                iss >> nSomY;
+                nRows = nRows*nSomY;
+            } else if (nColumns == 0) {
+                iss >> nColumns;
+            } else {
+                break;
+            }
+        }
+    }
+    file.close();
+    unsigned int *columnMap = new unsigned int[nColumns];
+    for (unsigned int i = 0; i < nColumns; ++i) {
+        columnMap[i] = 1;
+    }    
+    return columnMap;
+}
+
+/** Reads a matrix
+ * @param inFileName
+ * @param nRows - returns the number of rows
+ * @param nColumns - returns the number of columns
+ * @return the matrix
+ */
+float *readMatrix(const char *inFileName, unsigned int &nRows, unsigned int &nColumns)
+{
+    float *data = NULL;
+    unsigned int *columnMap = NULL;    
+    if (isFileType(inFileName,"lrn\0")) {
+        columnMap = readLrnHeader(inFileName, nRows, nColumns);
+    } else if (isFileType(inFileName,"wts\0")) {
+        columnMap = readWtsHeader(inFileName, nRows, nColumns);
+    } else {
+        getMatrixDimensions(inFileName, nRows, nColumns);
+        columnMap = new unsigned int[nColumns];
+        for (unsigned int i = 0; i < nColumns; ++i) {
+            columnMap[i] = 1;
+        }
+    }
+    ifstream file;
+    file.open(inFileName);
+    string line;
+    float tmp;
+    unsigned int j = 0;
+    unsigned int currentColumn = 0;
+
+    while(getline(file,line)) {
+        if (line.substr(0,1) == "#" | line.substr(0,1) == "%") {
             continue;
         }
         if (data == NULL) {
@@ -220,57 +307,7 @@ float *readLrnFile(const char *inFileName, unsigned int &nRows, unsigned int &nC
         }
     }
     file.close();
-    return data;
-}
-
-/** Reads a matrix
- * @param inFileNae
- * @param nRows - returns the number of rows
- * @param nColumns - returns the number of columns
- * @return the matrix
- */
-
-float *readMatrix(const char *inFileName, unsigned int &nRows, unsigned int &nColumns)
-{
-    if (isLrnFile(inFileName)) {
-        return readLrnFile(inFileName, nRows, nColumns);
-    }
-    ifstream file;
-    file.open(inFileName);
-    float *data=NULL;
-    if (file.is_open()) {
-        string line;
-        float tmp;
-        while(getline(file,line)) {
-            if (line.substr(0,1) == "#") {
-                continue;
-            }
-            std::istringstream iss(line);
-            if (nRows == 0) {
-                while (iss >> tmp) {
-                    nColumns++;
-                }
-            }
-            nRows++;
-        }
-        data=new float[nRows*nColumns];
-        file.close();
-        file.open(inFileName);
-        int j=0;
-        while(getline(file,line)) {
-            if (line.substr(0,1) == "#") {
-                continue;
-            }
-            std::istringstream iss(line);
-            while (iss >> tmp) {
-                data[j++] = tmp;
-            }
-        }
-        file.close();
-    } else {
-        std::cerr << "Input file could not be opened!\n";
-        my_abort(-1);
-    }
+    delete [] columnMap;
     return data;
 }
 
