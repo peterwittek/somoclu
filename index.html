@@ -36,7 +36,15 @@
 
 <p>Somoclu is a cluster-oriented implementation of self-organizing maps. It relies on MPI for distributing the workload, and it can be accelerated by CUDA on a GPU cluster. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes.</p>
 
-<h1>
+<p>Key features:</p>
+
+<ul>
+<li>Fast execution by parallelization: MPI and CUDA are supported.</li>
+<li>Planar and toroid maps.</li>
+<li>Both dense and sparse input data are supported.</li>
+<li>Large maps of several hundred thousand neurons are feasible.</li>
+<li>Integration with Databionic ESOM Tools.</li>
+</ul><h1>
 <a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h1>
 
 <p>Somoclu takes a plain text input file -- either dense or sparse data. Example files are included.</p>
@@ -111,9 +119,11 @@ $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 <h1>
 <a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h1>
 
-<p>You need a working MPI installation on your system to compile Somoclu. A single-core or a single-GPU variant will run without the MPI runtime. The package was tested with OpenMPI, but it should work with other MPI flavours. </p>
+<p>The only dependency is GCC, albeit other compiler chains might also work.</p>
 
-<p>CUDA support is optional. CUDA 4.1 and 5.0 versions are known to work.</p>
+<p>Distributed systems and single-machine multicore execution is supported through MPI. The package was tested with OpenMPI, versions 1.3.2 and 1.6.5 were tested. It should also work with other MPI flavours. </p>
+
+<p>CUDA support is optional. CUDA versions 4.1, 5.0 and 5.5 are known to work.</p>
 
 <h1>
 <a name="compilation--installation" class="anchor" href="#compilation--installation"><span class="octicon octicon-link"></span></a>Compilation &amp; Installation</h1>
@@ -139,10 +149,11 @@ $ make install
 different location, use this option to select an installation
 directory.</p>
 
-<pre><code>--with-mpi-compilers=DIR or --with-mpi-compilers=yes
+<pre><code>--without-mpi           Disregard any MPI installation found.
+--with-mpi=MPIROOT      Use MPI root directory.
+--with-mpi-compilers=DIR or --with-mpi-compilers=yes
                           use MPI compiler (mpicxx) found in directory DIR, or
                           in your PATH if =yes
---with-mpi=MPIROOT      use MPI root directory.
 --with-mpi-libs="LIBS"  MPI libraries [default "-lmpi"]
 --with-mpi-incdir=DIR   MPI include directory [default MPIROOT/include]
 --with-mpi-libdir=DIR   MPI library directory [default MPIROOT/lib]
