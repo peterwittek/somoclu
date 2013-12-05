@@ -34,11 +34,11 @@ using namespace std;
  * @param nSomY - dimensions of SOM map in the y direction
  * @param nDimensions - dimensions of a data instance
  */
-int saveCodebook(char* cbFileName, float *codebook, unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions)
+int saveCodebook(string cbFileName, float *codebook, unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions)
 {
     char temp[80];
     cout << "    Codebook file = " << cbFileName << endl;
-    ofstream mapFile(cbFileName);
+    ofstream mapFile(cbFileName.c_str());
     cout << "    Saving Codebook..." << endl;
     mapFile << "%" << nSomY << " " << nSomX << endl;
     mapFile << "%" << nDimensions << endl;
@@ -108,12 +108,12 @@ float* get_wvec(float *codebook, unsigned int som_y, unsigned int som_x,
  * @param nDimensions - dimensions of a data instance
  */
 
-int saveUMat(char* fname, float *codebook, unsigned int nSomX,
+int saveUMat(string fname, float *codebook, unsigned int nSomX,
              unsigned int nSomY, unsigned int nDimensions, unsigned int mapType)
 {
 
     float min_dist = 1.5f;
-    FILE* fp = fopen(fname, "wt");
+    FILE* fp = fopen(fname.c_str(), "wt");
     fprintf(fp, "%%");
     fprintf(fp, "%d %d", nSomY, nSomX);
     fprintf(fp, "\n");
@@ -155,21 +155,10 @@ int saveUMat(char* fname, float *codebook, unsigned int nSomX,
         return -2;
 }
 
-bool isFileType(const char *inFileName, const char *fileType) {
-    unsigned int size = 0;
-    while(inFileName[size++]!='\0') {}
-    unsigned int testResult = strcmp(fileType, inFileName + size - 4);
-    if (testResult == 0) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-void getMatrixDimensions(const char *inFileName, unsigned int &nRows, unsigned int &nColumns) 
+void getMatrixDimensions(string inFilename, unsigned int &nRows, unsigned int &nColumns) 
 {
     ifstream file;
-    file.open(inFileName);
+    file.open(inFilename.c_str());
     float *data=NULL;
     if (file.is_open()) {
         string line;
@@ -193,10 +182,10 @@ void getMatrixDimensions(const char *inFileName, unsigned int &nRows, unsigned i
     }
 }
 
-unsigned int *readLrnHeader(const char *inFileName, unsigned int &nRows, unsigned int &nColumns)
+unsigned int *readLrnHeader(string inFilename, unsigned int &nRows, unsigned int &nColumns)
 {
     ifstream file;
-    file.open(inFileName);
+    file.open(inFilename.c_str());
     string line;
     unsigned int currentColumn = 0;
     unsigned int nAllColumns = 0;
@@ -230,10 +219,10 @@ unsigned int *readLrnHeader(const char *inFileName, unsigned int &nRows, unsigne
     return columnMap;
 }
 
-unsigned int *readWtsHeader(const char *inFileName, unsigned int &nRows, unsigned int &nColumns)
+unsigned int *readWtsHeader(string inFilename, unsigned int &nRows, unsigned int &nColumns)
 {
     ifstream file;
-    file.open(inFileName);
+    file.open(inFilename.c_str());
     string line;
     unsigned int currentColumn = 0;
     while(getline(file,line)) {
@@ -263,28 +252,28 @@ unsigned int *readWtsHeader(const char *inFileName, unsigned int &nRows, unsigne
 }
 
 /** Reads a matrix
- * @param inFileName
+ * @param inFilename
  * @param nRows - returns the number of rows
  * @param nColumns - returns the number of columns
  * @return the matrix
  */
-float *readMatrix(const char *inFileName, unsigned int &nRows, unsigned int &nColumns)
+float *readMatrix(string inFilename, unsigned int &nRows, unsigned int &nColumns)
 {
     float *data = NULL;
-    unsigned int *columnMap = NULL;    
-    if (isFileType(inFileName,"lrn\0")) {
-        columnMap = readLrnHeader(inFileName, nRows, nColumns);
-    } else if (isFileType(inFileName,"wts\0")) {
-        columnMap = readWtsHeader(inFileName, nRows, nColumns);
+    unsigned int *columnMap = NULL;
+    if (inFilename.compare(inFilename.size()-3, 3, "lrn") == 0) {
+        columnMap = readLrnHeader(inFilename, nRows, nColumns);
+    } else if (inFilename.compare(inFilename.size()-3, 3, "wts") == 0) {
+        columnMap = readWtsHeader(inFilename, nRows, nColumns);
     } else {
-        getMatrixDimensions(inFileName, nRows, nColumns);
+        getMatrixDimensions(inFilename, nRows, nColumns);
         columnMap = new unsigned int[nColumns];
         for (unsigned int i = 0; i < nColumns; ++i) {
             columnMap[i] = 1;
         }
     }
     ifstream file;
-    file.open(inFileName);
+    file.open(inFilename.c_str());
     string line;
     float tmp;
     unsigned int j = 0;
@@ -311,10 +300,10 @@ float *readMatrix(const char *inFileName, unsigned int &nRows, unsigned int &nCo
     return data;
 }
 
-void readSparseMatrixDimensions(const char *filename, unsigned int &nRows,
+void readSparseMatrixDimensions(string filename, unsigned int &nRows,
                                 unsigned int &nColumns) {
     ifstream file;
-    file.open(filename);
+    file.open(filename.c_str());
     if (file.is_open()) {
         string line;
         int max_index=-1;
@@ -343,11 +332,11 @@ void readSparseMatrixDimensions(const char *filename, unsigned int &nRows,
     }
 }
 
-svm_node** readSparseMatrixChunk(const char *filename, unsigned int nRows,
+svm_node** readSparseMatrixChunk(string filename, unsigned int nRows,
                                  unsigned int nRowsToRead,
                                  unsigned int rowOffset) {
     ifstream file;
-    file.open(filename);
+    file.open(filename.c_str());
     string line;
     for (unsigned int i=0; i<rowOffset; i++) {
         getline(file, line);

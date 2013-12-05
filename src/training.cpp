@@ -20,6 +20,7 @@
 #include <cmath>
 #include <mpi.h>
 #include <cstdlib>
+#include <sstream>
 
 #include "somoclu.h"
 
@@ -62,7 +63,7 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int nDimensions, unsigned int nVectors,
            unsigned int nVectorsPerRank, unsigned int nEpoch,
            unsigned int radius0,
-           const char *outPrefix, bool shouldSaveInterim,
+           string outPrefix, bool shouldSaveInterim,
            unsigned int kernelType, unsigned int mapType)
 {
     ///
@@ -161,9 +162,9 @@ void train(int itask, float *data, svm_node **sparseData,
         ///
         if (shouldSaveInterim && itask == 0) {
             cout << "Saving interim U-Matrix..." << endl;
-            char umatInterimFileName[50];
-            sprintf(umatInterimFileName, "%s-umat-%03d.umx", outPrefix,  x);
-            saveUMat(umatInterimFileName, codebook, nSomX, nSomY, nDimensions, mapType);
+            stringstream sstm;
+            sstm << outPrefix << "." << x << ".umx";
+            saveUMat(sstm.str(), codebook, nSomX, nSomY, nDimensions, mapType);
         }
         nEpoch--;
         epoch_time = MPI_Wtime() - epoch_time;
@@ -185,9 +186,7 @@ void train(int itask, float *data, svm_node **sparseData,
         ///
         /// Save U-mat
         ///
-        char umatFileName[50];
-        sprintf(umatFileName, "%s-umat.umx", outPrefix);
-        int ret = saveUMat(umatFileName, codebook, nSomX, nSomY, nDimensions, mapType);
+        int ret = saveUMat(outPrefix + string(".umx"), codebook, nSomX, nSomY, nDimensions, mapType);
         if (ret < 0)
             cout << "    Failed to save u-matrix. !" << endl;
         else {
@@ -197,9 +196,7 @@ void train(int itask, float *data, svm_node **sparseData,
         ///
         /// Save codebook
         ///
-        char codebookInterimFileName[50];
-        sprintf(codebookInterimFileName, "%s-codebook.wts", outPrefix);
-        saveCodebook(codebookInterimFileName, codebook, nSomX, nSomY, nDimensions);
+        saveCodebook(outPrefix + string(".wts"), codebook, nSomX, nSomY, nDimensions);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);

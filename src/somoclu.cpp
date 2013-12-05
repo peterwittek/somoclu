@@ -39,12 +39,12 @@ using namespace std;
 #define MAP_TYPE 0
 #define ENABLE_SNAPSHOTS false
 
-void processCommandLine(int argc, char** argv, char* inFileName,
-                        char* outPrefix, unsigned int *nEpoch,
+void processCommandLine(int argc, char** argv, string *inFilename,
+                        string* outPrefix, unsigned int *nEpoch,
                         unsigned int *radius,
                         unsigned int *nSomX, unsigned int *nSomY,
                         unsigned int *kernelType, unsigned int *mapType,
-                        bool *enableSnapshots);
+                        bool *enableSnapshots, string *initialCodebookFilename);
 
 /* -------------------------------------------------------------------------- */
 int main(int argc, char** argv)
@@ -66,13 +66,15 @@ int main(int argc, char** argv)
     unsigned int mapType = 0;
     unsigned int radius = 0;
     bool enableSnapshots = false;
-    char *inFileName = new char[255];
-    char *outPrefix = new char[255];
+    string inFilename;
+    string initialCodebookFilename;
+    string outPrefix;
 
     if (rank==0) {
-        processCommandLine(argc, argv, inFileName, outPrefix,
+        processCommandLine(argc, argv, &inFilename, &outPrefix,
                            &nEpoch, &radius, &nSomX, &nSomY,
-                           &kernelType, &mapType, &enableSnapshots);
+                           &kernelType, &mapType, &enableSnapshots,
+                           &initialCodebookFilename);
 #ifndef CUDA
         if (kernelType == DENSE_GPU) {
             cerr << "Somoclu was compile without GPU support!\n";
@@ -86,8 +88,11 @@ int main(int argc, char** argv)
     MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&mapType, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(inFileName, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
-
+    char *inFilenameCStr = new char[inFilename.size()];
+    strcpy(inFilenameCStr,inFilename.c_str());
+    MPI_Bcast(inFilenameCStr, inFilename.size(), MPI_CHAR, 0, MPI_COMM_WORLD);
+    inFilename = inFilenameCStr;
+    
     double profile_time = MPI_Wtime();
 
     float * dataRoot = NULL;
@@ -95,9 +100,9 @@ int main(int argc, char** argv)
     unsigned int nVectors = 0;
     if(rank == 0 ) {
         if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
-            dataRoot = readMatrix(inFileName, nVectors, nDimensions);
+            dataRoot = readMatrix(inFilename, nVectors, nDimensions);
         } else {
-            readSparseMatrixDimensions(inFileName, nVectors, nDimensions);
+            readSparseMatrixDimensions(inFilename, nVectors, nDimensions);
         }
     }
     MPI_Barrier(MPI_COMM_WORLD);
@@ -120,7 +125,7 @@ int main(int argc, char** argv)
         int currentRankProcessed = 0;
         while (currentRankProcessed < nProcs) {
             if (rank == currentRankProcessed) {
-                sparseData=readSparseMatrixChunk(inFileName, nVectors, nVectorsPerRank,
+                sparseData=readSparseMatrixChunk(inFilename, nVectors, nVectorsPerRank,
                                                  rank*nVectorsPerRank);
             }
             currentRankProcessed++;
@@ -194,12 +199,12 @@ void printUsage() {
          "     mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs\n";
 }
 
-void processCommandLine(int argc, char** argv, char* inFileName,
-                        char* outPrefix, unsigned int *nEpoch,
+void processCommandLine(int argc, char** argv, string *inFilename,
+                        string* outPrefix, unsigned int *nEpoch,
                         unsigned int *radius,
                         unsigned int *nSomX, unsigned int *nSomY,
                         unsigned int *kernelType, unsigned int *mapType,
-                        bool *enableSnapshots) {
+                        bool *enableSnapshots, string *initialCodebookFilename) {
 
     // Setting default values
     *nEpoch = N_EPOCH;
@@ -218,9 +223,12 @@ void processCommandLine(int argc, char** argv, char* inFileName,
     int c;
     extern int optind, optopt;
     int option_index = 0;
-    while ((c = getopt_long (argc, argv, "hsx:y:e:k:m:r:",
+    while ((c = getopt_long (argc, argv, "hsx:y:e:k:m:r:c:",
                              long_options, &option_index)) != -1) {
         switch (c) {
+        case 'c':
+            *initialCodebookFilename = optarg;
+            break;          
         case 'e':
             *nEpoch = atoi(optarg);
             if (*nEpoch<=0) {
@@ -294,8 +302,8 @@ void processCommandLine(int argc, char** argv, char* inFileName,
         printUsage();
         MPI_Abort(MPI_COMM_WORLD, 1);
     }
-    strcpy(inFileName, argv[optind++]);
-    strcpy(outPrefix, argv[optind++]);
+    *inFilename = argv[optind++];
+    *outPrefix = argv[optind++];
 }
 
 /** Shut down MPI cleanly if something goes wrong

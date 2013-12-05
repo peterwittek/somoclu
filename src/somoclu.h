@@ -17,6 +17,10 @@
  *
  */
 
+#include <string>
+
+using namespace std;
+
 #ifndef SOMOCLU_H
 #define SOMOCLU_H
 
@@ -44,19 +48,16 @@ struct svm_node
 
 float euclideanDistanceOnToroidMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y, const unsigned int nSomX, const unsigned int nSomY);
 float euclideanDistanceOnPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y); 
-float *loadCodebook(const char *mapFilename, 
-                    unsigned int SOM_X, unsigned int SOM_Y, 
-                    unsigned int NDIMEN);
-int saveCodebook(char* cbFileName, float *codebook, 
+int saveCodebook(string cbFileName, float *codebook, 
                 unsigned int SOM_X, unsigned int SOM_Y, unsigned int NDIMEN);
-int saveUMat(char* fname, float *codebook, unsigned int nSomX, 
+int saveUMat(string fname, float *codebook, unsigned int nSomX, 
               unsigned int nSomY, unsigned int nDimensions, unsigned int mapType);
 void printMatrix(float *A, int nRows, int nCols);
-float *readMatrix(const char *inFileName, 
+float *readMatrix(const string inFilename, 
                   unsigned int &nRows, unsigned int &nCols);
-void readSparseMatrixDimensions(const char *filename, unsigned int &nRows, 
+void readSparseMatrixDimensions(const string filename, unsigned int &nRows, 
                             unsigned int &nColumns);
-svm_node** readSparseMatrixChunk(const char *filename, unsigned int nRows, 
+svm_node** readSparseMatrixChunk(const string filename, unsigned int nRows, 
                                  unsigned int nRowsToRead, 
                                  unsigned int rowOffset);
 void train(int itask, float *data, svm_node **sparseData, 
@@ -64,7 +65,7 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int nDimensions, unsigned int nVectors, 
            unsigned int nVectorsPerRank, unsigned int nEpoch, 
            unsigned int radius0,
-           const char *outPrefix, bool shouldSaveInterim, 
+           string outPrefix, bool shouldSaveInterim, 
            unsigned int kernelType, unsigned int mapType);
 void trainOneEpochDenseCPU(int itask, float *data, float *numerator, 
                            float *denominator, float *codebook, 
