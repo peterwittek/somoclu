@@ -1,4 +1,5 @@
 Since 1.1.2
+  - Best matching units are saved.
   - Option for specifying an initial codebook for the map.
   - ESOM .lrn input format added.
   - Parsing of white-space characters corrected.
