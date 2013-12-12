@@ -56,6 +56,30 @@ int saveCodebook(string cbFilename, float *codebook, unsigned int nSomX, unsigne
     }
 }
 
+/** Save best matching units
+ * @param filename - name of the file to save
+ * @param bmus - the best matching units to save
+ * @param nSomX - dimensions of SOM map in the x direction
+ * @param nSomY - dimensions of SOM map in the y direction
+ * @param nVectors - the number of vectors
+ */
+int saveBmus(string filename, int *bmus, unsigned int nSomX, unsigned int nSomY, unsigned int nVectors)
+{
+    FILE* file = fopen(filename.c_str(), "wt");
+    cout << "    Saving best matching units " << filename << endl;
+    fprintf(file, "%%%d %d\n", nSomY, nSomX);
+    fprintf(file, "%%%d\n", nVectors);
+    if (file!=0) {
+        for (unsigned int i = 0; i < nVectors; ++i) {
+            fprintf(file, "%d %d %d\n", i, bmus[2*i], bmus[2*i+1]);
+        }
+        fclose(file);
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
 /** Euclidean distance between vec1 and vec2
  * @param vec1
  * @param vec2

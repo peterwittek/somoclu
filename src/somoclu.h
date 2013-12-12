@@ -56,6 +56,8 @@ int saveCodebook(string cbFileName, float *codebook,
                 unsigned int SOM_X, unsigned int SOM_Y, unsigned int NDIMEN);
 int saveUMat(string fname, float *codebook, unsigned int nSomX, 
               unsigned int nSomY, unsigned int nDimensions, unsigned int mapType);
+int saveBmus(string filename, int *bmus, unsigned int nSomX, 
+             unsigned int nSomY, unsigned int nVectors);              
 void printMatrix(float *A, int nRows, int nCols);
 float *readMatrix(const string inFilename, 
                   unsigned int &nRows, unsigned int &nCols);
@@ -77,13 +79,13 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nSomX, unsigned int nSomY, 
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius, 
-                           unsigned int mapType);
+                           unsigned int mapType, int *globalBmus);
 void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator, 
                            float *denominator, float *codebook, 
                            unsigned int nSomX, unsigned int nSomY, 
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius, 
-                           unsigned int mapType);
+                           unsigned int mapType, int *globalBmus);
 
 extern "C" {
 #ifdef CUDA
@@ -95,7 +97,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                            unsigned int nSomX, unsigned int nSomY, 
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius,
-                           unsigned int mapType);
+                           unsigned int mapType, int *globalBmus);
 #endif                           
 void my_abort(int err);
 }

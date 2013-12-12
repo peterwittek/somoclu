@@ -73,9 +73,12 @@ void train(int itask, float *data, svm_node **sparseData,
     float *codebook = new float[nSomY*nSomX*nDimensions];
     float *numerator;
     float *denominator;
+    int *globalBmus = NULL;
     if (itask == 0) {
         numerator = new float[nSomY*nSomX*nDimensions];
         denominator = new float[nSomY*nSomX];
+        globalBmus = new int[nVectorsPerRank*int(ceil(nVectors/(double)nVectorsPerRank))*2];
+        
         if (initialCodebookFilename.empty()){
             initializeCodebook(0, codebook, nSomX, nSomY, nDimensions);
         } else {
@@ -142,19 +145,22 @@ void train(int itask, float *data, svm_node **sparseData,
         case DENSE_CPU:
             trainOneEpochDenseCPU(itask, data, numerator, denominator,
                                   codebook, nSomX, nSomY, nDimensions,
-                                  nVectors, nVectorsPerRank, radius, mapType);
+                                  nVectors, nVectorsPerRank, radius, mapType,
+                                  globalBmus);
             break;
 #ifdef CUDA
         case DENSE_GPU:
             trainOneEpochDenseGPU(itask, data, numerator, denominator,
                                   codebook, nSomX, nSomY, nDimensions,
-                                  nVectors, nVectorsPerRank, radius, mapType);
+                                  nVectors, nVectorsPerRank, radius, mapType,
+                                  globalBmus);
             break;
 #endif
         case SPARSE_CPU:
             trainOneEpochSparseCPU(itask, sparseData, numerator, denominator,
                                    codebook, nSomX, nSomY, nDimensions,
-                                   nVectors, nVectorsPerRank, radius, mapType);
+                                   nVectors, nVectorsPerRank, radius, mapType,
+                                   globalBmus);
             break;
         }
 
@@ -212,7 +218,7 @@ void train(int itask, float *data, svm_node **sparseData,
         else {
             cout << "    Done!" << endl;
         }
-
+        saveBmus(outPrefix + string(".bm"), globalBmus, nSomX, nSomY, nVectors); 
         ///
         /// Save codebook
         ///

@@ -334,11 +334,10 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                            unsigned int nSomX, unsigned int nSomY,
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius,
-                           unsigned int mapType)
+                           unsigned int mapType, int *globalBmus)
 {
     float *localNumerator = new float[nSomY*nSomX*nDimensions];
     float *localDenominator = new float[nSomY*nSomX];
-
     for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
             localDenominator[som_y*nSomX + som_x] = 0.0;
@@ -384,6 +383,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                nSomY*nSomX*nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(localDenominator, denominator,
                nSomY*nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Gather(bmus, nVectorsPerRank*2, MPI_INT, globalBmus, nVectorsPerRank*2, MPI_INT, 0, MPI_COMM_WORLD);               
 #endif               
     delete [] localNumerator;
     delete [] localDenominator;

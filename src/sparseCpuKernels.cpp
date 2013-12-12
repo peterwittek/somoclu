@@ -81,12 +81,12 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                             unsigned int nSomX, unsigned int nSomY,
                             unsigned int nDimensions, unsigned int nVectors,
                             unsigned int nVectorsPerRank, float radius,
-                            unsigned int mapType)
+                            unsigned int mapType, int *globalBmus)
 {
     int p1[2] = {0, 0};
     float *localNumerator = new float[nSomY*nSomX*nDimensions];
     float *localDenominator = new float[nSomY*nSomX];
-
+    int *bmus = new int[nVectorsPerRank*2];
     /// v2
     for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
@@ -95,13 +95,13 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                 localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] = 0.0;
         }
     }
-
+    unsigned int bmu_index = 0;
     for (unsigned int n = 0; n < nVectorsPerRank; n++) {
         if (itask*nVectorsPerRank+n<nVectors) {
             /// get the best matching unit
             get_bmu_coord(codebook, sparseData, nSomY, nSomX,
                           nDimensions, p1, n);
-
+            bmus[bmu_index++] = p1[0]; bmus[bmu_index++] = p1[1];
             /// Accumulate denoms and numers
             for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
                 for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
@@ -131,6 +131,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                nSomY*nSomX*nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(localDenominator, denominator,
                nSomY*nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Gather(bmus, nVectorsPerRank*2, MPI_INT, globalBmus, nVectorsPerRank*2, MPI_INT, 0, MPI_COMM_WORLD);               
 #endif
     delete [] localNumerator;
     delete [] localDenominator;
