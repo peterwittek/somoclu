@@ -37,14 +37,14 @@ using namespace std;
 #define N_SOM_Y 50
 #define KERNEL_TYPE 0
 #define MAP_TYPE 0
-#define ENABLE_SNAPSHOTS false
+#define SNAPSHOTS 0
 
 void processCommandLine(int argc, char** argv, string *inFilename,
                         string* outPrefix, unsigned int *nEpoch,
                         unsigned int *radius,
                         unsigned int *nSomX, unsigned int *nSomY,
                         unsigned int *kernelType, unsigned int *mapType,
-                        bool *enableSnapshots, string *initialCodebookFilename);
+                        unsigned int *snapshots, string *initialCodebookFilename);
 
 /* -------------------------------------------------------------------------- */
 int main(int argc, char** argv)
@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     unsigned int kernelType = 0;
     unsigned int mapType = 0;
     unsigned int radius = 0;
-    bool enableSnapshots = false;
+    unsigned int snapshots = 0;
     string inFilename;
     string initialCodebookFilename;
     string outPrefix;
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
     if (rank==0) {
         processCommandLine(argc, argv, &inFilename, &outPrefix,
                            &nEpoch, &radius, &nSomX, &nSomY,
-                           &kernelType, &mapType, &enableSnapshots,
+                           &kernelType, &mapType, &snapshots,
                            &initialCodebookFilename);
 #ifndef CUDA
         if (kernelType == DENSE_GPU) {
@@ -175,7 +175,7 @@ int main(int argc, char** argv)
     // TRAINING
     train(rank, data, sparseData, nSomX, nSomY,
           nDimensions, nVectors, nVectorsPerRank,
-          nEpoch, radius, outPrefix, enableSnapshots, kernelType, mapType,
+          nEpoch, radius, outPrefix, snapshots, kernelType, mapType,
           initialCodebookFilename);
 
     if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
@@ -214,7 +214,10 @@ void printUsage() {
          "                              0: Planar\n" \
          "                              1: Toroid\n" \
          "     -r NUMBER             Initial radius (default: half of the map in direction x)\n" \
-         "     -s                    Enable snapshots of U-matrix (default: false)\n" \
+         "     -s NUMBER             Save interim files (default: 0):\n" \
+         "                              0: Do not save interim files\n" \
+         "                              1: Save U-matrix only\n" \
+         "                              2: Also save codebook and best matching neurons\n" \
          "     -x, --columns NUMBER  Number of columns in map (size of SOM in direction x) (default: " << N_SOM_X << ")\n" \
          "     -y, --rows NUMBER     Number of rows in map (size of SOM in direction y) (default: " << N_SOM_Y << ")\n" \
          "Examples:\n" \
@@ -227,14 +230,14 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                         unsigned int *radius,
                         unsigned int *nSomX, unsigned int *nSomY,
                         unsigned int *kernelType, unsigned int *mapType,
-                        bool *enableSnapshots, string *initialCodebookFilename) {
+                        unsigned int *snapshots, string *initialCodebookFilename) {
 
     // Setting default values
     *nEpoch = N_EPOCH;
     *nSomX = N_SOM_X;
     *nSomY = N_SOM_Y;
     *kernelType = KERNEL_TYPE;
-    *enableSnapshots = ENABLE_SNAPSHOTS;
+    *snapshots = SNAPSHOTS;
     *mapType = MAP_TYPE;
     *radius = 0;
     static struct option long_options[] =
@@ -246,7 +249,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     int c;
     extern int optind, optopt;
     int option_index = 0;
-    while ((c = getopt_long (argc, argv, "hsx:y:e:k:m:r:c:",
+    while ((c = getopt_long (argc, argv, "hx:y:e:k:m:r:s:c:",
                              long_options, &option_index)) != -1) {
         switch (c) {
         case 'c':
@@ -285,7 +288,12 @@ void processCommandLine(int argc, char** argv, string *inFilename,
             }
             break;
         case 's':
-            *enableSnapshots = true;
+            *snapshots = atoi(optarg);
+            if (*snapshots>2) {
+                cerr << "The argument of option -s should be 0, 1, or 2.\n";
+                my_abort(1);
+            }
+
             break;
         case 'x':
             *nSomX = atoi(optarg);
@@ -336,7 +344,7 @@ void my_abort(int err)
 {
     cerr << "Aborted\n";
 #ifdef HAVE_MPI    
-    my_abort(err);
+    MPI_Abort(MPI_COMM_WORLD, err);
 #else
     exit(err);
 #endif

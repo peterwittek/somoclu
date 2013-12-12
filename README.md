@@ -33,8 +33,10 @@ Arguments:
                                 0: Planar
                                 1: Toroid
     -r NUMBER                Initial radius (default: half the number of columns)
-    -s                       Enable snapshots of U-matrix
-    -x, --columns NUMBER     Number of columns in map (size of SOM in direction x)
+    -s NUMBER             Save interim files (default: 0):\n" \
+                                0: Do not save interim files\n" \
+                                1: Save U-matrix only\n" \
+                                2: Also save codebook and best matching     -x, --columns NUMBER     Number of columns in map (size of SOM in direction x)
     -y, --rows    NUMBER     Number of rows in map (size of SOM in direction y)
 
 Examples:

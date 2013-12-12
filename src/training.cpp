@@ -63,7 +63,7 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int nDimensions, unsigned int nVectors,
            unsigned int nVectorsPerRank, unsigned int nEpoch,
            unsigned int radius0,
-           string outPrefix, bool shouldSaveInterim,
+           string outPrefix, unsigned int snapshots,
            unsigned int kernelType, unsigned int mapType,
            string initialCodebookFilename)
 {
@@ -184,11 +184,15 @@ void train(int itask, float *data, svm_node **sparseData,
             }
         }
         ///
-        if (shouldSaveInterim && itask == 0) {
+        if (snapshots > 0 && itask == 0) {
             cout << "Saving interim U-Matrix..." << endl;
             stringstream sstm;
-            sstm << outPrefix << "." << x << ".umx";
-            saveUMat(sstm.str(), codebook, nSomX, nSomY, nDimensions, mapType);
+            sstm << outPrefix << "." << x;
+            saveUMat(sstm.str() + string(".umx"), codebook, nSomX, nSomY, nDimensions, mapType);
+            if (snapshots == 2){
+                saveBmus(sstm.str() + string(".bm"), globalBmus, nSomX, nSomY, nVectors); 
+                saveCodebook(sstm.str() + string(".wts"), codebook, nSomX, nSomY, nDimensions);                
+            }
         }
         nEpoch--;
 #ifdef HAVE_MPI        

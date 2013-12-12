@@ -71,7 +71,7 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int nDimensions, unsigned int nVectors, 
            unsigned int nVectorsPerRank, unsigned int nEpoch, 
            unsigned int radius0,
-           string outPrefix, bool shouldSaveInterim, 
+           string outPrefix, unsigned int snapshots, 
            unsigned int kernelType, unsigned int mapType,
            string initialCodebookFilename);
 void trainOneEpochDenseCPU(int itask, float *data, float *numerator, 
