@@ -33,7 +33,7 @@ Arguments:
                                 0: Planar
                                 1: Toroid
     -r NUMBER                Initial radius (default: half the number of columns)
-    -s NUMBER             Save interim files (default: 0):
+    -s NUMBER                Save interim files (default: 0):
                                 0: Do not save interim files
                                 1: Save U-matrix only
                                 2: Also save codebook and best matching
