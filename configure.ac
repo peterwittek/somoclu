@@ -74,13 +74,14 @@ fi
 AC_ARG_WITH([mpi],
    [  --with-mpi=PATH    prefix where MPI is installed])
 
+mpi_enabled=no
 if test x"$with_mpi" != x"no" ; then
     AX_MPI_OPTIONS
-    AX_MPI_TESTS
-    CXX=$MPI_CXX
-    mpi_enabled=yes
-else
-    mpi_enabled=no
+    if test x"$MPI_CXX" != x"none"; then
+      AX_MPI_TESTS
+      CXX=$MPI_CXX
+      mpi_enabled=yes
+    fi
 fi
 
 AC_CONFIG_FILES([Makefile

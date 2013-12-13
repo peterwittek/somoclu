@@ -56,11 +56,6 @@ if test "X${MPI_CXX}" = "Xnone" ; then
   MPI_CXX=${MY_CXX}
 fi
 
-if test "X${MPI_CXX}" = "Xnone" ; then
-    AC_MSG_ERROR([No C++ compiler: try --with-mpi-compilers= or --with-mpi-cxx=])
-fi
-
-
 AC_ARG_WITH(mpi,
 AS_HELP_STRING([--with-mpi=MPIROOT],[use MPI root directory.]),
 [
