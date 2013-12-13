@@ -14,6 +14,10 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 
 AC_OPENMP
+openmp_enabled=no
+if test x"$OPENMP_CFLAGS" != x"" ; then
+  openmp_enabled=yes
+fi
 CXXFLAGS="${CXXFLAGS} ${OPENMP_CFLAGS}"
 
 #find out what version we are running
@@ -93,10 +97,11 @@ echo \
 
  ${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 
- Prefix: '${prefix}'.
- Compiler: '${CXX} ${CXXFLAGS} ${MPI_INC} ${MPI_LIBDIR} ${MPI_LIBS}'
+ Prefix: ${prefix}.
+ Compiler: ${CXX} ${CXXFLAGS} ${MPI_INC} ${MPI_LIBDIR} ${MPI_LIBS}
 
  Package features:
+   OpenMP enabled: ${openmp_enabled}
    MPI enabled: ${mpi_enabled}
    CUDA enabled: ${cuda_enabled}
 
