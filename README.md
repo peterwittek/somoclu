@@ -80,7 +80,7 @@ If the input file is sparse, but a dense kernel is invoked, Somoclu will execute
 
 Visualisation
 ==
-The primary purpose of generating a map is visualisation. Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures. A simplot gnuplot script is provided with the source code as plot_som.gp. This script takes a U-matrix (umat.umx), and outputs a plot (som.png).
+The primary purpose of generating a map is visualisation. Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures. 
 
 The output formats of the U-matrix and the codebook are compatible with [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/) for more advanced visualisation.
 
