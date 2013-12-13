@@ -4,7 +4,7 @@ Somoclu is a cluster-oriented implementation of self-organizing maps. It relies 
 
 Key features:
 
-* Fast execution by parallelization: MPI and CUDA are supported.
+* Fast execution by parallelization: OpenMP, MPI, and CUDA are supported.
 * Planar and toroid maps.
 * Both dense and sparse input data are supported.
 * Large maps of several hundred thousand neurons are feasible.
@@ -77,6 +77,24 @@ xn1		xn2			..		xnm
 Here n is the number of rows in the file, that is, the number of data instances. Parameter m defines the number of columns in the file. The next row defines the column mask: the value 1 for a column means the column should be used in the training. Note that the first column in this format is always a unique key, so this should have the value 9 in the column mask. The row with the variable names is ignore by Somoclu. The elements of the matrix follow -- from here, the file is identical to the basic dense format, with the addition of the first column as the unique key.
 
 If the input file is sparse, but a dense kernel is invoked, Somoclu will execute and results will be incorrect. Invoking a sparse kernel on a dense input file is likely to lead to a segmentation fault.
+
+Efficient Parallel Execution
+==
+The CPU kernels use OpenMP to load multicore processors. On a single node, this is more efficient than launching tasks with MPI to match the number of cores. The MPI tasks replicated the codebook, which is especially inefficient for large maps. 
+
+For instance, given a single node with eight cores, the following execution will use 1/8th of the memory, and will run 10-20% faster:
+
+    $ somoclu -x 200 -y 200 data/rgbs.txt data/rgbs
+
+Or, equivalently:
+
+    $ OMP_NUM_THREADS=8 somoclu -x 200 -y 200 data/rgbs.txt data/rgbs
+
+Avoid the following on a single node:
+
+    $ OMP_NUM_THREADS=1 mpirun -np 8 somoclu -x 200 -y 200 data/rgbs.txt data/rgbs
+
+The same caveats apply for the sparse CPU kernel.
 
 Visualisation
 ==
