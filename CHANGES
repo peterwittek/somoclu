@@ -1,10 +1,11 @@
 Since 1.1.2
+  - Massive improvements in OpenMP parallelization.
+  - MPI libraries are no longer mandatory.
   - Best matching units are saved.
   - Option for specifying an initial codebook for the map.
   - ESOM .lrn input format added.
   - Parsing of white-space characters corrected.
   - Long options for specifying SOM dimensions.
-  - MPI libraries are no longer mandatory.
   - Fine-grained control of which interim files to save across epochs
   
 Version 1.1.2: 2013-11-28

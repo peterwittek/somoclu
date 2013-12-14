@@ -3,6 +3,7 @@
 
 AC_PREREQ([2.61])
 AC_INIT([Somoclu], [1.1.2])
+AM_INIT_AUTOMAKE
 m4_include([m4/ax_mpi_options.m4])
 m4_include([m4/ax_mpi_tests.m4])
 AC_CONFIG_SRCDIR([src/somoclu.cpp])
@@ -72,6 +73,7 @@ else
   cuda_enabled=no  
 fi
 
+AM_CONDITIONAL([HAVE_CUDA], [test x"$cuda_enabled" = x"yes"])
 
 #Setup MPI Paths
 # ------------------------------------------------------------------------------
