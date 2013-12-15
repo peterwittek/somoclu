@@ -337,17 +337,4 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     *outPrefix = argv[optind++];
 }
 
-/** Shut down MPI cleanly if something goes wrong
- * @param err - error code to print
- */
-void my_abort(int err)
-{
-    cerr << "Aborted\n";
-#ifdef HAVE_MPI    
-    MPI_Abort(MPI_COMM_WORLD, err);
-#else
-    exit(err);
-#endif
-}
-
 /// EOF

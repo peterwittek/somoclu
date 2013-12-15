@@ -3,14 +3,13 @@
 
 AC_PREREQ([2.61])
 AC_INIT([Somoclu], [1.1.2])
-AM_INIT_AUTOMAKE
 m4_include([m4/ax_mpi_options.m4])
 m4_include([m4/ax_mpi_tests.m4])
 AC_CONFIG_SRCDIR([src/somoclu.cpp])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
-CXXFLAGS="-O3"
+CXXFLAGS="-O3 -fPIC"
 AC_PROG_CXX
 AC_PROG_INSTALL
 
