@@ -62,9 +62,6 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL_PROGRAM) -m 0755 somoclu \
 	 $(DESTDIR)$(bindir)
-	$(INSTALL) -d $(DESTDIR)$(libdir)
-	$(INSTALL_PROGRAM) -m 0755 libsomoclu.so \
-	 $(DESTDIR)$(libdir)
 	 
 uninstall:
 	-rm $(DESTDIR)$(bindir)/somoclu &>/dev/null
