@@ -1,12 +1,13 @@
-Since 1.1.2
+Version 1.2: 2013-12-17
   - Massive improvements in OpenMP parallelization.
   - MPI libraries are no longer mandatory.
   - Best matching units are saved.
   - Option for specifying an initial codebook for the map.
   - ESOM .lrn input format added.
   - Parsing of white-space characters corrected.
-  - Long options for specifying SOM dimensions.
+  - Long-named command line switches for specifying SOM dimensions.
   - Fine-grained control of which interim files to save across epochs
+  - Option in Makefile for building shared library.
   
 Version 1.1.2: 2013-11-28
 
