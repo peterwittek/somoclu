@@ -26,14 +26,18 @@ $(distdir).tar.gz: FORCE $(distdir)
 
 $(distdir):
 	mkdir -p $(distdir)/src
+	mkdir -p $(distdir)/data
 	cp $(srcdir)/configure $(distdir)
 	cp $(srcdir)/config.h.in $(distdir)
 	cp $(srcdir)/install-sh $(distdir)
 	cp $(srcdir)/Makefile.in $(distdir)
 	cp $(srcdir)/README.md $(distdir)
 	cp $(srcdir)/LICENSE $(distdir)  
+	cp $(srcdir)/TODO $(distdir)
+	cp $(srcdir)/CHANGES $(distdir)
 	cp $(srcdir)/src/Makefile.in $(distdir)/src
-	cp src/*.c* src/*.h $(distdir)/src
+	cp $(srcdir)/src/*.c* $(srcdir)/src/*.h $(distdir)/src
+	cp $(srcdir)/data/rgbs.* $(distdir)/data
 
 distcheck: $(distdir).tar.gz
 	gzip -cd $+ | tar xvf -
