@@ -64,10 +64,13 @@
                             0: Dense CPU
                             1: Dense GPU
                             2: Sparse CPU
--m NUMBER                Map type
-                            0: Planar
-                            1: Toroid
--r NUMBER                Initial radius (default: half the number of columns)
+-m TYPE                  Map type: planar or toroid (default: planar)
+-t STRATEGY              Radius cooling strategy: linear or exponential (default: linear)
+-r NUMBER                Start radius (default: half of the map in direction x)
+-R NUMBER                End radius (default: 1)
+-T STRATEGY              Learning rate cooling strategy: linear or exponential (default: linear)
+-l NUMBER                Starting learning rate (default: 1.0)
+-L NUMBER                Finishing learning rate (default: 0.01)
 -s NUMBER                Save interim files (default: 0):
                             0: Do not save interim files
                             1: Save U-matrix only
