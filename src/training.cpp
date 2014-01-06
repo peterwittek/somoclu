@@ -52,6 +52,24 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
     }
 }
 
+float linearCooling(float start, float end, float nEpoch, float epoch) {
+  float diff = (start - end) / (nEpoch-1);
+  return start - (epoch * diff);
+}
+
+float exponentialCooling(float start, float end, float nEpoch, float epoch) {
+  float diff = 0;
+  if (end == 0.0)
+  {
+      diff = -log(0.1) / nEpoch;
+  }
+  else
+  {
+      diff = -log(end / start) / nEpoch;
+  }
+  return start * exp(-epoch * diff);
+}
+
 /** Main training loop
  * @param itask - number of work items
  * @param kv
@@ -62,9 +80,12 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int nSomX, unsigned int nSomY,
            unsigned int nDimensions, unsigned int nVectors,
            unsigned int nVectorsPerRank, unsigned int nEpoch,
-           unsigned int radius0,
+           unsigned int radius0, unsigned int radiusN, 
+           string radiusCooling,
+           float scale0, float scaleN,
+           string scaleCooling,
            string outPrefix, unsigned int snapshots,
-           unsigned int kernelType, unsigned int mapType,
+           unsigned int kernelType, string mapType,
            string initialCodebookFilename)
 {
     ///
@@ -103,9 +124,18 @@ void train(int itask, float *data, svm_node **sparseData,
     if (radius0 == 0) {
         radius0 = nSomX / 2.0f;              /// init radius for updating neighbors
     }
+    if (radiusN == 0) {
+        radiusN = 1;
+    }
+    if (scale0 == 0) {
+      scale0 = 1.0;
+    }
+        
     float radius = radius0;
+    float scale = scale0;
+    
     unsigned int x = 0;             /// 0...N-1
-
+    
     ///
     /// Training
     ///
@@ -117,9 +147,18 @@ void train(int itask, float *data, svm_node **sparseData,
         double epoch_time = MPI_Wtime();
 #endif        
         if (itask == 0) {
-            radius = radius0 * exp(-10.0f * (x * x) / (N * N));
+            if (radiusCooling == "linear") {
+              radius = linearCooling(float(radius0), radiusN, N, x);
+            } else {
+              radius = exponentialCooling(radius0, radiusN, N, x);
+            }
+            if (scaleCooling == "linear") {
+              scale = linearCooling(scale0, scaleN, N, x);
+            } else {
+              scale = exponentialCooling(scale0, scaleN, N, x);
+            }
             x++;
-            cout << "Epoch: " << (nEpoch-1) << " Radius: " << radius << endl;
+            cout << "Epoch: " << x << " Radius: " << radius << endl;
         }
 #ifdef HAVE_MPI
         MPI_Bcast(&radius, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
@@ -145,22 +184,22 @@ void train(int itask, float *data, svm_node **sparseData,
         case DENSE_CPU:
             trainOneEpochDenseCPU(itask, data, numerator, denominator,
                                   codebook, nSomX, nSomY, nDimensions,
-                                  nVectors, nVectorsPerRank, radius, mapType,
-                                  globalBmus);
+                                  nVectors, nVectorsPerRank, radius, scale, 
+                                  mapType, globalBmus);
             break;
 #ifdef CUDA
         case DENSE_GPU:
             trainOneEpochDenseGPU(itask, data, numerator, denominator,
                                   codebook, nSomX, nSomY, nDimensions,
-                                  nVectors, nVectorsPerRank, radius, mapType,
-                                  globalBmus);
+                                  nVectors, nVectorsPerRank, radius, scale, 
+                                  mapType, globalBmus);
             break;
 #endif
         case SPARSE_CPU:
             trainOneEpochSparseCPU(itask, sparseData, numerator, denominator,
                                    codebook, nSomX, nSomY, nDimensions,
-                                   nVectors, nVectorsPerRank, radius, mapType,
-                                   globalBmus);
+                                   nVectors, nVectorsPerRank, radius, scale, 
+                                   mapType, globalBmus);
             break;
         }
 

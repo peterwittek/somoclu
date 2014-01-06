@@ -36,14 +36,16 @@ using namespace std;
 #define N_SOM_X 50
 #define N_SOM_Y 50
 #define KERNEL_TYPE 0
-#define MAP_TYPE 0
 #define SNAPSHOTS 0
 
 void processCommandLine(int argc, char** argv, string *inFilename,
                         string* outPrefix, unsigned int *nEpoch,
-                        unsigned int *radius,
+                        unsigned int *radius0, unsigned int *radiusN,
+                        string *radiusCooling,
+                        float *scale0, float *scaleN,
+                        string *scaleCooling,
                         unsigned int *nSomX, unsigned int *nSomY,
-                        unsigned int *kernelType, unsigned int *mapType,
+                        unsigned int *kernelType, string *mapType,
                         unsigned int *snapshots, string *initialCodebookFilename);
 
 /* -------------------------------------------------------------------------- */
@@ -67,8 +69,13 @@ int main(int argc, char** argv)
     unsigned int nSomX = 0;
     unsigned int nSomY = 0;
     unsigned int kernelType = 0;
-    unsigned int mapType = 0;
-    unsigned int radius = 0;
+    string mapType;
+    unsigned int radius0 = 0;
+    unsigned int radiusN = 0;
+    string radiusCooling;
+    float scale0 = 0.0;
+    float scaleN = 0.0;
+    string scaleCooling;    
     unsigned int snapshots = 0;
     string inFilename;
     string initialCodebookFilename;
@@ -76,7 +83,9 @@ int main(int argc, char** argv)
 
     if (rank==0) {
         processCommandLine(argc, argv, &inFilename, &outPrefix,
-                           &nEpoch, &radius, &nSomX, &nSomY,
+                           &nEpoch, &radius0, &radiusN, &radiusCooling,
+                           &scale0, &scaleN, &scaleCooling,
+                           &nSomX, &nSomY,
                            &kernelType, &mapType, &snapshots,
                            &initialCodebookFilename);
 #ifndef CUDA
@@ -88,7 +97,7 @@ int main(int argc, char** argv)
     }
 #ifdef HAVE_MPI 
     MPI_Bcast(&nEpoch, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&radius, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&radius0, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -175,7 +184,9 @@ int main(int argc, char** argv)
     // TRAINING
     train(rank, data, sparseData, nSomX, nSomY,
           nDimensions, nVectors, nVectorsPerRank,
-          nEpoch, radius, outPrefix, snapshots, kernelType, mapType,
+          nEpoch, radius0, radiusN, radiusCooling,
+          scale0, scaleN, scaleCooling,
+          outPrefix, snapshots, kernelType, mapType,
           initialCodebookFilename);
 
     if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
@@ -210,10 +221,13 @@ void printUsage() {
          "                              0: Dense CPU\n" \
          "                              1: Dense GPU\n" \
          "                              2: Sparse CPU\n" \
-         "     -m NUMBER             Map type (default: " << MAP_TYPE << "): \n" \
-         "                              0: Planar\n" \
-         "                              1: Toroid\n" \
-         "     -r NUMBER             Initial radius (default: half of the map in direction x)\n" \
+         "     -m TYPE               Map type: planar or toroid (default: planar) \n" \
+         "     -t STRATEGY           Radius cooling strategy: linear or exponential (default: linear)\n" \
+         "     -r NUMBER             Start radius (default: half of the map in direction x)\n" \
+         "     -R NUMBER             End radius (default: 1)\n" \
+         "     -T STRATEGY           Learning rate cooling strategy: linear or exponential (default: linear)\n" \
+         "     -l NUMBER             Starting learning rate (default: 1.0)\n" \
+         "     -L NUMBER             Finishing learning rate (default: 0.01)\n" \
          "     -s NUMBER             Save interim files (default: 0):\n" \
          "                              0: Do not save interim files\n" \
          "                              1: Save U-matrix only\n" \
@@ -227,9 +241,12 @@ void printUsage() {
 
 void processCommandLine(int argc, char** argv, string *inFilename,
                         string* outPrefix, unsigned int *nEpoch,
-                        unsigned int *radius,
+                        unsigned int *radius0, unsigned int *radiusN,
+                        string *radiusCooling,
+                        float *scale0, float *scaleN,
+                        string *scaleCooling,
                         unsigned int *nSomX, unsigned int *nSomY,
-                        unsigned int *kernelType, unsigned int *mapType,
+                        unsigned int *kernelType, string *mapType,
                         unsigned int *snapshots, string *initialCodebookFilename) {
 
     // Setting default values
@@ -238,8 +255,13 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     *nSomY = N_SOM_Y;
     *kernelType = KERNEL_TYPE;
     *snapshots = SNAPSHOTS;
-    *mapType = MAP_TYPE;
-    *radius = 0;
+    *mapType = "planar";
+    *radius0 = 0;
+    *radiusN = 0;
+    *radiusCooling = "linear";
+    *scale0 = 0.0;
+    *scaleN = 0.01;
+    *scaleCooling = "linear";
     static struct option long_options[] =
     {
         {"rows",  required_argument, 0, 'y'},
@@ -249,7 +271,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     int c;
     extern int optind, optopt;
     int option_index = 0;
-    while ((c = getopt_long (argc, argv, "hx:y:e:k:m:r:s:c:",
+    while ((c = getopt_long (argc, argv, "hx:y:e:k:l:m:r:s:t:c:L:R:T:",
                              long_options, &option_index)) != -1) {
         switch (c) {
         case 'c':
@@ -274,19 +296,54 @@ void processCommandLine(int argc, char** argv, string *inFilename,
             }
             break;
         case 'm':
-            *mapType = atoi(optarg);
-            if (*mapType<PLANAR||*mapType>TOROID) {
-                cerr << "The argument of option -m should be a valid map type.\n";
+            *mapType = optarg;
+            if (*mapType!="planar"&&*mapType!="toroid") {
+                cerr << "The argument of option -m should be either planar or toroid.\n";
                 my_abort(1);
             }
             break;
         case 'r':
-            *radius = atoi(optarg);
-            if (*radius<=0) {
+            *radius0 = atoi(optarg);
+            if (*radius0<=0) {
                 cerr << "The argument of option -r should be a positive integer.\n";
                 my_abort(1);
             }
             break;
+        case 'R':
+            *radiusN = atoi(optarg);
+            if (*radiusN<=0) {
+                cerr << "The argument of option -R should be a positive integer.\n";
+                my_abort(1);
+            }
+            break;
+        case 't':
+            *radiusCooling = optarg;
+            if (*radiusCooling!="linear"&&*radiusCooling!="exponential") {
+                cerr << "The argument of option -t should be linear or exponential.\n";
+                my_abort(1);
+            }
+            break;
+        case 'l':
+            *scale0 = atof(optarg);
+            if (*scale0<=0) {
+                cerr << "The argument of option -l should be a positive float.\n";
+                my_abort(1);
+            }
+            break;
+        case 'L':
+            *scaleN = atof(optarg);
+            if (*scaleN<=0) {
+                cerr << "The argument of option -L should be a positive float.\n";
+                my_abort(1);
+            }
+            break;
+        case 'T':
+            *scaleCooling = optarg;
+            if (*scaleCooling!="linear"&&*scaleCooling!="exponential") {
+                cerr << "The argument of option -T should be linear or exponential.\n";
+                my_abort(1);
+            }
+            break;            
         case 's':
             *snapshots = atoi(optarg);
             if (*snapshots>2) {

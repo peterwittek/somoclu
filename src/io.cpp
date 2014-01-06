@@ -128,7 +128,7 @@ float* get_wvec(float *codebook, unsigned int som_y, unsigned int som_x,
  */
 
 int saveUMat(string fname, float *codebook, unsigned int nSomX,
-             unsigned int nSomY, unsigned int nDimensions, unsigned int mapType)
+             unsigned int nSomY, unsigned int nDimensions, string mapType)
 {
 
     float min_dist = 1.5f;
@@ -147,9 +147,9 @@ int saveUMat(string fname, float *codebook, unsigned int nSomX,
 
                         if (som_x1 == som_x2 && som_y1 == som_y2) continue;
                         float tmp = 0.0f;
-                        if (mapType == PLANAR) {
+                        if (mapType == "planar") {
                             tmp = euclideanDistanceOnPlanarMap(som_x1, som_y1, som_x2, som_y2);
-                        } else if (mapType == TOROID) {
+                        } else if (mapType == "toroid") {
                             tmp = euclideanDistanceOnToroidMap(som_x1, som_y1, som_x2, som_y2, nSomX, nSomY);
                         }
                         if (tmp <= min_dist) {

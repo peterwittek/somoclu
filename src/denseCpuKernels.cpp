@@ -75,7 +75,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nSomX, unsigned int nSomY,
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius,
-                           unsigned int mapType, int *globalBmus)
+                           float scale, string mapType, int *globalBmus)
 {
     int p1[2] = {0, 0};
     int *bmus = new int[nVectorsPerRank*2];
@@ -113,13 +113,13 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                 for (unsigned int n = 0; n < nVectorsPerRank; n++) {
                     if (itask*nVectorsPerRank+n<nVectors) {
                         float dist = 0.0f;
-                        if (mapType == PLANAR) {
+                        if (mapType == "planar") {
                             dist = euclideanDistanceOnPlanarMap(som_x, som_y, bmus[2*n], bmus[2*n+1]);
-                        } else if (mapType == TOROID) {
+                        } else if (mapType == "toroid") {
                             dist = euclideanDistanceOnToroidMap(som_x, som_y, bmus[2*n], bmus[2*n+1], nSomX, nSomY);
                         }
-                        float neighbor_fuct = 0.0f;
-                        neighbor_fuct = exp(-(1.0f * dist * dist) / (radius * radius));
+                        float neighbor_fuct = getWeight(dist, radius, scale);
+                        
                         for (unsigned int d = 0; d < nDimensions; d++) {
                             localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] +=
                                 1.0f * neighbor_fuct

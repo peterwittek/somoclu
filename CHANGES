@@ -1,4 +1,11 @@
+Since version 1.2:
+
+  - Learning rate parameter included.
+  - Linear and exponential cooling strategies added for radius and learning rate.
+  - CLI interface made more user-friendly.
+
 Version 1.2: 2013-12-17
+
   - Massive improvements in OpenMP parallelization.
   - MPI libraries are no longer mandatory.
   - Best matching units are saved.
@@ -17,4 +24,5 @@ Version 1.1.2: 2013-11-28
   - Bug fixes: codebook update with a compact support was removed, NaN entry no longer appears in U-matrices. 
 
 Version 1.0: 2013-05-14
+
   - Initial release.
