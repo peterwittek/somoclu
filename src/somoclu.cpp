@@ -215,7 +215,7 @@ void printUsage() {
     cout << "Usage:\n" \
          "     [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX\n" \
          "Arguments:\n" \
-         "     -c FILENAME           Specify an initial codebook for the map." \
+         "     -c FILENAME           Specify an initial codebook for the map.\n" \
          "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
          "     -k NUMBER             Kernel type (default: " << KERNEL_TYPE << "): \n" \
          "                              0: Dense CPU\n" \

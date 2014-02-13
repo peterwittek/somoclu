@@ -119,6 +119,50 @@ float* get_wvec(float *codebook, unsigned int som_y, unsigned int som_x,
     return wvec;
 }
 
+/** Calculate U-matrix
+ * @param codebook - the codebook 
+ * @param nSomX - dimensions of SOM map in the x direction
+ * @param nSomY - dimensions of SOM map in the y direction
+ * @param nDimensions - dimensions of a data instance
+ */
+
+float *calculateUMatrix(float *codebook, unsigned int nSomX,
+             unsigned int nSomY, unsigned int nDimensions, string mapType)
+{
+    float *uMatrix = new float[nSomX*nSomY];
+    float min_dist = 1.5f;
+    for (unsigned int som_y1 = 0; som_y1 < nSomY; som_y1++) {
+        for (unsigned int som_x1 = 0; som_x1 < nSomX; som_x1++) {
+            float dist = 0.0f;
+            unsigned int nodes_number = 0;
+
+            for (unsigned int som_y2 = 0; som_y2 < nSomY; som_y2++) {
+                for (unsigned int som_x2 = 0; som_x2 < nSomX; som_x2++) {
+
+                    if (som_x1 == som_x2 && som_y1 == som_y2) continue;
+                    float tmp = 0.0f;
+                    if (mapType == "planar") {
+                        tmp = euclideanDistanceOnPlanarMap(som_x1, som_y1, som_x2, som_y2);
+                    } else if (mapType == "toroid") {
+                        tmp = euclideanDistanceOnToroidMap(som_x1, som_y1, som_x2, som_y2, nSomX, nSomY);
+                    }
+                    if (tmp <= min_dist) {
+                        nodes_number++;
+                        float* vec1 = get_wvec(codebook, som_y1, som_x1, nSomX, nSomY, nDimensions);
+                        float* vec2 = get_wvec(codebook, som_y2, som_x2, nSomX, nSomY, nDimensions);
+                        dist += get_distance(vec1, vec2, nDimensions);
+                        delete [] vec1;
+                        delete [] vec2;
+                    }
+                }
+            }
+            dist /= (float)nodes_number;
+            uMatrix[som_y1*nSomX+som_x1] = dist;
+        }
+    }
+    return uMatrix;
+}
+
 /** Save u-matrix
  * @param fname
  * @param codebook - the codebook to save
@@ -127,8 +171,8 @@ float* get_wvec(float *codebook, unsigned int som_y, unsigned int som_x,
  * @param nDimensions - dimensions of a data instance
  */
 
-int saveUMat(string fname, float *codebook, unsigned int nSomX,
-             unsigned int nSomY, unsigned int nDimensions, string mapType)
+int saveUMatrix(string fname, float *uMatrix, unsigned int nSomX,
+             unsigned int nSomY)
 {
 
     float min_dist = 1.5f;
@@ -139,31 +183,7 @@ int saveUMat(string fname, float *codebook, unsigned int nSomX,
     if (fp != 0) {
         for (unsigned int som_y1 = 0; som_y1 < nSomY; som_y1++) {
             for (unsigned int som_x1 = 0; som_x1 < nSomX; som_x1++) {
-                float dist = 0.0f;
-                unsigned int nodes_number = 0;
-
-                for (unsigned int som_y2 = 0; som_y2 < nSomY; som_y2++) {
-                    for (unsigned int som_x2 = 0; som_x2 < nSomX; som_x2++) {
-
-                        if (som_x1 == som_x2 && som_y1 == som_y2) continue;
-                        float tmp = 0.0f;
-                        if (mapType == "planar") {
-                            tmp = euclideanDistanceOnPlanarMap(som_x1, som_y1, som_x2, som_y2);
-                        } else if (mapType == "toroid") {
-                            tmp = euclideanDistanceOnToroidMap(som_x1, som_y1, som_x2, som_y2, nSomX, nSomY);
-                        }
-                        if (tmp <= min_dist) {
-                            nodes_number++;
-                            float* vec1 = get_wvec(codebook, som_y1, som_x1, nSomX, nSomY, nDimensions);
-                            float* vec2 = get_wvec(codebook, som_y2, som_x2, nSomX, nSomY, nDimensions);
-                            dist += get_distance(vec1, vec2, nDimensions);
-                            delete [] vec1;
-                            delete [] vec2;
-                        }
-                    }
-                }
-                dist /= (float)nodes_number;
-                fprintf(fp, " %f", dist);
+                fprintf(fp, " %f", uMatrix[som_y1*nSomX+som_x1]);
             }
             fprintf(fp, "\n");
         }
