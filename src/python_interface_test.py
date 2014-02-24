@@ -29,7 +29,7 @@ if __name__ == "__main__":
     mapType = "planar"
     snapshots = 0
     initialCodebookFilename = ''
-    res1, res2, res3 = \
+    codebook, globalBmus, uMatrix = \
         somoclu.trainWrapper(data1D, nEpoch, nSomX, nSomY,
                              nDimensions, nVectors,
                              radius0, radiusN,
