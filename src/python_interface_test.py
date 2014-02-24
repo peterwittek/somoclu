@@ -13,37 +13,25 @@ if __name__ == "__main__":
     data = np.loadtxt(args.input_file)
     print(data)
     data = np.float32(data)
-    rank = 0
-    sparseData = None
-    nSomX = 200
-    nSomY = 200
+    nSomX = 50
+    nSomY = 50
     nVectors = data.shape[0]
     nDimensions = data.shape[1]
-    data_length = nSomX * nSomY * nDimensions
     data1D = np.ndarray.flatten(data, order='C')
-    codebook = np.float32(np.random.rand(data_length) - 0.5)
-    nProcs = 1
-    nVectorsPerRank = int(np.ceil(nVectors / (1.0 * nProcs)))
-    nEpoch = 0
-    currentEpoch = 0
-    snapshots = 0
-    enableCalculatingUMatrix = snapshots > 0
+    nEpoch = 10
     radius0 = 0
     radiusN = 0
     radiusCooling = "linear"
-    scale0 = 0.0
+    scale0 = 0
     scaleN = 0.01
     scaleCooling = "linear"
     kernelType = 0
     mapType = "planar"
-    globalBmus = np.zeros(nVectorsPerRank *
-                          np.ceil(nVectors/nVectorsPerRank) * 2,
-                          dtype=np.int32)
-    uMatrix = np.array((1, 0), dtype=np.float32)
-    res = somoclu.trainWrapper(rank, data1D, sparseData,
-                               codebook, globalBmus, uMatrix,
-                               nEpoch, currentEpoch, enableCalculatingUMatrix,
-                               nSomX, nSomY, nDimensions, nVectors,
-                               nVectorsPerRank, radius0, radiusN,
+    snapshots = 0
+    initialCodebookFilename = ''
+    res = somoclu.trainWrapper(data1D, nEpoch, nSomX, nSomY,
+                               nDimensions, nVectors,
+                               radius0, radiusN,
                                radiusCooling, scale0, scaleN,
-                               scaleCooling, kernelType, mapType)
+                               scaleCooling, snapshots,
+                               kernelType, mapType, initialCodebookFilename)

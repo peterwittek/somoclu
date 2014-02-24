@@ -109,6 +109,9 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius, 
                            float scale, string mapType, int *globalBmus);
+void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
+                        unsigned int nSomY, unsigned int nDimensions);
+
 
 extern "C" {
 #ifdef CUDA
