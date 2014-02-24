@@ -3,10 +3,7 @@
 #include <cmath>
 #include <iostream>
 using namespace std;
-core_data trainWrapper(float *data, int data_length,
-//                       float *codebook, int codebook_length,
-//                       int *globalBmus, int globalBmus_length,
-//                       float *uMatrix, int uMatrix_length,
+void trainWrapper(float *data, int data_length,
                        unsigned int nEpoch,
                        unsigned int nSomX, unsigned int nSomY,
                        unsigned int nDimensions, unsigned int nVectors,
@@ -15,7 +12,7 @@ core_data trainWrapper(float *data, int data_length,
                        float scale0, float scaleN,
                        string scaleCooling, unsigned int snapshots,
                        unsigned int kernelType, string mapType,
-                       string initialCodebookFilename)
+                       string initialCodebookFilename, core_data* cd)
 {
   ///
   /// Codebook
@@ -24,14 +21,14 @@ core_data trainWrapper(float *data, int data_length,
   int itask = 0;
   svm_node ** sparseData = NULL;
   core_data coreData;
-  int codebook_size = nSomY*nSomX*nDimensions;
-  coreData.codebook = new float[codebook_size];
+  coreData.codebook_size = nSomY*nSomX*nDimensions;
+  coreData.codebook = new float[coreData.codebook_size];
   coreData.globalBmus = NULL;
   coreData.uMatrix = NULL;
   unsigned int nVectorsPerRank = nVectors;
-  int globalBmus_size = nVectorsPerRank*int(ceil(nVectors/(double)nVectorsPerRank))*2;
+  coreData.globalBmus_size = nVectorsPerRank*int(ceil(nVectors/(double)nVectorsPerRank))*2;
   if (itask == 0) {
-      coreData.globalBmus = new int[globalBmus_size];
+      coreData.globalBmus = new int[coreData.globalBmus_size];
 
       if (initialCodebookFilename.empty()){
           initializeCodebook(0, coreData.codebook, nSomX, nSomY, nDimensions);
@@ -91,8 +88,9 @@ core_data trainWrapper(float *data, int data_length,
       /// Save U-mat
       ///
       coreData.uMatrix = calculateUMatrix(coreData.codebook, nSomX, nSomY, nDimensions, mapType);
+      coreData.uMatrix_size = nSomX * nSomY;
   }
-
-  return coreData;
+  cd = &coreData;
+ // return coreData;
 
 }

@@ -52,7 +52,10 @@ struct core_data
 {
 	float *codebook;
 	int *globalBmus;
-  float *uMatrix;
+	float *uMatrix;
+	int codebook_size;
+	int globalBmus_size;
+	int uMatrix_size;
 };
 
 
@@ -67,7 +70,7 @@ int saveUMatrix(string fname, float *uMatrix, unsigned int nSomX,
               unsigned int nSomY);
 int saveBmus(string filename, int *bmus, unsigned int nSomX, 
              unsigned int nSomY, unsigned int nVectors);              
-void printMatrix(float *A, int nRows, int nCols);
+//void printMatrix(float *A, int nRows, int nCols);
 float *readMatrix(const string inFilename, 
                   unsigned int &nRows, unsigned int &nCols);
 void readSparseMatrixDimensions(const string filename, unsigned int &nRows, 

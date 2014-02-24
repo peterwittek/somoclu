@@ -29,9 +29,12 @@ if __name__ == "__main__":
     mapType = "planar"
     snapshots = 0
     initialCodebookFilename = ''
-    res = somoclu.trainWrapper(data1D, nEpoch, nSomX, nSomY,
-                               nDimensions, nVectors,
-                               radius0, radiusN,
-                               radiusCooling, scale0, scaleN,
-                               scaleCooling, snapshots,
-                               kernelType, mapType, initialCodebookFilename)
+    res1, res2, res3 = \
+        somoclu.trainWrapper(data1D, nEpoch, nSomX, nSomY,
+                             nDimensions, nVectors,
+                             radius0, radiusN,
+                             radiusCooling, scale0, scaleN,
+                             scaleCooling, snapshots,
+                             kernelType, mapType,
+                             initialCodebookFilename)
+    print res1
