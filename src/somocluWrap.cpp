@@ -2,17 +2,22 @@
 #include"somocluWrap.h"
 #include <cmath>
 #include <iostream>
+#include <string.h>
+
 using namespace std;
 void trainWrapper(float *data, int data_length,
-                       unsigned int nEpoch,
-                       unsigned int nSomX, unsigned int nSomY,
-                       unsigned int nDimensions, unsigned int nVectors,
-                       unsigned int radius0, unsigned int radiusN,
-                       string radiusCooling,
-                       float scale0, float scaleN,
-                       string scaleCooling, unsigned int snapshots,
-                       unsigned int kernelType, string mapType,
-                       string initialCodebookFilename, core_data* cd)
+                  unsigned int nEpoch,
+                  unsigned int nSomX, unsigned int nSomY,
+                  unsigned int nDimensions, unsigned int nVectors,
+                  unsigned int radius0, unsigned int radiusN,
+                  string radiusCooling,
+                  float scale0, float scaleN,
+                  string scaleCooling, unsigned int snapshots,
+                  unsigned int kernelType, string mapType,
+                  string initialCodebookFilename,
+                  float *codebook, int codebook_size,
+                  int *globalBmus, int globalBmus_size,
+                  float *uMatrix, int uMatrix_size)
 {
   ///
   /// Codebook
@@ -90,7 +95,10 @@ void trainWrapper(float *data, int data_length,
       coreData.uMatrix = calculateUMatrix(coreData.codebook, nSomX, nSomY, nDimensions, mapType);
       coreData.uMatrix_size = nSomX * nSomY;
   }
-  cd = &coreData;
+  memcpy(codebook, coreData.codebook, sizeof(float) *  codebook_size);
+  memcpy(globalBmus, coreData.globalBmus, sizeof(int) *  globalBmus_size);
+  memcpy(uMatrix, coreData.uMatrix, sizeof(float) *  uMatrix_size);
+  //cd = &coreData;
  // return coreData;
 
 }
