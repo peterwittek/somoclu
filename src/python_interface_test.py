@@ -37,4 +37,4 @@ if __name__ == "__main__":
                              scaleCooling, snapshots,
                              kernelType, mapType,
                              initialCodebookFilename)
-    print res1
+    
