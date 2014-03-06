@@ -95,13 +95,16 @@ void trainWrapper(float *data, int data_length,
       coreData.uMatrix = calculateUMatrix(coreData.codebook, nSomX, nSomY, nDimensions, mapType);
       coreData.uMatrix_size = nSomX * nSomY;
   }
-  memcpy(codebook, coreData.codebook, sizeof(float) *  codebook_size);
-  delete [] coreData.codebook;
-  memcpy(globalBmus, coreData.globalBmus, sizeof(int) *  globalBmus_size);
-  delete [] coreData.globalBmus;
-  memcpy(uMatrix, coreData.uMatrix, sizeof(float) *  uMatrix_size);
-  delete [] coreData.uMatrix;
-  //cd = &coreData;
- // return coreData;
-
+  if(coreData.codebook != NULL){
+      memcpy(codebook, coreData.codebook, sizeof(float) *  codebook_size);
+      delete [] coreData.codebook;
+    }
+  if(coreData.globalBmus != NULL){
+      memcpy(globalBmus, coreData.globalBmus, sizeof(int) *  globalBmus_size);
+      delete [] coreData.globalBmus;
+    }
+  if(coreData.uMatrix != NULL){
+      memcpy(uMatrix, coreData.uMatrix, sizeof(float) *  uMatrix_size);
+      delete [] coreData.uMatrix;
+    }
 }
