@@ -21,7 +21,9 @@
 #undef _GLIBCXX_USE_INT128
 
 #include <iostream>
+#include <map>
 #include <vector>
+#include <stdio.h>
 #include <cublas_v2.h>
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
@@ -248,10 +250,13 @@ void initializeGpu(float *hostData, int nVectorsPerRank, int nDimensions, int nS
  * @param commSize - the size of MPI comm world
  */
 
-#ifdef HAVE_MPI         
 /// Note that this function was lifted from http://code.google.com/p/gpmr/
 void setDevice(int commRank, int commSize)
 {
+    int devCount;
+    int deviceNum=0;
+    CUDA_CHECK(cudaGetDeviceCount(&devCount));
+#ifdef HAVE_MPI  
     FILE * fp = popen("/bin/hostname", "r");
     char buf[1024];
     if (fgets(buf, 1023, fp) == NULL) strcpy(buf, "localhost");
@@ -259,20 +264,15 @@ void setDevice(int commRank, int commSize)
     string host = buf;
     host = host.substr(0, host.size() - 1);
     strcpy(buf, host.c_str());
-
-    int devCount;
-    int deviceNum=-1;
-    CUDA_CHECK(cudaGetDeviceCount(&devCount));
-
     if (commRank == 0)
     {
         map<string, vector<int> > hosts;
         map<string, int> devCounts;
-        MPI_Status stat;
-        MPI_Request req;
-
         hosts[buf].push_back(0);
         devCounts[buf] = devCount;
+
+        MPI_Status stat;
+        MPI_Request req;
         for (int i = 1; i < commSize; ++i)
         {
             MPI_Recv(buf, 1024, MPI_CHAR, i, 0, MPI_COMM_WORLD, &stat);
@@ -298,7 +298,7 @@ void setDevice(int commRank, int commSize)
                 printf("Error, more jobs running on '%s' than devices - %d jobs > %d devices.\n",
                        it->first.c_str(), static_cast<int>(it->second.size()), devCounts[it->first]);
                 fflush(stdout);
-                MPI_Abort(MPI_COMM_WORLD, 1);
+                my_abort(1);
             }
         }
 
@@ -322,10 +322,10 @@ void setDevice(int commRank, int commSize)
         MPI_Send(&devCount, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
         MPI_Recv(&deviceNum, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &stat);
     }
-    CUDA_CHECK(cudaSetDevice(deviceNum));
     MPI_Barrier(MPI_COMM_WORLD);
+#endif    
+    CUDA_CHECK(cudaSetDevice(deviceNum));
 }
-#endif
 
 /** One epoch on the GPU, dense variant
  */
