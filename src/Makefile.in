@@ -56,7 +56,7 @@ somoclu: $(OBJS)
 		$(NVCC) $(DEFS) $(CUDA_CFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
 clean:
-	-rm somoclu libsomoclu.so $(OBJS) 1>/dev/null
+	-rm -f somoclu libsomoclu.so $(OBJS) 1>/dev/null
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
