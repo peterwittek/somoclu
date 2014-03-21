@@ -1,0 +1,18 @@
+Metadata-Version: 1.0
+Name: somoclu
+Version: 1.2
+Summary: a cluster-oriented implementation of self-organizing maps
+Home-page: http://peterwittek.github.io/somoclu/
+Author: Peter Wittek
+Author-email: peter@peterwittek.com
+License: GPL3
+Description: .. include globals.rst
+        
+        
+Keywords: somoclu SOM
+Platform: Linux,Mac OS-X,Unix
+License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Topic :: Scientific/Engineering :: Artificial Intelligence
+Programming Language :: C++
+Operating System :: MacOS
+Operating System :: Unix
