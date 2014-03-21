@@ -2,7 +2,7 @@
 %include "std_string.i"
 %{
 #define SWIG_FILE_WITH_INIT
-#include "somocluWrap.h"
+#include "src/src/somocluWrap.h"
 %}
 %include "numpy.i"
 %init %{
@@ -50,7 +50,7 @@ import_array();
 /* 	int uMatrix_size; */
 /* }; */
 
-%include "somocluWrap.h"
+%include "src/src/somocluWrap.h"
 
 
 
