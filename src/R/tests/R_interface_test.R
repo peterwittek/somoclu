@@ -1,11 +1,8 @@
-source("Rsomoclu.R", chdir<-T)
-input_data <- read.table("../data/rgbs.txt")
+library('Rsomoclu')
+input_data <- read.table("rgbs.txt")
 input_data <- data.matrix(input_data)
 nSomX <- 50
 nSomY <- 50
-# nVectors <- nrow(input_data)
-# nDimensions <- ncol(input_data)
-#input_data1D <- np.ndarray.flatten(input_data, order<-'C')
 nEpoch <- 10
 radius0 <- 0
 radiusN <- 0

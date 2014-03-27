@@ -1,24 +1,18 @@
 require(Rcpp)
-# Rsomoclu <- Module("Rsomoclu",getDynLib("Rsomoclu.so"))
-# dyn.unload("Rsomoclu.so")
-dyn.load("Rsomoclu.so")
+
 Rsomoclu.train <-
-   function(input_data, nEpoch, 
-            nSomX, nSomY,
-#            nDimensions, nVectors,
+  function(input_data, nEpoch, 
+           nSomX, nSomY,
            radius0, radiusN,
            radiusCooling, scale0, scaleN,
            scaleCooling, snapshots,
            kernelType, mapType,
            initialCodebookFilename
-           )
+  )
   {
-#     codebook
-#     globalBmus
-#     uMatrix
-#     codebook_size <- nSomY * nSomX * nDimensions
-#     globalBmus_size <- nVectors * ceiling(nVectors/nVectors)*2
-#     uMatrix_size <- nSomX * nSomY
+    if(!is.loaded("Rtrain", PACKAGE = "Rsomoclu")){
+      dyn.load("Rsomoclu.so")
+    }
     res <- .Call("Rtrain", input_data, nEpoch,
                  nSomX, nSomY, radius0, radiusN,
                  radiusCooling, scale0, scaleN,
