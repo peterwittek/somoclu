@@ -9,4 +9,6 @@ rm src/aclocal.m4
 rm src/config.*
 rm src/install-sh
 rm src/Makefile
+rm src/src/Makefile
 rm -rf ..Rcheck
+rm data/*.gz
