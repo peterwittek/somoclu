@@ -34,7 +34,7 @@ class MyInstall(install):
         call(["pwd"])
         os.chdir('src')
         call(["bash", "autogen.sh"])
-        call(["./configure"])
+        call(["./configure", "--without-mpi", "--without-cuda"])
         call(["make"])
         os.chdir('../')
         install.run(self)
@@ -52,12 +52,13 @@ somoclu_module = Extension('_somoclu',
                            libraries=['gomp'],
                            include_dirs=[numpy_include]
                            )
+somoclu_module.extra_objects
 
 setup(name='somoclu',
       version='1.2',
       license='GPL3',
       author="peterwittek",
-      author_email="peter@peterwittek.com",
+      author_email="",
       url="http://peterwittek.github.io/somoclu/",
       description="""a cluster-oriented implementation \
       of self-organizing maps""",

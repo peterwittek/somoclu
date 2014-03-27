@@ -1,1 +1,1 @@
-./python_interface_test.py -i /home/gsc/Dropbox/Lab/Somoclu/somoclu/data/rgbs.txt
+./python_interface_test.py -i ../../../data/rgbs.txt

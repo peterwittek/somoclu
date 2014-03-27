@@ -17,12 +17,13 @@
  *
  */
 
+#include <cstdlib>
 #include <cmath>
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <string.h>
-#include <stdlib.h>
+
 #include "somoclu.h"
 
 using namespace std;

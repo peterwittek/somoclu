@@ -17,7 +17,7 @@ if __name__ == "__main__":
     nSomY = 50
     nVectors = data.shape[0]
     nDimensions = data.shape[1]
-    data1D = np.ndarray.flatten(data, order='C')
+    data1D = np.ndarray.flatten(data)
     nEpoch = 10
     radius0 = 0
     radiusN = 0
