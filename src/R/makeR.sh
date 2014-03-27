@@ -13,4 +13,4 @@ cp ../../src/*.cpp ./src/src
 cp ../../src/*.cu ./src/src
 cp ../../src/Makefile.in ./src/src
 cp ../../data/rgbs.txt ./data/
-#gzip ./data/rgbs.txt
+gzip ./data/rgbs.txt
