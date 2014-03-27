@@ -1,4 +1,4 @@
-data = importdata('../data/rgbs.txt');
+data = importdata('../../data/rgbs.txt');
 nSomX = 50;
 nSomY = 50;
 dataSize = size(data);
