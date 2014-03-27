@@ -1,5 +1,7 @@
 library('Rsomoclu')
-input_data <- read.table("rgbs.txt")
+#input_data <- read.table("rgbs.txt")
+data_file <- system.file("data", "rgbs.txt", package = 'Rsomoclu')
+input_data <- read.table(data_file) 
 input_data <- data.matrix(input_data)
 nSomX <- 50
 nSomY <- 50

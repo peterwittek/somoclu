@@ -11,5 +11,4 @@ cp ../../src/*.h ./src/src
 cp ../../src/*.cpp ./src/src
 cp ../../src/*.cu ./src/src
 cp ../../src/Makefile.in ./src/src
-cp ../../data/rgbs.txt tests/
-cp ../../data/rgbs.txt data/
+cp ../../data/rgbs.txt ./data/

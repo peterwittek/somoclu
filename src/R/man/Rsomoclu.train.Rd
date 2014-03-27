@@ -42,7 +42,8 @@ Rsomoclu.train(input_data, nEpoch,
 \author{Peter Wittek, Shichao Gao}
 \examples{
 library('Rsomoclu')
-input_data <- read.table("../tests/rgbs.txt")
+data_file <- system.file("data", "rgbs.txt", package = 'Rsomoclu')
+input_data <- read.table(data_file) 
 input_data <- data.matrix(input_data)
 nSomX <- 50
 nSomY <- 50

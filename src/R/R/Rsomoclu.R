@@ -1,4 +1,4 @@
-require(Rcpp)
+#require(Rcpp)
 
 Rsomoclu.train <-
   function(input_data, nEpoch, 

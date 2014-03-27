@@ -2,9 +2,10 @@ Package: Rsomoclu
 Version: 1.2
 Date: 2014-03-16
 Title: R package for somoclu
-Depends: Rcpp
-Imports: 
-Suggests: 
+Depends: 
+Imports: Rcpp
+Suggests:
+LinkingTo: Rcpp
 Authors@R: c(person(given = "Peter", family = "Wittek", role = c("aut"), email = ""),
              person(given = "Shichao", family = "Gao", role = c("cre"), email = "xgdgsc@gmail.com"))
 Description: Somoclu is a cluster-oriented implementation of self-organizing maps. It 			     relies on MPI for distributing the workload, and it can be accelerated by 			     CUDA on a GPU cluster. A sparse kernel is also included, which is useful for 		     training maps on vector spaces generated in text mining processes.
