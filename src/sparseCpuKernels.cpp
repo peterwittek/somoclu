@@ -145,8 +145,19 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                nSomY*nSomX*nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(localDenominator, denominator,
                nSomY*nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Gather(bmus, nVectorsPerRank*2, MPI_INT, globalBmus, nVectorsPerRank*2, MPI_INT, 0, MPI_COMM_WORLD);               
+    MPI_Gather(bmus, nVectorsPerRank*2, MPI_INT, globalBmus, nVectorsPerRank*2, MPI_INT, 0, MPI_COMM_WORLD);
+#else
+    for (unsigned int i=0; i < nSomY*nSomX*nDimensions; ++i) {
+        numerator[i] = localNumerator[i];
+    }
+    for (unsigned int i=0; i < nSomY*nSomX; ++i) {
+        denominator[i] = localDenominator[i];
+    }
+    for (unsigned int i=0; i < 2*nVectorsPerRank; ++i) {
+      globalBmus[i]=bmus[i];
+    }
 #endif
+    delete [] bmus;
     delete [] localNumerator;
     delete [] localDenominator;
 }

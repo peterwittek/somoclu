@@ -49,7 +49,7 @@ float get_distance(float* codebook, float* data,
  */
 void get_bmu_coord(float* codebook, float* data,
                    unsigned int nSomY, unsigned int nSomX,
-                   unsigned int nDimensions, int* coords, unsigned int n)
+                   unsigned int nDimensions, unsigned int* coords, unsigned int n)
 {
     float mindist = 9999.99;
     float dist = 0.0f;
@@ -77,8 +77,8 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nVectorsPerRank, float radius,
                            float scale, string mapType, int *globalBmus)
 {
-    int p1[2] = {0, 0};
-    int *bmus = new int[nVectorsPerRank*2];
+    unsigned int p1[2] = {0, 0};
+    unsigned int *bmus = new unsigned int[nVectorsPerRank*2];
 
     #pragma omp parallel default(shared) private(p1)
     {
@@ -145,7 +145,11 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
     for (unsigned int i=0; i < nSomY*nSomX; ++i) {
         denominator[i] = localDenominator[i];
     }
+    for (unsigned int i=0; i < 2*nVectorsPerRank; ++i) {
+      globalBmus[i]=bmus[i];
+    }
 #endif
+    delete [] bmus;
     delete [] localNumerator;
     delete [] localDenominator;
 }

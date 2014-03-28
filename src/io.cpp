@@ -17,6 +17,7 @@
  *
  */
 
+#include <cstdlib>
 #include <cmath>
 #include <sstream>
 #include <iostream>
