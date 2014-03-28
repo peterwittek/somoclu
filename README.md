@@ -31,7 +31,7 @@ Arguments:
                                 2: Sparse CPU
     -m TYPE                  Map type: planar or toroid (default: planar)
     -t STRATEGY              Radius cooling strategy: linear or exponential (default: linear)
-    -r NUMBER                Start radius (default: half of the map in direction x)
+    -r NUMBER                Start radius (default: half of the map in direction min(x,y))
     -R NUMBER                End radius (default: 1)
     -T STRATEGY              Learning rate cooling strategy: linear or exponential (default: linear)
     -l NUMBER                Starting learning rate (default: 1.0)

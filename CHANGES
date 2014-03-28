@@ -3,6 +3,7 @@ Since version 1.2:
   - Learning rate parameter included.
   - Linear and exponential cooling strategies added for radius and learning rate.
   - CLI interface made more user-friendly.
+  - Default radius depends on both X and Y of the map.
   - Bug fixes: CUDA build without MPI, best matching unit passing without MPI.
 
 Version 1.2: 2013-12-17
