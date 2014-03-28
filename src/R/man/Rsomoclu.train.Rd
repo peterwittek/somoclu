@@ -18,7 +18,7 @@ Rsomoclu.train(input_data, nEpoch,
   \item{nEpoch}{Maximum number of epochs}
   \item{nSomX}{Number of columns in map (size of SOM in direction x)}
   \item{nSomY}{Number of rows in map (size of SOM in direction y)}
-  \item{radius0}{Start radius (default: half of the map in direction x)}
+  \item{radius0}{Start radius (default: half of the map in direction min(x,y))}
   \item{radiusN}{End radius (default: 1)}
   \item{radiusCooling}{Radius cooling strategy: linear or exponential
     (default: linear)}
