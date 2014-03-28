@@ -57,14 +57,16 @@ Example, in which the data file rgbs.txt can be found at https://github.com/pete
 
 Get it now
 ----------
+
 ::
-    $sudo pip install somoclu
+   
+    $ sudo pip install somoclu
 
 Build on Mac OS X:
 ----------
 Before installing using pip, gcc should be installed first. As of OS X 10.9, gcc is just symlink to clang. To build somoclu and this extension correctly, it is recommended to install gcc using something like:
 ::
-    $brew install gcc48
+    $ brew install gcc48
 
 and set environment using:
 ::
@@ -81,4 +83,4 @@ and set environment using:
 
 Then you can
 ::
-    $sudo pip install somoclu
+    $ sudo pip install somoclu
