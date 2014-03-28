@@ -6,3 +6,5 @@ include src/src/*.h
 include src/src/*.cpp
 include src/src/*.cu
 include src/src/Makefile.in
+include tests/rgbs.txt
+include tests/somoclu_test.py

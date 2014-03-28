@@ -64,16 +64,10 @@ setup(name='somoclu',
       url="http://peterwittek.github.io/somoclu/",
       platforms="unix",
       description="a cluster-oriented implementation of self-organizing maps",
-      long_description="""Somoclu is a cluster-oriented implementation of \
-      self-organizing maps. It relies on MPI for distributing the workload, \
-      and it can be accelerated by CUDA on a GPU cluster. \
-      A sparse kernel is also included, \
-      which is useful for training maps on vector spaces generated \
-      in text mining processes.""",
       ext_modules=[somoclu_module],
       py_modules=["somoclu"],
       install_requires=['numpy'],
-      test_suite="tests",
+      # test_suite="tests",
       cmdclass={'install': MyInstall}  # , 'build_ext': MyBuildExt
       )
 

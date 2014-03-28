@@ -17,5 +17,6 @@ cp ../../src/*.h ./src/src
 cp ../../src/*.cpp ./src/src
 cp ../../src/*.cu ./src/src
 cp ../../src/Makefile.in ./src/src
+cp ../../data/rgbs.txt tests/
 python2 setup.py sdist
 #sudo python2 setup.py install

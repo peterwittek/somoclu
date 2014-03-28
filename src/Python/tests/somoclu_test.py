@@ -2,16 +2,17 @@
 # -*- coding: utf-8 -*-
 import somoclu
 import numpy as np
-import argparse
+#import argparse
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("Somoclu python example")
-    parser.add_argument('-i', '--input_file', help='Input data file path',
-                        required=True)
-    args = parser.parse_args()
-    data = np.loadtxt(args.input_file)
-    print(data)
+    #parser = argparse.ArgumentParser("Somoclu python example")
+    #parser.add_argument('-i', '--input_file', help='Input data file path',
+    #                    required=True)
+    #args = parser.parse_args()
+    #data = np.loadtxt(args.input_file)
+    data = np.loadtxt('rgbs.txt')
+    #print(data)
     data = np.float32(data)
     nSomX = 50
     nSomY = 50
@@ -43,6 +44,6 @@ if __name__ == "__main__":
                          kernelType, mapType,
                          initialCodebookFilename,
                          codebook, globalBmus, uMatrix)
-    print codebook
-    print globalBmus
-    print uMatrix
+    #print codebook
+    #print globalBmus
+    #print uMatrix
