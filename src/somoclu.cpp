@@ -223,7 +223,7 @@ void printUsage() {
          "                              2: Sparse CPU\n" \
          "     -m TYPE               Map type: planar or toroid (default: planar) \n" \
          "     -t STRATEGY           Radius cooling strategy: linear or exponential (default: linear)\n" \
-         "     -r NUMBER             Start radius (default: half of the map in direction x)\n" \
+         "     -r NUMBER             Start radius (default: half of the map in direction min(x,y))\n" \
          "     -R NUMBER             End radius (default: 1)\n" \
          "     -T STRATEGY           Learning rate cooling strategy: linear or exponential (default: linear)\n" \
          "     -l NUMBER             Starting learning rate (default: 1.0)\n" \

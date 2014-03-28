@@ -224,7 +224,8 @@ void train(int itask, float *data, svm_node **sparseData,
     /// Parameters for SOM
     ///
     if (radius0 == 0) {
-        radius0 = nSomX / 2.0f;              /// init radius for updating neighbors
+        unsigned int minDim = min(nSomX, nSomY);
+        radius0 = minDim / 2.0f;              /// init radius for updating neighbors
     }
     if (radiusN == 0) {
         radiusN = 1;
