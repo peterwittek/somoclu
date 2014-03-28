@@ -1,22 +1,29 @@
 Version: 1.2
+
 Maintainer: ShichaoGao<xgdgsc at gmail.com>
+
 URL: http://peterwittek.github.io/somoclu/
+
 BugReports: https://github.com/peterwittek/somoclu/issues
+
 License: GPL-3
+
 OS_type: unix
 
 Somoclu MATLAB Extension Build Guide:
 ================================
 
-1. follow the instructions to build Somoclu itself at:
-https://github.com/peterwittek/somoclu
-**(OS X users see the Note below)**
+1. follow the instructions to build Somoclu itself at: https://github.com/peterwittek/somoclu
 
-2. Build MATLAB Extension by running: 
-MEX_BIN="/usr/local/MATLAB/R2013a/bin/mex" ./makeMex.sh
-where MEX_BIN is the path to the MATLAB installation mex binary
+**(OS X users see the Note below first)**
 
-3. Then MexSomoclu.mexa64/MexSomoclu.mexa32 is generated for use, you can test by running the mex_interface_test.m
+2. Build MATLAB Extension by running:
+::
+    MEX_BIN="/usr/local/MATLAB/R2013a/bin/mex" ./makeMex.sh
+    
+where MEX_BIN is the path to the MATLAB installation mex binary.
+
+3. Then ``MexSomoclu.mexa64/MexSomoclu.mexa32`` is generated for use, you can test by running the ``mex_interface_test.m``.
 
 Note for Mac OS X users:
 ================================
@@ -43,7 +50,7 @@ Then follow the instructions at https://github.com/peterwittek/somoclu to build 
 Building Mex Extension on OS X:
 ===============================
 
-To build the extension on OS X, we need to make mex use gcc instead of the default clang compiler. So we need to copy MATLAB_ROOT/bin/mexopts.sh to ~/.matlab/VERSION/mexopts.sh , replace MATLAB_ROOT with your installation path of MATLAB and replace VERSION with your MATLAB version in that folder. Example:
+To build the extension on OS X, we need to make mex use gcc instead of the default clang compiler. So we need to copy ``MATLAB_ROOT/bin/mexopts.sh`` to ``~/.matlab/VERSION/mexopts.sh`` , replace MATLAB_ROOT with your installation path of MATLAB and replace VERSION with your MATLAB version in that folder. Example:
 ::
    cp /Applications/MATLAB_R2013a.app/bin/mexopts.sh ~/.matlab/R2013a/mexopts.sh
 
