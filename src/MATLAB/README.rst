@@ -21,9 +21,9 @@ Somoclu MATLAB Extension Build Guide:
    ::
       MEX_BIN="/usr/local/MATLAB/R2013a/bin/mex" ./makeMex.sh
     
-    where MEX_BIN is the path to the MATLAB installation mex binary.
+where ``MEX_BIN`` is the path to the MATLAB installation mex binary.
 
-3. Then ``MexSomoclu.mexa64/MexSomoclu.mexa32`` is generated for use, you can test by running the ``mex_interface_test.m``.
+3. Then ``MexSomoclu.mexa64`` or ``MexSomoclu.mexa32`` is generated for use, you can test by running the ``mex_interface_test.m``.
 
 Note for Mac OS X users:
 ================================
