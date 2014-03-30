@@ -66,7 +66,7 @@
                             2: Sparse CPU
 -m TYPE                  Map type: planar or toroid (default: planar)
 -t STRATEGY              Radius cooling strategy: linear or exponential (default: linear)
--r NUMBER                Start radius (default: half of the map in direction x)
+-r NUMBER                Start radius (default: half of the map in direction min(x,y))
 -R NUMBER                End radius (default: 1)
 -T STRATEGY              Learning rate cooling strategy: linear or exponential (default: linear)
 -l NUMBER                Starting learning rate (default: 1.0)
@@ -118,6 +118,18 @@ $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 <p>Here n is the number of rows in the file, that is, the number of data instances. Parameter m defines the number of columns in the file. The next row defines the column mask: the value 1 for a column means the column should be used in the training. Note that the first column in this format is always a unique key, so this should have the value 9 in the column mask. The row with the variable names is ignore by Somoclu. The elements of the matrix follow -- from here, the file is identical to the basic dense format, with the addition of the first column as the unique key.</p>
 
 <p>If the input file is sparse, but a dense kernel is invoked, Somoclu will execute and results will be incorrect. Invoking a sparse kernel on a dense input file is likely to lead to a segmentation fault.</p>
+
+<h1>
+<a name="interfaces" class="anchor" href="#interfaces"><span class="octicon octicon-link"></span></a>Interfaces</h1>
+
+<p>Python, R, and MATLAB interfaces are available for the dense CPU kernel. MPI, CUDA, and the sparse kernel are not support through the interfaces. The connection to the C++ library is seamless, data structures are not duplicated. For respective examples, see the folders in src. </p>
+
+<p>The Python version is also available in Pypi. You can install with</p>
+
+<pre><code>$ sudo pip install somoclu
+</code></pre>
+
+<p>The R version is available on CRAN.</p>
 
 <h1>
 <a name="efficient-parallel-execution" class="anchor" href="#efficient-parallel-execution"><span class="octicon octicon-link"></span></a>Efficient Parallel Execution</h1>
