@@ -81,6 +81,16 @@ Here n is the number of rows in the file, that is, the number of data instances.
 
 If the input file is sparse, but a dense kernel is invoked, Somoclu will execute and results will be incorrect. Invoking a sparse kernel on a dense input file is likely to lead to a segmentation fault.
 
+Interfaces
+==
+Python, R, and MATLAB interfaces are available for the dense CPU kernel. MPI, CUDA, and the sparse kernel are not support through the interfaces. The connection to the C++ library is seamless, data structures are not duplicated. For respective examples, see the folders in src. 
+
+The Python version is also available in Pypi. You can install with
+
+    $ sudo pip install somoclu
+    
+The R version is available on CRAN.
+
 Efficient Parallel Execution
 ==
 The CPU kernels use OpenMP to load multicore processors. On a single node, this is more efficient than launching tasks with MPI to match the number of cores. The MPI tasks replicated the codebook, which is especially inefficient for large maps. 
