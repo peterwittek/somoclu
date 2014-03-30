@@ -9,6 +9,7 @@ Key features:
 * Both dense and sparse input data are supported.
 * Large maps of several hundred thousand neurons are feasible.
 * Integration with Databionic ESOM Tools.
+* Python, R, and MATLAB interfaces for the dense CPU kernel.
 
 For more information, refer to the following paper:
 
