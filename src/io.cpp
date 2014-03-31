@@ -72,7 +72,8 @@ int saveBmus(string filename, int *bmus, unsigned int nSomX, unsigned int nSomY,
     fprintf(file, "%%%d\n", nVectors);
     if (file!=0) {
         for (unsigned int i = 0; i < nVectors; ++i) {
-            fprintf(file, "%d %d %d\n", i, bmus[2*i], bmus[2*i+1]);
+            // ESOM Tools swaps x and y!
+            fprintf(file, "%d %d %d\n", i, bmus[2*i+1], bmus[2*i]);
         }
         fclose(file);
         return 0;
