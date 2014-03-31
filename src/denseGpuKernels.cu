@@ -393,7 +393,6 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
       globalBmus[i]=bmus[i];
     }
 #endif
-    delete [] bmus;
     delete [] localNumerator;
     delete [] localDenominator;
 }
