@@ -44,6 +44,7 @@
 <li>Both dense and sparse input data are supported.</li>
 <li>Large maps of several hundred thousand neurons are feasible.</li>
 <li>Integration with Databionic ESOM Tools.</li>
+<li>Python, R, and MATLAB interfaces for the dense CPU kernel.</li>
 </ul><p>For more information, refer to the following paper:</p>
 
 <p>Peter Wittek (2013). Somoclu: An Efficient Distributed Library for Self-Organizing Maps. <a href="http://arxiv.org/abs/1305.1422">arXiv:1305.1422</a>.</p>
@@ -122,14 +123,21 @@ $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 <h1>
 <a name="interfaces" class="anchor" href="#interfaces"><span class="octicon octicon-link"></span></a>Interfaces</h1>
 
-<p>Python, R, and MATLAB interfaces are available for the dense CPU kernel. MPI, CUDA, and the sparse kernel are not support through the interfaces. The connection to the C++ library is seamless, data structures are not duplicated. For respective examples, see the folders in src. </p>
+<p>Python, R, and MATLAB interfaces are available for the dense CPU kernel. MPI, CUDA, and the sparse kernel are not support through the interfaces. The connection to the C++ library is seamless, data structures are not duplicated. For respective examples, see the folders in src. All versions require GCC to compile the code.</p>
 
-<p>The Python version is also available in Pypi. You can install with</p>
+<p>The Python version is also available in Pypi. You can install it with</p>
 
 <pre><code>$ sudo pip install somoclu
 </code></pre>
 
-<p>The R version is available on CRAN.</p>
+<p>The R version is available on CRAN. You can install it with</p>
+
+<pre><code>install.packages("Rsomoclu")
+</code></pre>
+
+<p>For using the MATLAB toolbox, define the location of the mex compiler in MEX_BIN. Then invoke makeMex.sh in the src/MATLAB folder.</p>
+
+<p>For more information on the respective interfaces, refer to the subfolders in src.</p>
 
 <h1>
 <a name="efficient-parallel-execution" class="anchor" href="#efficient-parallel-execution"><span class="octicon octicon-link"></span></a>Efficient Parallel Execution</h1>
@@ -163,7 +171,7 @@ $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 <h1>
 <a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h1>
 
-<p>The only dependency is GCC, albeit other compiler chains might also work.</p>
+<p>The only dependency is GCC, although other compiler chains might also work.</p>
 
 <p>Distributed systems and single-machine multicore execution is supported through MPI. The package was tested with OpenMPI, versions 1.3.2 and 1.6.5 were tested. It should also work with other MPI flavours. </p>
 
