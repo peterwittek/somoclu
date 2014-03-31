@@ -63,13 +63,15 @@ Get it now
     $ sudo pip install somoclu
 
 Build on Mac OS X:
-----------
+--------------------
 Before installing using pip, gcc should be installed first. As of OS X 10.9, gcc is just symlink to clang. To build somoclu and this extension correctly, it is recommended to install gcc using something like:
 ::
+   
     $ brew install gcc48
 
 and set environment using:
 ::
+   
     export CC=/usr/local/bin/gcc
     export CXX=/usr/local/bin/g++
     export CPP=/usr/local/bin/cpp
@@ -83,4 +85,5 @@ and set environment using:
 
 Then you can
 ::
+   
     $ sudo pip install somoclu
