@@ -1,4 +1,4 @@
-Since version 1.2:
+Version 1.3: 2014-03-31
 
   - Learning rate parameter included.
   - Linear and exponential cooling strategies added for radius and learning rate.
