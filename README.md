@@ -84,13 +84,19 @@ If the input file is sparse, but a dense kernel is invoked, Somoclu will execute
 
 Interfaces
 ==
-Python, R, and MATLAB interfaces are available for the dense CPU kernel. MPI, CUDA, and the sparse kernel are not support through the interfaces. The connection to the C++ library is seamless, data structures are not duplicated. For respective examples, see the folders in src. 
+Python, R, and MATLAB interfaces are available for the dense CPU kernel. MPI, CUDA, and the sparse kernel are not support through the interfaces. The connection to the C++ library is seamless, data structures are not duplicated. For respective examples, see the folders in src. All versions require GCC to compile the code.
 
-The Python version is also available in Pypi. You can install with
+The Python version is also available in Pypi. You can install it with
 
     $ sudo pip install somoclu
     
-The R version is available on CRAN.
+The R version is available on CRAN. You can install it with
+    
+    install.packages("Rsomoclu")
+
+For using the MATLAB toolbox, define the location of the mex compiler in MEX_BIN. Then invoke makeMex.sh in the src/MATLAB folder.
+
+For more information on the respective interfaces, refer to the subfolders in src.
 
 Efficient Parallel Execution
 ==
@@ -118,7 +124,7 @@ The output formats of the U-matrix and the codebook are compatible with [Databio
 
 Dependencies
 ==
-The only dependency is GCC, albeit other compiler chains might also work.
+The only dependency is GCC, although other compiler chains might also work.
 
 Distributed systems and single-machine multicore execution is supported through MPI. The package was tested with OpenMPI, versions 1.3.2 and 1.6.5 were tested. It should also work with other MPI flavours. 
 
