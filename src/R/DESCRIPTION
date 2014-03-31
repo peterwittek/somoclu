@@ -17,3 +17,4 @@ Maintainer: Shichao Gao <xgdgsc@gmail.com>
 NeedsCompilation: yes
 Repository: CRAN
 OS_type: unix
+SystemRequirements: GNU make

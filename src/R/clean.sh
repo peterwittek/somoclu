@@ -12,3 +12,4 @@ rm src/Makefile
 rm src/src/Makefile
 rm -rf ..Rcheck
 rm data/*.gz
+rm src/Rsomoclu*

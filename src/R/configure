@@ -1,10 +1,11 @@
 #! /bin/sh
 cd src
 bash autogen.sh
+
 ./configure --without-cuda --without-mpi
 make
-export PKG_CXXFLAGS=`Rscript -e "Rcpp:::CxxFlags()"`
+export PKG_CXXFLAGS=`${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()"`
 cd src
-R CMD SHLIB -lgomp -o Rsomoclu.so Rsomoclu.cpp somocluWrap.cpp somoclu.o denseCpuKernels.o io.o sparseCpuKernels.o training.o mapDistanceFunctions.o
+${R_HOME}/bin/R CMD SHLIB -lgomp Rsomoclu.cpp somocluWrap.cpp somoclu.o denseCpuKernels.o io.o sparseCpuKernels.o training.o mapDistanceFunctions.o
 rm somoclu
-cp Rsomoclu.so ../
+cp Rsomoclu.* ../

@@ -1,2 +1,3 @@
 useDynLib(Rsomoclu)
 export(Rsomoclu.train)
+import(Rcpp)
