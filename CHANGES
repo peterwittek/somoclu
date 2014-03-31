@@ -4,7 +4,8 @@ Since version 1.2:
   - Linear and exponential cooling strategies added for radius and learning rate.
   - CLI interface made more user-friendly.
   - Default radius depends on both X and Y of the map.
-  - Bug fixes: CUDA build without MPI, best matching unit passing without MPI.
+  - Bug fixes: CUDA build without MPI, best matching unit passing without MPI, 
+    coordinate order in best matching unit file.
   - Python, R, and MATLAB interfaces added.
 
 Version 1.2: 2013-12-17
