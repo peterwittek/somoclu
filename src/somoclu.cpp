@@ -290,7 +290,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
             break;
         case 'k':
             *kernelType = atoi(optarg);
-            if (*kernelType<DENSE_CPU||*kernelType>SPARSE_CPU) {
+            if (*kernelType>SPARSE_CPU) {
                 cerr << "The argument of option -k should be a valid kernel.\n";
                 my_abort(1);
             }

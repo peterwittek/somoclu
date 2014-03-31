@@ -112,7 +112,7 @@ float get_distance(const float* vec1, const float* vec2,
  */
 
 float* get_wvec(float *codebook, unsigned int som_y, unsigned int som_x,
-                unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions)
+                unsigned int nSomX, unsigned int nDimensions)
 {
     float* wvec = new float[nDimensions];
     for (unsigned int d = 0; d < nDimensions; d++)
@@ -149,8 +149,8 @@ float *calculateUMatrix(float *codebook, unsigned int nSomX,
                     }
                     if (tmp <= min_dist) {
                         nodes_number++;
-                        float* vec1 = get_wvec(codebook, som_y1, som_x1, nSomX, nSomY, nDimensions);
-                        float* vec2 = get_wvec(codebook, som_y2, som_x2, nSomX, nSomY, nDimensions);
+                        float* vec1 = get_wvec(codebook, som_y1, som_x1, nSomX, nDimensions);
+                        float* vec2 = get_wvec(codebook, som_y2, som_x2, nSomX, nDimensions);
                         dist += get_distance(vec1, vec2, nDimensions);
                         delete [] vec1;
                         delete [] vec2;
@@ -176,7 +176,6 @@ int saveUMatrix(string fname, float *uMatrix, unsigned int nSomX,
              unsigned int nSomY)
 {
 
-    float min_dist = 1.5f;
     FILE* fp = fopen(fname.c_str(), "wt");
     fprintf(fp, "%%");
     fprintf(fp, "%d %d", nSomY, nSomX);
@@ -199,7 +198,6 @@ void getMatrixDimensions(string inFilename, unsigned int &nRows, unsigned int &n
 {
     ifstream file;
     file.open(inFilename.c_str());
-    float *data=NULL;
     if (file.is_open()) {
         string line;
         float tmp;
@@ -264,7 +262,6 @@ unsigned int *readWtsHeader(string inFilename, unsigned int &nRows, unsigned int
     ifstream file;
     file.open(inFilename.c_str());
     string line;
-    unsigned int currentColumn = 0;
     while(getline(file,line)) {
         if (line.substr(0,1) == "#") {
             continue;
@@ -320,7 +317,7 @@ float *readMatrix(string inFilename, unsigned int &nRows, unsigned int &nColumns
     unsigned int currentColumn = 0;
 
     while(getline(file,line)) {
-        if (line.substr(0,1) == "#" | line.substr(0,1) == "%") {
+        if ( (line.substr(0,1) == "#") | (line.substr(0,1) == "%") ) {
             continue;
         }
         if (data == NULL) {
