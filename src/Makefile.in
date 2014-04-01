@@ -33,7 +33,7 @@ MPI_LIBS       = @MPI_LIBS@
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
-LIBOBJS=sparseCpuKernels.o io.o denseCpuKernels.o mapDistanceFunctions.o training.o
+LIBOBJS=sparseCpuKernels.o io.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o trainOneEpoch.o
 
 ifdef CUDA_LIBS
 	LIBOBJS+=denseGpuKernels.cu.co

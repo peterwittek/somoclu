@@ -8,8 +8,8 @@ Rsomoclu.train <-
            radius0, radiusN,
            radiusCooling, scale0, scaleN,
            scaleCooling, snapshots,
-           kernelType, mapType,
-           initialCodebookFilename
+           kernelType, mapType
+#            initialCodebookFilename
   )
   {
     ## if(!is.loaded("Rtrain", PACKAGE = "Rsomoclu")){
@@ -19,6 +19,7 @@ Rsomoclu.train <-
                  nSomX, nSomY, radius0, radiusN,
                  radiusCooling, scale0, scaleN,
                  scaleCooling, snapshots, kernelType,
-                 mapType, initialCodebookFilename)
+#                  mapType, initialCodebookFilename)
+                mapType)
     res
   }

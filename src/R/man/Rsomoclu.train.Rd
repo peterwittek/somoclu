@@ -10,8 +10,8 @@ Rsomoclu.train(input_data, nEpoch,
            radius0, radiusN,
            radiusCooling, scale0, scaleN,
            scaleCooling, snapshots,
-           kernelType, mapType,
-           initialCodebookFilename)
+           kernelType, mapType
+           )
 }
 \arguments{
   \item{input_data}{input data, matrix format}
@@ -35,7 +35,7 @@ Rsomoclu.train(input_data, nEpoch,
                             1: Dense GPU
                             2: Sparse CPU}
   \item{mapType}{Map type: planar or toroid (default: planar)}
-  \item{initialCodebookFilename}{Specify an initial codebook for the map}
+  %% \item{initialCodebookFilename}{Specify an initial codebook for the map}
 }
 \references{Peter Wittek (2013). Somoclu: An Efficient Distributed
   Library for Self-Organizing Maps. arXiv:1305.1422.}
@@ -57,13 +57,11 @@ scaleCooling <- "linear"
 kernelType <- 0
 mapType <- "planar"
 snapshots <- 0
-initialCodebookFilename <- ''
 res <- Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                radius0, radiusN,
                radiusCooling, scale0, scaleN,
                scaleCooling, snapshots,
-               kernelType, mapType,
-               initialCodebookFilename)
+               kernelType, mapType)
 res$codebook
 res$globalBmus
 res$uMatrix

@@ -14,8 +14,8 @@ RcppExport SEXP Rtrain(SEXP data_p,
                        SEXP radiusCooling_p,
                        SEXP scale0_p, SEXP scaleN_p,
                        SEXP scaleCooling_p, SEXP snapshots_p,
-                       SEXP kernelType_p, SEXP mapType_p,
-                       SEXP initialCodebookFilename_p)
+                       SEXP kernelType_p, SEXP mapType_p)
+//                       SEXP initialCodebookFilename_p)
 //            SEXP codebook, SEXP codebook_size,
 //            SEXP globalBmus, SEXP globalBmus_size,
 //            SEXP uMatrix, SEXP uMatrix_size)
@@ -35,7 +35,7 @@ RcppExport SEXP Rtrain(SEXP data_p,
   unsigned int snapshots = (unsigned int) as<int>(snapshots_p);
   unsigned int kernelType = (unsigned int) as<int>(kernelType_p);
   string mapType = as<string>(mapType_p);
-  string initialCodebookFilename = as<string>(initialCodebookFilename_p);
+//  string initialCodebookFilename = as<string>(initialCodebookFilename_p);
   int data_length = nVectors * nDimensions;
   float* data = new float[data_length];
   // convert matrix to data c float array
@@ -51,10 +51,10 @@ RcppExport SEXP Rtrain(SEXP data_p,
   float* codebook = new float[codebook_size];
   int* globalBmus = new int[globalBmus_size];
   float* uMatrix = new float[uMatrix_size];
-    trainWrapper(data, data_length, nEpoch, nSomX, nSomY,
+    trainWrapperR(data, data_length, nEpoch, nSomX, nSomY,
                  nDimensions, nVectors, radius0, radiusN,
                  radiusCooling, scale0, scaleN, scaleCooling,
-                 snapshots, kernelType, mapType, initialCodebookFilename,
+                 snapshots, kernelType, mapType,
                  codebook, codebook_size, globalBmus, globalBmus_size,
                  uMatrix, uMatrix_size);
   Rcpp::NumericVector codebook_vec(codebook_size);

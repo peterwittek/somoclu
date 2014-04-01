@@ -48,7 +48,9 @@ somoclu_module = Extension('_somoclu',
                                           'src/src/io.o',
                                           'src/src/sparseCpuKernels.o',
                                           'src/src/training.o',
-                                          'src/src/mapDistanceFunctions.o'],
+                                          'src/src/mapDistanceFunctions.o',
+                                          'src/src/trainOneEpoch.o',
+                                          'src/src/uMatrix.o'],
                            libraries=['gomp'],
                            include_dirs=[numpy_include]
                            )
