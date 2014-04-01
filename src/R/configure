@@ -1,7 +1,6 @@
-#! /bin/sh
+#!/bin/bash
 cd src
 bash autogen.sh
-
 ./configure --without-cuda --without-mpi
 make
 export PKG_CXXFLAGS=`${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()"`

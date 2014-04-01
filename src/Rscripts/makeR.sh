@@ -3,6 +3,7 @@
 # export PKG_CXXFLAGS=`Rscript -e "Rcpp:::CxxFlags()"`
 # R CMD SHLIB -lgomp -o Rsomoclu.so Rsomoclu.cpp somocluWrap.cpp somoclu.o denseCpuKernels.o io.o sparseCpuKernels.o training.o mapDistanceFunctions.o
 #rm -rf ./build
+cd ../R
 mkdir data
 cp ../../autogen.sh ./src
 cp -r ../../m4 ./src
