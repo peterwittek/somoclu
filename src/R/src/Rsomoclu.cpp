@@ -187,5 +187,5 @@ RcppExport SEXP Rtrain(SEXP data_p,
 }
 
 RCPP_MODULE(Rsomoclu){
-  function("Rtrain", &Rtrain);
+  Rcpp::function("Rtrain", &Rtrain);
 }
