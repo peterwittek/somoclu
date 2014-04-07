@@ -116,5 +116,8 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
   for(int i = 0; i < uMatrix_size; i++){
       uMatrix_p[i] = (double) uMatrix[i];
     }
+  delete[] codebook;
+  delete[] globalBmus;
+  delete[] uMatrix;
 }
 

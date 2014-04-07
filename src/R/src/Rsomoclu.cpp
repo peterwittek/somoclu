@@ -181,6 +181,9 @@ RcppExport SEXP Rtrain(SEXP data_p,
           uMatrix_vec(i) = uMatrix[i];
         }
     }
+  delete[] codebook;
+  delete[] globalBmus;
+  delete[] uMatrix;
   return Rcpp::List::create(Rcpp::Named("codebook") = codebook_vec,
                             Rcpp::Named("globalBmus") = globalBmus_vec,
                             Rcpp::Named("uMatrix") = uMatrix_vec);;
