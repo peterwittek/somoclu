@@ -1,6 +1,5 @@
 
 #include<Rcpp.h>
-//#include<R/R.h>
 using namespace std;
 using namespace Rcpp;
 
@@ -37,22 +36,7 @@ void trainWrapperR(float *data, int data_length,
   if (itask == 0) {
       coreData.globalBmus = new int[coreData.globalBmus_size];
 
-//      if (initialCodebookFilename.empty()){
-          initializeCodebook(0, coreData.codebook, nSomX, nSomY, nDimensions);
-//      } else {
-//          unsigned int nSomXY = 0;
-//          unsigned int tmpNDimensions = 0;
-//          delete [] coreData.codebook;
-//          coreData.codebook = readMatrix(initialCodebookFilename, nSomXY, tmpNDimensions);
-//          if (tmpNDimensions != nDimensions) {
-//              cerr << "Dimension of initial codebook does not match data!\n";
-//              my_abort(5);
-//          } else if (nSomXY / nSomY != nSomX) {
-//              cerr << "Dimension of initial codebook does not match specified SOM grid!\n";
-//              my_abort(6);
-//          }
-//          cout << "Read initial codebook: " << initialCodebookFilename << "\n";
-//      }
+      initializeCodebook(0, coreData.codebook, nSomX, nSomY, nDimensions);
   }
   ///
   /// Parameters for SOM
@@ -121,10 +105,6 @@ RcppExport SEXP Rtrain(SEXP data_p,
                        SEXP scale0_p, SEXP scaleN_p,
                        SEXP scaleCooling_p, SEXP snapshots_p,
                        SEXP kernelType_p, SEXP mapType_p)
-//                       SEXP initialCodebookFilename_p)
-//            SEXP codebook, SEXP codebook_size,
-//            SEXP globalBmus, SEXP globalBmus_size,
-//            SEXP uMatrix, SEXP uMatrix_size)
 {
   Rcpp::NumericMatrix dataMatrix(data_p);
   int nVectors = dataMatrix.rows();
@@ -141,7 +121,6 @@ RcppExport SEXP Rtrain(SEXP data_p,
   unsigned int snapshots = (unsigned int) as<int>(snapshots_p);
   unsigned int kernelType = (unsigned int) as<int>(kernelType_p);
   string mapType = as<string>(mapType_p);
-//  string initialCodebookFilename = as<string>(initialCodebookFilename_p);
   int data_length = nVectors * nDimensions;
   float* data = new float[data_length];
   // convert matrix to data c float array

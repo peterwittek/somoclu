@@ -14,13 +14,11 @@ scaleCooling <- "linear"
 kernelType <- 0
 mapType <- "planar"
 snapshots <- 0
-# initialCodebookFilename <- ''
 res <- Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                       radius0, radiusN,
                       radiusCooling, scale0, scaleN,
                       scaleCooling, snapshots,
                       kernelType, mapType)
-#                initialCodebookFilename)
 res$codebook
 res$globalBmus
 res$uMatrix

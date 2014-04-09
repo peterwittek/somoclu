@@ -9,17 +9,12 @@ Rsomoclu.train <-
            radiusCooling, scale0, scaleN,
            scaleCooling, snapshots,
            kernelType, mapType
-#            initialCodebookFilename
   )
   {
-    ## if(!is.loaded("Rtrain", PACKAGE = "Rsomoclu")){
-      
-    ## }
     res <- .Call("Rtrain", input_data, nEpoch,
                  nSomX, nSomY, radius0, radiusN,
                  radiusCooling, scale0, scaleN,
                  scaleCooling, snapshots, kernelType,
-#                  mapType, initialCodebookFilename)
                 mapType)
     res
   }
