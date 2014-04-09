@@ -1,7 +1,8 @@
 Since version 1.3:
   - Better I/O separation for the Python, R, and MATLAB interfaces.
   - Initial Windows support through GCC on Windows.
-
+  - Bug fixes: major MPI initialization fixed.
+  
 Version 1.3: 2014-03-31
 
   - Learning rate parameter included.

@@ -101,13 +101,20 @@ int main(int argc, char** argv)
     MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&mapType, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
     char *inFilenameCStr = new char[255];
     if (rank == 0) {
         strcpy(inFilenameCStr,inFilename.c_str());
     }
     MPI_Bcast(inFilenameCStr, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
     inFilename = inFilenameCStr;
+
+    char *mapTypeCStr = new char[255];
+    if (rank == 0) {
+        strcpy(mapTypeCStr,mapType.c_str());
+    }
+    MPI_Bcast(mapTypeCStr, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
+    mapType = mapTypeCStr;
 
     double profile_time = MPI_Wtime();
 #endif
