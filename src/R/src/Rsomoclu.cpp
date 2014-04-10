@@ -1,5 +1,6 @@
 
 #include<Rcpp.h>
+//#include<R/R.h>
 using namespace std;
 using namespace Rcpp;
 
@@ -35,7 +36,6 @@ void trainWrapperR(float *data, int data_length,
   coreData.globalBmus_size = nVectorsPerRank*int(ceil(nVectors/(double)nVectorsPerRank))*2;
   if (itask == 0) {
       coreData.globalBmus = new int[coreData.globalBmus_size];
-
       initializeCodebook(0, coreData.codebook, nSomX, nSomY, nDimensions);
   }
   ///
@@ -99,7 +99,6 @@ void trainWrapperR(float *data, int data_length,
 RcppExport SEXP Rtrain(SEXP data_p,
                        SEXP nEpoch_p,
                        SEXP nSomX_p, SEXP nSomY_p,
-                       //            SEXP nDimensions, SEXP nVectors,
                        SEXP radius0_p, SEXP radiusN_p,
                        SEXP radiusCooling_p,
                        SEXP scale0_p, SEXP scaleN_p,
@@ -160,9 +159,6 @@ RcppExport SEXP Rtrain(SEXP data_p,
           uMatrix_vec(i) = uMatrix[i];
         }
     }
-  delete[] codebook;
-  delete[] globalBmus;
-  delete[] uMatrix;
   return Rcpp::List::create(Rcpp::Named("codebook") = codebook_vec,
                             Rcpp::Named("globalBmus") = globalBmus_vec,
                             Rcpp::Named("uMatrix") = uMatrix_vec);;
