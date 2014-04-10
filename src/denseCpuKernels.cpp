@@ -19,8 +19,10 @@
 
 #include <cmath>
 #include <iostream>
-
 #include "somoclu.h"
+#ifdef HAVE_R
+#include <Rconfig.h>
+#endif
 
 /** Distance b/w a feature vector and a weight vector
  * = Euclidean
@@ -79,10 +81,13 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
 {
     unsigned int p1[2] = {0, 0};
     unsigned int *bmus = new unsigned int[nVectorsPerRank*2];
-
+#ifdef _OPENMP
     #pragma omp parallel default(shared) private(p1)
+#endif
     {
+#ifdef _OPENMP
         #pragma omp for
+#endif
         for (unsigned int n = 0; n < nVectorsPerRank; n++) {
             if (itask*nVectorsPerRank+n<nVectors) {
                 /// get the best matching unit
@@ -95,10 +100,13 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
 
     float *localNumerator = new float[nSomY*nSomX*nDimensions];
     float *localDenominator = new float[nSomY*nSomX];
-
+#ifdef _OPENMP
     #pragma omp parallel default(shared)
+#endif
     {
+#ifdef _OPENMP
         #pragma omp for
+#endif
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 localDenominator[som_y*nSomX + som_x] = 0.0;
@@ -107,7 +115,9 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
             }
         }
         /// Accumulate denoms and numers
+#ifdef _OPENMP
         #pragma omp for
+#endif
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 for (unsigned int n = 0; n < nVectorsPerRank; n++) {

@@ -1,2 +1,2 @@
 PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(SHLIB_OPENMP_CXXFLAGS)
-PKG_CXXFLAGS = `$(R_HOME)/bin/Rscript -e "Rcpp:::CxxFlags()"` $(SHLIB_OPENMP_CXXFLAGS)
+PKG_CXXFLAGS = `$(R_HOME)/bin/Rscript -e "Rcpp:::CxxFlags()"` $(SHLIB_OPENMP_CXXFLAGS) -DHAVE_R
