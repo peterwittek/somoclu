@@ -6,22 +6,6 @@
 
 using namespace std;
 
-//struct core_data
-//{
-//	float *codebook;
-//	int *globalBmus;
-//	float *uMatrix;
-//	int codebook_size;
-//	int globalBmus_size;
-//	int uMatrix_size;
-//};
-
-//struct svm_node
-//{
-//	int index;
-//	float value;
-//};
-
 void trainWrapper(float *data, int data_length,
                   unsigned int nEpoch,
                   unsigned int nSomX, unsigned int nSomY,
@@ -45,7 +29,6 @@ void trainWrapperR(float *data, int data_length,
                   float scale0, float scaleN,
                   string scaleCooling, unsigned int snapshots,
                   unsigned int kernelType, string mapType,
-//                  string initialCodebookFilename,
                   float *codebook, int codebook_size,
                   int *globalBmus, int globalBmus_size,
                   float *uMatrix, int uMatrix_size);
