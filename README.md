@@ -166,3 +166,7 @@ The above flags allow the identification of the correct MPI library the user wis
     --with-cuda=/path/to/cuda           Set path for CUDA
 
 Somoclu looks for CUDA in /usr/local/cuda. If your installation is not there, then specify the path with this parameter. If you do not want CUDA enabled, set the parameter to ```--without-cuda```.
+
+Acknowledgment
+==
+This work was supported by the European Commission Seventh Framework Programme under Grant Agreement Number FP7-601138 PERICLES and by the AWS in Education Machine Learning Grant award.
