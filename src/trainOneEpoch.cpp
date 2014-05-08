@@ -122,6 +122,18 @@ core_data trainOneEpoch(int itask, float *data, svm_node **sparseData,
         break;
     }
 
+    /// 2b. print status in console
+    if ( (currentEpoch != nEpoch) && (currentEpoch % (nEpoch/100+1) != 0) ){}
+    else{
+       float ratio  =  currentEpoch/(float)nEpoch;
+       int   c      =  ratio * 50 + 1;
+       cout << setw(7) << (int)(ratio*100) << "% [";
+       for (int x=0; x<c; x++) cout << "=";
+       for (int x=c; x<50; x++) cout << " ";
+       cout << "]\r" << flush;
+    }
+    /// EO 2b
+
     /// 3. Update codebook using numerator and denominator
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
