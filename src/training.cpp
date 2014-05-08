@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <iomanip> 
 
 #include "somoclu.h"
 
@@ -154,6 +155,15 @@ void train(int itask, float *data, svm_node **sparseData,
         if (itask == 0) {
             epoch_time = MPI_Wtime() - epoch_time;
             cerr << "Epoch Time: " << epoch_time << endl;
+            if ( (currentEpoch != nEpoch) && (currentEpoch % (nEpoch/100+1) != 0) ){}
+            else{
+              float ratio  =  currentEpoch/(float)nEpoch;
+              int   c      =  ratio * 50 + 1;
+              cout << std::setw(7) << (int)(ratio*100) << "% [";
+              for (int x=0; x<c; x++) cout << "=";
+              for (int x=c; x<50; x++) cout << " ";
+              cout << "]\n" << flush;
+            }
         }
 #endif        
     }
