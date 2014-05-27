@@ -87,3 +87,39 @@ Then you can
 ::
    
     $ sudo pip install somoclu
+
+    Build with CUDA support on Linux:
+--------------------------------------
+You need to clone this repo or download the latest release tarball, and
+
+::
+   
+    $ cd src/Python
+    $ bash makepy.sh
+
+Then if your CUDA installation is located at /opt/cuda and 64bit, you can do the following to install:
+
+::
+   
+    $ sudo python2 setup_with_CUDA.py install
+
+Otherwise, you should modify the setup_with_CUDA.py ,
+change the path to CUDA installation accordingly:
+
+::
+   
+   call(["./configure", "--without-mpi","--with-cuda=/opt/cuda/"])
+
+and
+
+::
+   
+   library_dirs=['/opt/cuda/lib64']
+
+Then run the install command
+
+::
+   
+    $ sudo python2 setup_with_CUDA.py install
+
+Then you can use the python interface like before, with CUDA support.
