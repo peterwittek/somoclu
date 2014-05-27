@@ -88,7 +88,8 @@ Then you can
    
     $ sudo pip install somoclu
 
-    Build with CUDA support on Linux:
+    
+Build with CUDA support on Linux:
 --------------------------------------
 You need to clone this repo or download the latest release tarball, and
 
