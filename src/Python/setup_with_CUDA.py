@@ -47,6 +47,7 @@ somoclu_module = Extension('_somoclu',
                                           'src/src/trainOneEpoch.o',
                                           'src/src/uMatrix.o',
                                           'src/src/denseGpuKernels.cu.co'],
+                           define_macros=[('CUDA', None)],
                            #PATH to CUDA library here, 64 for 64 bit
                            library_dirs=['/opt/cuda/lib64'],
                            libraries=['gomp','cudart','cublas','nvblas'],
