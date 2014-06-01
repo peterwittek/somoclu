@@ -55,6 +55,16 @@ void trainWrapper(float *data, int data_length,
           cout << "Read initial codebook: " << initialCodebookFilename << "\n";
       }
   }
+
+#ifdef CUDA
+    if(kernelType==DENSE_GPU){
+        int rank = 0;
+        int nProcs = 1;
+        setDevice(rank, nProcs);
+        initializeGpu(data, nVectorsPerRank, nDimensions, nSomX, nSomY);
+    }
+#endif
+
   ///
   /// Parameters for SOM
   ///
@@ -98,6 +108,11 @@ void trainWrapper(float *data, int data_length,
       coreData.uMatrix = calculateUMatrix(coreData.codebook, nSomX, nSomY, nDimensions, mapType);
       coreData.uMatrix_size = nSomX * nSomY;
   }
+#ifdef CUDA
+  if (kernelType == DENSE_GPU) {
+      freeGpu();
+  }
+#endif
   if(coreData.codebook != NULL){
       memcpy(codebook, coreData.codebook, sizeof(float) *  codebook_size);
       delete [] coreData.codebook;
