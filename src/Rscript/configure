@@ -1,0 +1,27 @@
+#!/bin/bash
+cd src
+bash autogen.sh
+HAS_CUDA=FALSE
+if test -z "${CUDA_HOME}"; then
+  echo "could not determine CUDA_HOME. Please see the README file for installation requirements"
+  exit 1
+else
+  HAS_CUDA=TRUE
+fi
+ARCH=$(uname -m)
+# replace these five lines with
+# CUDA_LIB := <path to your cuda shared libraries>
+if [ ${ARCH} = 'i386' ] ; then
+    CUDA_LIB=${CUDA_HOME}/lib
+else
+    CUDA_LIB=${CUDA_HOME}/lib64
+fi
+
+./configure --with-cuda=${CUDA_HOME} --without-mpi
+make
+export PKG_LIBS=`${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()"`
+export PKG_CXXFLAGS=`${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()"`" -DHAVE_R -DCUDA"
+cd src
+${R_HOME}/bin/R CMD SHLIB $PKG_CXXFLAGS Rsomoclu.cpp denseCpuKernels.o sparseCpuKernels.o mapDistanceFunctions.o trainOneEpoch.o uMatrix.o denseGpuKernels.cu.co io.o -lgomp -L${CUDA_LIB} -lcudart -lcublas -lnvblas
+rm somoclu
+cp Rsomoclu.so ../
