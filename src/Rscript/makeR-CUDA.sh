@@ -21,5 +21,5 @@ mv Rsomoclu.cpp src
 rm *.cpp
 rm *.h
 rm Makevars*
-#cd ../
-#R CMD build R-CUDA
+cd ../../
+R CMD build R-CUDA
