@@ -128,7 +128,12 @@ core_data trainOneEpoch(int itask, float *data, svm_node **sparseData,
 #endif
     if (itask == 0) {
         #pragma omp parallel for
+#ifdef linux
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+#endif
+#ifdef _WIN32
+		for (int som_y = 0; som_y < nSomY; som_y++) {
+#endif
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 float denom = denominator[som_y*nSomX + som_x];
                 for (unsigned int d = 0; d < nDimensions; d++) {

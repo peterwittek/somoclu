@@ -95,7 +95,12 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
 #ifdef _OPENMP
         #pragma omp for
 #endif
+#ifdef linux
         for (unsigned int n = 0; n < nVectorsPerRank; n++) {
+#endif
+#ifdef _WIN32
+		for (int n = 0; n < nVectorsPerRank; n++) {
+#endif
             if (itask*nVectorsPerRank+n<nVectors) {
                 /// get the best matching unit
                 get_bmu_coord(codebook, sparseData, nSomY, nSomX,
@@ -114,7 +119,12 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
 #ifdef _OPENMP
         #pragma omp for
 #endif
-        for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+#ifdef linux
+		for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+#endif
+#ifdef _WIN32
+		for (int som_y = 0; som_y < nSomY; som_y++) {
+#endif
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 localDenominator[som_y*nSomX + som_x] = 0.0;
                 for (unsigned int d = 0; d < nDimensions; d++)
@@ -126,7 +136,13 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
 #ifdef _OPENMP
         #pragma omp for
 #endif
-        for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+#ifdef linux
+		for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+#endif
+#ifdef _WIN32
+		for (int som_y = 0; som_y < nSomY; som_y++) {
+#endif
+        
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 for (unsigned int n = 0; n < nVectorsPerRank; n++) {
                     if (itask*nVectorsPerRank+n<nVectors) {
