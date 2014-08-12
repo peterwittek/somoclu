@@ -19,8 +19,16 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+
+#ifdef linux
 #include <unistd.h>
 #include <getopt.h>
+#endif
+
+#ifdef _WIN32
+#include "unistd.h"
+#include "getopt.h"
+#endif
 
 #include "somoclu.h"
 
