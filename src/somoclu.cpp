@@ -26,8 +26,8 @@
 #endif
 
 #ifdef _WIN32
-#include "unistd.h"
-#include "getopt.h"
+#include "Windows/unistd.h"
+#include "Windows/getopt.h"
 #endif
 
 #include "somoclu.h"
