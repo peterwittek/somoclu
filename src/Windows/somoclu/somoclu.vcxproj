@@ -155,14 +155,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\getopt.h" />
     <ClInclude Include="..\..\somoclu.h" />
     <ClInclude Include="..\..\somocluWrap.h" />
-    <ClInclude Include="..\..\unistd.h" />
+    <ClInclude Include="..\getopt.h" />
+    <ClInclude Include="..\unistd.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\denseCpuKernels.cpp" />
-    <ClCompile Include="..\..\getopt.c" />
     <ClCompile Include="..\..\io.cpp" />
     <ClCompile Include="..\..\mapDistanceFunctions.cpp" />
     <ClCompile Include="..\..\somoclu.cpp" />
@@ -171,6 +170,7 @@
     <ClCompile Include="..\..\training.cpp" />
     <ClCompile Include="..\..\trainOneEpoch.cpp" />
     <ClCompile Include="..\..\uMatrix.cpp" />
+    <ClCompile Include="..\getopt.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\denseGpuKernels.cu" />
