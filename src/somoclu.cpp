@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#ifdef unix
+#if defined(linux) || defined(__APPLE__)
 #include <unistd.h>
 #include <getopt.h>
 #endif

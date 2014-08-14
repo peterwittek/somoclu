@@ -128,7 +128,7 @@ core_data trainOneEpoch(int itask, float *data, svm_node **sparseData,
 #endif
     if (itask == 0) {
         #pragma omp parallel for
-#ifdef unix
+#if defined(linux) || defined(__APPLE__)
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
 #endif
 #ifdef _WIN32

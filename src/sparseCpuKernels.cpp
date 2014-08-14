@@ -95,7 +95,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
 #ifdef _OPENMP
         #pragma omp for
 #endif
-#ifdef unix
+#if defined(linux) || defined(__APPLE__)
         for (unsigned int n = 0; n < nVectorsPerRank; n++) {
 #endif
 #ifdef _WIN32
@@ -119,7 +119,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
 #ifdef _OPENMP
         #pragma omp for
 #endif
-#ifdef unix
+#if defined(linux) || defined(__APPLE__)
 		for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
 #endif
 #ifdef _WIN32
@@ -136,7 +136,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
 #ifdef _OPENMP
         #pragma omp for
 #endif
-#ifdef unix
+#if defined(linux) || defined(__APPLE__)
 		for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
 #endif
 #ifdef _WIN32
