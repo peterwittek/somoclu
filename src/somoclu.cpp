@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#ifdef linux
+#ifdef unix
 #include <unistd.h>
 #include <getopt.h>
 #endif
