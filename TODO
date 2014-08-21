@@ -1,3 +1,4 @@
   - MATLAB interfaces with CUDA support.
+  - Python, R with CUDA support on windows.
   - Integration with data structures of SOM libraries in Python and R.
   - Implement hexagonal grid.
