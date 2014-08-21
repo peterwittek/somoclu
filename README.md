@@ -130,7 +130,7 @@ Distributed systems and single-machine multicore execution is supported through 
 
 CUDA support is optional. CUDA versions 4.1, 5.0 and 5.5 are known to work.
 
-Compilation & Installation
+Compilation & Installation on Linux or Mac OS X
 ==
 From GIT repository first run
 
@@ -166,6 +166,14 @@ The above flags allow the identification of the correct MPI library the user wis
     --with-cuda=/path/to/cuda           Set path for CUDA
 
 Somoclu looks for CUDA in /usr/local/cuda. If your installation is not there, then specify the path with this parameter. If you do not want CUDA enabled, set the parameter to ```--without-cuda```.
+
+Compilation & Installation on Windows
+==
+Use the `somoclu.sln ` under src/Windows/somoclu as an example visual studio 2013 solution. Modify the CUDA version or VC compiler version according to your needs. 
+
+The default solution enables all of openmp, mpi and CUDA. The default MPI installation path is `C:\Program Files\Microsoft MPI`, modify the settings if yours is in a different path. The configuration default CUDA version is CUDA 6.5.  Disable MPI by undefine `HAVE_MPI` macro in the settings.
+
+The usage is identical to the linux version through command line (see above). 
 
 Acknowledgment
 ==
