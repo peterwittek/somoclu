@@ -61,8 +61,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\denseGpuKernels.cu">
+    <CudaCompile Include="..\..\denseGpuKernels.cu">
       <Filter>Source Files</Filter>
-    </None>
+    </CudaCompile>
   </ItemGroup>
 </Project>

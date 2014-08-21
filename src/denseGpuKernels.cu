@@ -32,6 +32,11 @@
 
 #include "somoclu.h"
 
+#ifdef _WIN32
+#define popen _popen
+#define pclose _pclose
+#endif
+
 // Error handling macro
 #define CUDA_CHECK(call) \
     if((call) != cudaSuccess) { \
@@ -257,7 +262,11 @@ void setDevice(int commRank, int commSize)
     int deviceNum=0;
     CUDA_CHECK(cudaGetDeviceCount(&devCount));
 #ifdef HAVE_MPI  
-    FILE * fp = popen("/bin/hostname", "r");
+#ifdef _WIN32
+	FILE * fp = popen("hostname.exe", "r");
+#else
+	FILE * fp = popen("/bin/hostname", "r");
+#endif
     char buf[1024];
     if (fgets(buf, 1023, fp) == NULL) strcpy(buf, "localhost");
     pclose(fp);
@@ -336,7 +345,11 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                            unsigned int nVectorsPerRank, float radius,
                            float scale, string mapType, int *globalBmus)
 {
+#ifdef _WIN32
+	int* bmus = (int *)alloca(sizeof(int) * nVectorsPerRank * 2);
+#else
     int bmus[nVectorsPerRank*2];
+#endif
     getBmusOnGpu(bmus, codebook, nSomX, nSomY, nDimensions, nVectorsPerRank);
 
     float *localNumerator = new float[nSomY*nSomX*nDimensions];
