@@ -171,7 +171,7 @@ Compilation & Installation on Windows
 ==
 Use the `somoclu.sln ` under src/Windows/somoclu as an example visual studio 2013 solution. Modify the CUDA version or VC compiler version according to your needs. 
 
-The default solution enables all of openmp, mpi and CUDA. The default MPI installation path is `C:\Program Files\Microsoft MPI`, modify the settings if yours is in a different path. The configuration default CUDA version is CUDA 6.5.  Disable MPI by undefine `HAVE_MPI` macro in the settings.
+The default solution enables all of openmp, mpi and CUDA. The default MPI installation path is `C:\Program Files\Microsoft MPI`, modify the settings if yours is in a different path. The configuration default CUDA version is CUDA 6.5.  Disable MPI by removing `HAVE_MPI` macro in the project properties (`Properties -> Configuration Properties -> C/C++ -> Preprocessor`). Disable CUDA by removing `CUDA` macro in the solution properties.
 
 The usage is identical to the linux version through command line (see above). 
 
