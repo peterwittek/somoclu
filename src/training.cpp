@@ -27,33 +27,6 @@
 
 using namespace std;
 
-/** Initialize SOM codebook with random values
- * @param seed - random seed
- * @param codebook - the codebook to fill in
- * @param nSomX - dimensions of SOM map in the currentEpoch direction
- * @param nSomY - dimensions of SOM map in the y direction
- * @param nDimensions - dimensions of a data instance
- */
-
-//void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
-//                        unsigned int nSomY, unsigned int nDimensions)
-//{
-//    ///
-//    /// Fill initial random weights
-//    ///
-//    srand(seed);
-//    for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-//        for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-//            for (unsigned int d = 0; d < nDimensions; d++) {
-//                int w = 0xFFF & rand();
-//                w -= 0x800;
-//                codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] = (float)w / 4096.0f;
-//            }
-//        }
-//    }
-//}
-
-
 /** Main training loop
  * @param itask - number of work items
  * @param kv
