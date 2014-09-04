@@ -241,7 +241,7 @@ void printUsage() {
          "     -r NUMBER             Start radius (default: half of the map in direction min(x,y))\n" \
          "     -R NUMBER             End radius (default: 1)\n" \
          "     -T STRATEGY           Learning rate cooling strategy: linear or exponential (default: linear)\n" \
-         "     -l NUMBER             Starting learning rate (default: 1.0)\n" \
+         "     -l NUMBER             Starting learning rate (default: 0.1)\n" \
          "     -L NUMBER             Finishing learning rate (default: 0.01)\n" \
          "     -s NUMBER             Save interim files (default: 0):\n" \
          "                              0: Do not save interim files\n" \

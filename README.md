@@ -36,7 +36,7 @@ Arguments:
     -r NUMBER                Start radius (default: half of the map in direction min(x,y))
     -R NUMBER                End radius (default: 1)
     -T STRATEGY              Learning rate cooling strategy: linear or exponential (default: linear)
-    -l NUMBER                Starting learning rate (default: 1.0)
+    -l NUMBER                Starting learning rate (default: 0.1)
     -L NUMBER                Finishing learning rate (default: 0.01)
     -s NUMBER                Save interim files (default: 0):
                                 0: Do not save interim files

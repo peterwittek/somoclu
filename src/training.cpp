@@ -83,7 +83,7 @@ void train(int itask, float *data, svm_node **sparseData,
         radiusN = 1;
     }
     if (scale0 == 0) {
-      scale0 = 1.0;
+      scale0 = 0.1;
     }
         
     unsigned int currentEpoch = 0;             /// 0...nEpoch-1
