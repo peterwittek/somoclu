@@ -45,12 +45,7 @@ if test x"$with_cuda" != x"no" ; then
   AC_CHECK_PROG(NVCC_CHECK,nvcc,yes,no,$CUDA_PATH/bin)
   if test x"$NVCC_CHECK" = x"yes" ; then
      cuda_enabled=yes
-     GENCODE_SM10="-gencode arch=compute_10,code=sm_10"
-     GENCODE_SM20="-gencode arch=compute_20,code=sm_20"
-     if test `nvcc --version|grep release|awk '{print $5}'|cut -d. -f1` -ge 5 ; then
-      GENCODE_SM30="-gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35"
-     fi
-     CUDA_CFLAGS="-I$CUDA_PATH/include -use_fast_math ${GENCODE_SM10} ${GENCODE_SM20} ${GENCODE_SM30} -Xcompiler \"${CXXFLAGS}\""
+     CUDA_CFLAGS="-I$CUDA_PATH/include -use_fast_math -Xcompiler \"${CXXFLAGS}\""
      CUDA_LIBS="-lcudart -lcublas"
      CUDA_LDFLAGS="-L$CUDA_PATH/lib$SUFFIX"
      NVCC="$CUDA_PATH/bin/nvcc"
