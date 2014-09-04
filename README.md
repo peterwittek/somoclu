@@ -1,5 +1,5 @@
 Somoclu
-==
+===
 Somoclu is a cluster-oriented implementation of self-organizing maps. It relies on MPI for distributing the workload, and it can be accelerated by CUDA on a GPU cluster. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes. The topology of the grid is rectangular.
 
 Key features:
@@ -9,15 +9,16 @@ Key features:
 * Both dense and sparse input data are supported.
 * Large maps of several hundred thousand neurons are feasible.
 * Integration with Databionic ESOM Tools.
-* Python, R, and MATLAB interfaces for the dense CPU kernel.
+* Python, R, and MATLAB interfaces for the dense CPU and GPU kernels.
 
 For more information, refer to the following paper:
 
 Peter Wittek (2013). Somoclu: An Efficient Distributed Library for Self-Organizing Maps. [arXiv:1305.1422](http://arxiv.org/abs/1305.1422).
 
-
 Usage
-==
+===
+Basic Use
+---
 Somoclu takes a plain text input file -- either dense or sparse data. Example files are included.
 
     $ [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX
@@ -49,8 +50,33 @@ Examples:
     $ somoclu data/rgbs.txt data/rgbs
     $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 
+Efficient Parallel Execution
+---
+The CPU kernels use OpenMP to load multicore processors. On a single node, this is more efficient than launching tasks with MPI to match the number of cores. The MPI tasks replicated the codebook, which is especially inefficient for large maps. 
+
+For instance, given a single node with eight cores, the following execution will use 1/8th of the memory, and will run 10-20% faster:
+
+    $ somoclu -x 200 -y 200 data/rgbs.txt data/rgbs
+
+Or, equivalently:
+
+    $ OMP_NUM_THREADS=8 somoclu -x 200 -y 200 data/rgbs.txt data/rgbs
+
+Avoid the following on a single node:
+
+    $ OMP_NUM_THREADS=1 mpirun -np 8 somoclu -x 200 -y 200 data/rgbs.txt data/rgbs
+
+The same caveats apply for the sparse CPU kernel.
+
+Visualisation
+---
+The primary purpose of generating a map is visualisation. Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures. 
+
+The output formats of the U-matrix and the codebook are compatible with [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/) for more advanced visualisation.
+
+
 Input File Formats
-==
+===
 One sparse and two dense data formats are supported. All of them are plain text files. The entries can be separated by any white-space character. One row represents one data instance across all formats. Comment lines starting with a hash mark are ignored.
 
 The sparse format follows the [libsvm](http://www.csie.ntu.edu.tw/~cjlin/libsvm/) guidelines. The first feature is zero-indexed. For instance, the vector [ 1.2 0 0 3.4] is represented as the following line in the file:
@@ -83,7 +109,7 @@ Here n is the number of rows in the file, that is, the number of data instances.
 If the input file is sparse, but a dense kernel is invoked, Somoclu will execute and results will be incorrect. Invoking a sparse kernel on a dense input file is likely to lead to a segmentation fault.
 
 Interfaces
-==
+===
 Python, R, and MATLAB interfaces are available for the dense CPU kernel. MPI, CUDA, and the sparse kernel are not support through the interfaces. The connection to the C++ library is seamless, data structures are not duplicated. For respective examples, see the folders in src. All versions require GCC to compile the code.
 
 The Python version is also available in Pypi. You can install it with
@@ -98,40 +124,16 @@ For using the MATLAB toolbox, define the location of the mex compiler in MEX_BIN
 
 For more information on the respective interfaces, refer to the subfolders in src.
 
-Efficient Parallel Execution
-==
-The CPU kernels use OpenMP to load multicore processors. On a single node, this is more efficient than launching tasks with MPI to match the number of cores. The MPI tasks replicated the codebook, which is especially inefficient for large maps. 
-
-For instance, given a single node with eight cores, the following execution will use 1/8th of the memory, and will run 10-20% faster:
-
-    $ somoclu -x 200 -y 200 data/rgbs.txt data/rgbs
-
-Or, equivalently:
-
-    $ OMP_NUM_THREADS=8 somoclu -x 200 -y 200 data/rgbs.txt data/rgbs
-
-Avoid the following on a single node:
-
-    $ OMP_NUM_THREADS=1 mpirun -np 8 somoclu -x 200 -y 200 data/rgbs.txt data/rgbs
-
-The same caveats apply for the sparse CPU kernel.
-
-Visualisation
-==
-The primary purpose of generating a map is visualisation. Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures. 
-
-The output formats of the U-matrix and the codebook are compatible with [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/) for more advanced visualisation.
-
-Dependencies
-==
+Compilation & Installation
+===
 The only dependency is GCC, although other compiler chains might also work.
 
-Distributed systems and single-machine multicore execution is supported through MPI. The package was tested with OpenMPI, versions 1.3.2 and 1.6.5 were tested. It should also work with other MPI flavours. 
+Distributed systems and single-machine multicore execution is supported through MPI. The package was tested with OpenMPI. It should also work with other MPI flavours. 
 
-CUDA support is optional. CUDA versions 4.1, 5.0 and 5.5 are known to work.
+CUDA support is optional.
 
-Compilation & Installation on Linux or Mac OS X
-==
+Linux or Mac OS X
+---
 From GIT repository first run
 
     $ ./autogen.sh
@@ -167,14 +169,20 @@ The above flags allow the identification of the correct MPI library the user wis
 
 Somoclu looks for CUDA in /usr/local/cuda. If your installation is not there, then specify the path with this parameter. If you do not want CUDA enabled, set the parameter to ```--without-cuda```.
 
-Compilation & Installation on Windows
-==
-Use the `somoclu.sln ` under src/Windows/somoclu as an example visual studio 2013 solution. Modify the CUDA version or VC compiler version according to your needs. 
+Windows
+---
+Use the `somoclu.sln` under src/Windows/somoclu as an example visual studio 2013 solution. Modify the CUDA version or VC compiler version according to your needs. 
 
-The default solution enables all of openmp, mpi and CUDA. The default MPI installation path is `C:\Program Files\Microsoft MPI`, modify the settings if yours is in a different path. The configuration default CUDA version is CUDA 6.5.  Disable MPI by removing `HAVE_MPI` macro in the project properties (`Properties -> Configuration Properties -> C/C++ -> Preprocessor`). Disable CUDA by removing `CUDA` macro in the solution properties.
+The default solution enables all of OpenMP, MPI, and CUDA. The default MPI installation path is `C:\Program Files\Microsoft MPI`, modify the settings if yours is in a different path. The configuration default CUDA version is 6.5.  Disable MPI by removing `HAVE_MPI` macro in the project properties (`Properties -> Configuration Properties -> C/C++ -> Preprocessor`). Disable CUDA by removing `CUDA` macro in the solution properties.
 
-The usage is identical to the linux version through command line (see above). 
+The usage is identical to the linux version through command line (see the relevant section). 
+
+Known Issues
+===
+The MATLAB CUDA interface crashes with unknown reasons.
+
+The maps generated by the GPU and the CPU kernels are likely to be different. For computational efficiency, Somoclu uses single-precision floats. This occasionally results in identical distances between a data instance and the neurons. The CPU version will pick the best matching unit with the lowest coordinate values. Such sequentiality cannot be guaranteed in the reduction kernel of the GPU variant. This is not a bug, but it is better to be aware of it.
 
 Acknowledgment
-==
+===
 This work was supported by the European Commission Seventh Framework Programme under Grant Agreement Number FP7-601138 PERICLES and by the AWS in Education Machine Learning Grant award.
