@@ -22,6 +22,6 @@ make
 export PKG_LIBS=`${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()"`
 export PKG_CXXFLAGS=`${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()"`" -DHAVE_R -DCUDA"
 cd src
-${R_HOME}/bin/R CMD SHLIB $PKG_CXXFLAGS Rsomoclu.cpp denseCpuKernels.o sparseCpuKernels.o mapDistanceFunctions.o trainOneEpoch.o uMatrix.o denseGpuKernels.cu.co io.o -lgomp -L${CUDA_LIB} -lcudart -lcublas -lnvblas
+${R_HOME}/bin/R CMD SHLIB $PKG_CXXFLAGS Rsomoclu.cpp denseCpuKernels.o sparseCpuKernels.o mapDistanceFunctions.o trainOneEpoch.o uMatrix.o denseGpuKernels.cu.co io.o -lgomp -L${CUDA_LIB} -lcudart -lcublas
 rm somoclu
 cp Rsomoclu.so ../

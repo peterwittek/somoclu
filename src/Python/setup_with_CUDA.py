@@ -50,7 +50,7 @@ somoclu_module = Extension('_somoclu',
                            define_macros=[('CUDA', None)],
                            #PATH to CUDA library here, 64 for 64 bit
                            library_dirs=['/opt/cuda/lib64'],
-                           libraries=['gomp','cudart','cublas','nvblas'],
+                           libraries=['gomp','cudart','cublas'],
                            include_dirs=[numpy_include]
                            )
 
