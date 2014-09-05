@@ -1,4 +1,4 @@
-Since 1.3.1:
+Version 1.4: 2014-09-05
   - Better Windows support.
   - Completed CUDA support for Python and R interfaces.
   - Faster compilation by removing unnecessary flags for nvcc and support for CUDA 6.5.

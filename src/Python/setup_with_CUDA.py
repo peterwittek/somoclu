@@ -56,7 +56,7 @@ somoclu_module = Extension('_somoclu',
 
 
 setup(name='somoclu',
-      version='1.3.1',
+      version='1.4',
       license='GPL3',
       author="peterwittek",
       author_email="",
