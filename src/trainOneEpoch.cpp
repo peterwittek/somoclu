@@ -1,6 +1,9 @@
 #include"somoclu.h"
 #include<cmath>
 #include<stdlib.h>
+#ifdef HAVE_R
+#include<R.h>
+#endif
 
 float linearCooling(float start, float end, float nEpoch, float epoch) {
   float diff = (start - end) / (nEpoch-1);
@@ -21,6 +24,7 @@ float exponentialCooling(float start, float end, float nEpoch, float epoch) {
 }
 
 
+
 /** Initialize SOM codebook with random values
  * @param seed - random seed
  * @param codebook - the codebook to fill in
@@ -35,16 +39,27 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
     ///
     /// Fill initial random weights
     ///
+#ifdef HAVE_R
+    GetRNGstate();
+#else
     srand(seed);
+#endif
     for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
             for (unsigned int d = 0; d < nDimensions; d++) {
+#ifdef HAVE_R
+                int w = 0xFFF & (int) (RAND_MAX*unif_rand());
+#else
                 int w = 0xFFF & rand();
+#endif
                 w -= 0x800;
                 codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] = (float)w / 4096.0f;
             }
         }
     }
+#ifdef HAVE_R
+    PutRNGstate();
+#endif
 }
 
 core_data trainOneEpoch(int itask, float *data, svm_node **sparseData,
