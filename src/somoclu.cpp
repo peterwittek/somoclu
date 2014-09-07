@@ -20,14 +20,12 @@
 #include <cstdlib>
 #include <iostream>
 
-#if defined(linux) || defined(__APPLE__)
-#include <unistd.h>
-#include <getopt.h>
-#endif
-
 #ifdef _WIN32
 #include "Windows/unistd.h"
 #include "Windows/getopt.h"
+#else
+#include <unistd.h>
+#include <getopt.h>
 #endif
 
 #include "somoclu.h"
