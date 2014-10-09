@@ -10,6 +10,7 @@ from subprocess import call
 import numpy
 #from setuptools.command.build_ext import build_ext
 import os
+import sys
 
 try:
     numpy_include = numpy.get_include()
@@ -27,31 +28,38 @@ except AttributeError:
 #         build_ext.run(self)
 
         
-class MyInstall(install):
+#class MyInstall(install):
 
-    def run(self):
+ #   def run(self):
         #call(["src/autogen.sh"])
-        call(["pwd"])
-        os.chdir('src')
-        call(["bash", "autogen.sh"])
-        call(["./configure", "--without-mpi", "--without-cuda"])
-        call(["make"])
-        os.chdir('../')
-        install.run(self)
-        
+  #      call(["pwd"])
+   #     os.chdir('src')
+    #    call(["bash", "autogen.sh"])
+     #   call(["./configure", "--without-mpi", "--without-cuda"])
+      #  call(["make"])
+       # os.chdir('../')
+        #install.run(self)
+sources_files=['somoclu_wrap.cxx',
+				'src/src/somocluWrap.cpp',
+				'src/src/somoclu.cpp',
+				'src/src/denseCpuKernels.cpp',
+				'src/src/io.cpp',
+				'src/src/sparseCpuKernels.cpp',
+				'src/src/training.cpp',
+				'src/src/mapDistanceFunctions.cpp',
+				'src/src/trainOneEpoch.cpp',
+				'src/src/uMatrix.cpp']
+if sys.platform.startswith('win'):
+    extra_compile_args = ['-openmp']
+    sources_files.append('src/src/Windows/getopt.c')
+else:
+    extra_compile_args = ['-fopenmp']
+    extra_link_args = [
+        '-lgomp'
+    ]        
 
 somoclu_module = Extension('_somoclu',
-                           sources=['somoclu_wrap.cxx',
-                                    'src/src/somocluWrap.cpp'],
-                           extra_objects=['src/src/somoclu.o',
-                                          'src/src/denseCpuKernels.o',
-                                          'src/src/io.o',
-                                          'src/src/sparseCpuKernels.o',
-                                          'src/src/training.o',
-                                          'src/src/mapDistanceFunctions.o',
-                                          'src/src/trainOneEpoch.o',
-                                          'src/src/uMatrix.o'],
-                           libraries=['gomp'],
+                           sources=sources_files,						   
                            include_dirs=[numpy_include]
                            )
 
@@ -70,6 +78,6 @@ setup(name='somoclu',
       py_modules=["somoclu"],
       install_requires=['numpy'],
       # test_suite="tests",
-      cmdclass={'install': MyInstall}  # , 'build_ext': MyBuildExt
+      #cmdclass={'install': MyInstall}  # , 'build_ext': MyBuildExt
       )
 
