@@ -5,8 +5,6 @@ include src/m4/*
 include src/src/*.h
 include src/src/*.cpp
 include src/src/*.cu
-include src/src/Windows/*.c
-include src/src/Windows/*.h
 include src/src/Makefile.in
 include tests/rgbs.txt
 include tests/somoclu_test.py
