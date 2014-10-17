@@ -27,6 +27,7 @@ sources_files=['somoclu_wrap.cxx',
 				'src/src/uMatrix.cpp']
 if sys.platform.startswith('win'):
     extra_compile_args = ['-openmp']
+    extra_link_args = []
 else:
     extra_compile_args = ['-fopenmp']
     extra_link_args = [
@@ -35,7 +36,9 @@ else:
 
 somoclu_module = Extension('_somoclu',
                            sources=sources_files,						   
-                           include_dirs=[numpy_include]
+                           include_dirs=[numpy_include],
+                           extra_compile_args=extra_compile_args,
+                           extra_link_args=extra_link_args
                            )
 
 
