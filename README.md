@@ -181,7 +181,7 @@ When using the somoclu Python interface on Windows, if you encounter errors like
 
     ImportError: DLL load failed: The specified module could not be found
     
-You may need to find the right version (32/64bit) of `vcomp90.dll, msvcp90.dll, msvcr90.dll` and put to `C:\Windows\System32` or `C:\Windows\SysWOW64`
+You may need to find the right version (32/64bit) of `vcomp90.dll, msvcp90.dll, msvcr90.dll` and put to `C:\Windows\System32` or `C:\Windows\SysWOW64`.
 
 Known Issues
 ===
