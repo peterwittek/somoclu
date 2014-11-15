@@ -123,4 +123,18 @@ Then run the install command
    
     $ sudo python2 setup_with_CUDA.py install
 
-Then you can use the python interface like before, with CUDA support.
+Then you can use the python interface like before, with CUDA support. Building on OS X should be quite similar to linux.
+
+Build with CUDA support on Windows:
+--------------------------------------
+You should first follow the instructions to build the windows binary at https://github.com/peterwittek/somoclu with MPI disabled with the same version Visual Studio as your Python is built.(Since currently Python is built by VS2008 by default and CUDA v6.5 removed VS2008 support, you may use CUDA 6.0 with VS2008 or find a Python prebuilt with VS2010. And remember to install VS2010 or Windows SDK7.1 to get the option in Platform Toolset if you use VS2013.) Then you should copy the .obj files generated in the release build path to the Python/src/src folder. 
+
+Then modify the library_dirs in setup_with_CUDA_Win.py  to your CUDA path.
+
+Then run the install command
+
+::
+   
+    $ sudo python2 setup_with_CUDA_Win.py install
+	
+Then it should be able to build and install the extension.

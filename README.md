@@ -183,6 +183,8 @@ When using the somoclu Python interface on Windows, if you encounter errors like
     
 You may need to find the right version (32/64bit) of `vcomp90.dll, msvcp90.dll, msvcr90.dll` and put to `C:\Windows\System32` or `C:\Windows\SysWOW64`.
 
+Instructions on building python extension with CUDA support on windows is at [here](https://github.com/peterwittek/somoclu/tree/master/src/Python)
+
 Known Issues
 ===
 The MATLAB CUDA interface crashes with unknown reasons.
