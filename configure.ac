@@ -9,7 +9,7 @@ AC_CONFIG_SRCDIR([src/somoclu.cpp])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
-CXXFLAGS="-O3 -fPIC"
+CXXFLAGS="-fPIC"
 AC_PROG_CXX
 AC_PROG_INSTALL
 
@@ -19,6 +19,7 @@ if test x"$OPENMP_CFLAGS" != x"" ; then
   openmp_enabled=yes
 fi
 CXXFLAGS="${CXXFLAGS} ${OPENMP_CFLAGS}"
+AS_IF([test "x$GXX" = "xyes"],[CXXFLAGS="${CXXFLAGS} -Ofast -march=native"])
 
 #find out what version we are running
 ARCH=`uname -m`
