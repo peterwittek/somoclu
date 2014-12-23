@@ -19,8 +19,13 @@ if test x"$OPENMP_CFLAGS" != x"" ; then
   openmp_enabled=yes
 fi
 CXXFLAGS="${CXXFLAGS} ${OPENMP_CFLAGS}"
-AS_IF([test "x$GXX" = "xyes"],[CXXFLAGS="${CXXFLAGS} -Ofast -march=native"])
-
+string=`$CXX --version`
+if [[[ $string == *"ICC"* ]]]
+then  
+  CXXFLAGS="${CXXFLAGS} -fast"
+else
+  AS_IF([test "x$GXX" = "xyes"],[CXXFLAGS="${CXXFLAGS} -Ofast -march=native"])
+fi
 #find out what version we are running
 ARCH=`uname -m`
 if [[ $ARCH == "x86_64" ]];
