@@ -5,10 +5,11 @@ Somoclu is a massively parallel implementation of self-organizing maps. It explo
 Key features:
 
 * Fast execution by parallelization: OpenMP, MPI, and CUDA are supported.
+* Multi-platform: Linux, OS X, and Windows are supported.
 * Planar and toroid maps.
 * Both dense and sparse input data are supported.
 * Large maps of several hundred thousand neurons are feasible.
-* Integration with Databionic ESOM Tools.
+* Integration with [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/).
 * Python, R, and MATLAB interfaces for the dense CPU and GPU kernels.
 
 For more information, refer to the following paper:
@@ -17,7 +18,7 @@ Peter Wittek (2013). Somoclu: An Efficient Distributed Library for Self-Organizi
 
 Usage
 ===
-Basic Use
+Basic Command Line Use
 ---
 Somoclu takes a plain text input file -- either dense or sparse data. Example files are included.
 

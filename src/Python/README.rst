@@ -1,13 +1,20 @@
-Somoclu - python interface
+Somoclu - Python Interface
 ================================
 
-Somoclu is a massively parallel implementation of self-organizing maps. It relies on OpenMP for multicore execution, MPI for distributing the workload, and it can be accelerated by CUDA on a GPU cluster. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes. The topology of the grid is rectangular.
+Somoclu is a massively parallel implementation of self-organizing maps. It relies on OpenMP for multicore execution, MPI for distributing the workload, and it can be accelerated by CUDA on a GPU cluster. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes. The topology of the grid is rectangular. Currently a subset of the command line version is supported with this package.
 
-Currently a subset of the C++ version is supported with this package.
+Key features of the Python interface:
 
-Homepage: `https://github.com/peterwittek/somoclu <https://github.com/peterwittek/somoclu/>`_
+* Fast execution by parallelization: OpenMP and CUDA are supported.
+* Multi-platform: Linux, OS X, and Windows are supported.
+* Planar and toroid maps.
+* Both dense and sparse input data are supported.
+* Large maps of several hundred thousand neurons are feasible.
 
-Example, in which the data file rgbs.txt can be found at https://github.com/peterwittek/somoclu/tree/master/data
+
+Usage
+------
+The following file uses rgbs.txt, which can be found at https://github.com/peterwittek/somoclu/tree/master/data
 
 .. code-block:: python
 		
@@ -55,14 +62,21 @@ Example, in which the data file rgbs.txt can be found at https://github.com/pete
 
 
 
-Get it now
-----------
+Installation
+------------
+The code is available on PyPI, hence it can be installed by
 
 ::
-   
+
     $ sudo pip install somoclu
 
-Build on Mac OS X:
+If you want the latest git version, follow the standard procedure for installing Python modules:
+
+::
+
+    $ sudo python setup.py install
+
+Build on Mac OS X
 --------------------
 Before installing using pip, gcc should be installed first. As of OS X 10.9, gcc is just symlink to clang. To build somoclu and this extension correctly, it is recommended to install gcc using something like:
 ::
@@ -83,15 +97,15 @@ and set environment using:
     alias ld=/usr/local/bin/gcc
     alias cc=/usr/local/bin/gcc
 
-Then you can
+Then you can issue
 ::
    
     $ sudo pip install somoclu
 
     
-Build with CUDA support on Linux:
---------------------------------------
-You need to clone this repo or download the latest release tarball, and
+Build with CUDA support on Linux and OS X:
+------------------------------------------
+You need to clone the GitHub repo or download the latest release tarball, and use the following script:
 
 ::
    
@@ -123,7 +137,7 @@ Then run the install command
    
     $ sudo python2 setup_with_CUDA.py install
 
-Then you can use the python interface like before, with CUDA support. Building on OS X should be quite similar to linux.
+Then you can use the python interface like before, with CUDA support.
 
 Build with CUDA support on Windows:
 --------------------------------------
