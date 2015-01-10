@@ -472,17 +472,20 @@ template <typename T>
 void normsOfRowSpaceKernel(T *d_indata, T *d_odata, int nRows, int nColumns) {
 	//calc square
 	int length = nRows * nColumns;
+    T* d_indata_copy;
+    cudaMalloc((void **)& d_indata_copy, sizeof(float) * length);
+    cudaMemcpy(d_indata_copy, d_indata, sizeof(float) * length, cudaMemcpyDeviceToDevice);
 	getNumBlocksAndThreads(whichKernel, nRows * nColumns, maxBlocks, maxThreads, numBlocks, numThreads);
 	int n_blocks = length/numThreads + (length%numThreads == 0 ? 0:1);
-	squareArray <<< n_blocks, numThreads >>> (d_indata, length);
+	squareArray <<< n_blocks, numThreads >>> (d_indata_copy, length);
 	//reduce squared rows
 	getNumBlocksAndThreads(whichKernel, nColumns, maxBlocks, maxThreads, numBlocks, numThreads);
 
 	for (int i = 0; i < nRows; i++) {
 		reduce<T>(nColumns, numThreads, numBlocks,
-		              whichKernel, &d_indata[i*nColumns], &d_odata[i]);
+		              whichKernel, &d_indata_copy[i*nColumns], &d_odata[i]);
 	}
-
+	cudaFree(d_indata_copy);
 }
 
 template void
