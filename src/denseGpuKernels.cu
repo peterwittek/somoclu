@@ -211,11 +211,55 @@ struct SharedMemory
     }
 };
 
+template<>
+struct SharedMemory<float>
+{
+    __device__ inline operator       float *()
+    {
+        extern __shared__ int __smem[];
+        return (float *)__smem;
+    }
+
+    __device__ inline operator const float *() const
+    {
+        extern __shared__ int __smem[];
+        return (float *)__smem;
+    }
+};
+
 extern "C"
 bool isPow2(unsigned int x)
 {
     return ((x&(x-1))==0);
 }
+
+template <class T>
+__global__ void
+reduceRows(T *g_idata, T *g_odata, int nRows, int nCols)
+{
+	int tid = threadIdx.x;
+	int i = blockDim.x * blockIdx.x + tid;
+	T *sdata = SharedMemory<T>();
+	sdata[tid] = (i < nRows * nCols) ? g_idata[i] *  g_idata[i] : 0;
+
+	//		int row = i/nCols;
+	//		int col = i%nCols;
+
+	__syncthreads();
+	// do reduction in shared mem
+	for (unsigned int s=1; s < blockDim.x; s *= 2)
+	{
+		// modulo arithmetic is slow!
+		if ((tid % (2*s)) == 0)
+		{
+			sdata[tid] += sdata[tid + s];
+		}
+
+		__syncthreads();
+	}
+	if (tid == 0) g_odata[blockIdx.x] = sdata[0];
+}
+
 /*
     This version adds multiple elements per thread sequentially.  This reduces the overall
     cost of the algorithm while keeping the work complexity O(n) and the step complexity O(log n).
@@ -227,7 +271,7 @@ bool isPow2(unsigned int x)
 */
 template <class T, unsigned int blockSize, bool nIsPow2>
 __global__ void
-reduce6(T *g_idata, T *g_odata, unsigned int n)
+reduce6(T *g_idata, T *g_odata, int nRows, int nCols)
 {
     T *sdata = SharedMemory<T>();
 
@@ -242,15 +286,15 @@ reduce6(T *g_idata, T *g_odata, unsigned int n)
     // we reduce multiple elements per thread.  The number is determined by the
     // number of active thread blocks (via gridDim).  More blocks will result
     // in a larger gridSize and therefore fewer elements per thread
-    while (i < n)
+    while (i%nCols < nCols)
     {
-        mySum += g_idata[i];
+    	mySum += g_idata[i] * g_idata[i];
 
-        // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
-        if (nIsPow2 || i + blockSize < n)
-            mySum += g_idata[i+blockSize];
+    	// ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
+    	if (nIsPow2 || i + blockSize < nCols)
+    		mySum += g_idata[i+blockSize] * g_idata[i+blockSize];
 
-        i += gridSize;
+    	i += gridSize;
     }
 
     // each thread puts its local sum into shared memory
@@ -261,21 +305,21 @@ reduce6(T *g_idata, T *g_odata, unsigned int n)
     // do reduction in shared mem
     if ((blockSize >= 512) && (tid < 256))
     {
-        sdata[tid] = mySum = mySum + sdata[tid + 256];
+    	sdata[tid] = mySum = mySum + sdata[tid + 256];
     }
 
     __syncthreads();
 
     if ((blockSize >= 256) &&(tid < 128))
     {
-            sdata[tid] = mySum = mySum + sdata[tid + 128];
+    	sdata[tid] = mySum = mySum + sdata[tid + 128];
     }
 
-     __syncthreads();
+    __syncthreads();
 
     if ((blockSize >= 128) && (tid <  64))
     {
-       sdata[tid] = mySum = mySum + sdata[tid +  64];
+    	sdata[tid] = mySum = mySum + sdata[tid +  64];
     }
 
     __syncthreads();
@@ -283,70 +327,72 @@ reduce6(T *g_idata, T *g_odata, unsigned int n)
 #if (__CUDA_ARCH__ >= 300 )
     if ( tid < 32 )
     {
-        // Fetch final intermediate sum from 2nd warp
-        if (blockSize >=  64) mySum += sdata[tid + 32];
-        // Reduce final warp using shuffle
-        for (int offset = warpSize/2; offset > 0; offset /= 2)
-        {
-            mySum += __shfl_down(mySum, offset);
-        }
+    	// Fetch final intermediate sum from 2nd warp
+    	if (blockSize >=  64) mySum += sdata[tid + 32];
+    	// Reduce final warp using shuffle
+    	for (int offset = warpSize/2; offset > 0; offset /= 2)
+    	{
+    		mySum += __shfl_down(mySum, offset);
+    	}
     }
 #else
     // fully unroll reduction within a single warp
     if ((blockSize >=  64) && (tid < 32))
     {
-        sdata[tid] = mySum = mySum + sdata[tid + 32];
+    	sdata[tid] = mySum = mySum + sdata[tid + 32];
     }
 
     __syncthreads();
 
     if ((blockSize >=  32) && (tid < 16))
     {
-        sdata[tid] = mySum = mySum + sdata[tid + 16];
+    	sdata[tid] = mySum = mySum + sdata[tid + 16];
     }
 
     __syncthreads();
 
     if ((blockSize >=  16) && (tid <  8))
     {
-        sdata[tid] = mySum = mySum + sdata[tid +  8];
+    	sdata[tid] = mySum = mySum + sdata[tid +  8];
     }
 
     __syncthreads();
 
     if ((blockSize >=   8) && (tid <  4))
     {
-        sdata[tid] = mySum = mySum + sdata[tid +  4];
+    	sdata[tid] = mySum = mySum + sdata[tid +  4];
     }
 
     __syncthreads();
 
     if ((blockSize >=   4) && (tid <  2))
     {
-        sdata[tid] = mySum = mySum + sdata[tid +  2];
+    	sdata[tid] = mySum = mySum + sdata[tid +  2];
     }
 
     __syncthreads();
 
     if ((blockSize >=   2) && ( tid <  1))
     {
-        sdata[tid] = mySum = mySum + sdata[tid +  1];
+    	sdata[tid] = mySum = mySum + sdata[tid +  1];
     }
 
     __syncthreads();
 #endif
 
-    // write result for this block to global mem
+// write result for this block to global mem
     if (tid == 0) g_odata[blockIdx.x] = mySum;
+
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Wrapper function for kernel launch
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
 void
-reduce(int size, int threads, int blocks,
-       int whichKernel, T *d_idata, T *d_odata)
+reduce(int nRows,int nCols, int threads, int blocks,
+		const int whichKernel, T *d_idata, T *d_odata)
 {
     dim3 dimBlock(threads, 1, 1);
     dim3 dimGrid(blocks, 1, 1);
@@ -360,48 +406,48 @@ reduce(int size, int threads, int blocks,
     {
         case 6:
         default:
-            if (isPow2(size))
+            if (isPow2(nCols))
             {
                 switch (threads)
                 {
                     case 512:
-                        reduce6<T, 512, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, size);
+                        reduce6<T, 512, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case 256:
-                        reduce6<T, 256, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, size);
+                        reduce6<T, 256, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case 128:
-                        reduce6<T, 128, true><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T, 128, true><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case 64:
-                        reduce6<T,  64, true><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T,  64, true><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case 32:
-                        reduce6<T,  32, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, size);
+                        reduce6<T,  32, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case 16:
-                        reduce6<T,  16, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, size);
+                        reduce6<T,  16, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case  8:
-                        reduce6<T,   8, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, size);
+                        reduce6<T,   8, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case  4:
-                        reduce6<T,   4, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, size);
+                        reduce6<T,   4, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case  2:
-                        reduce6<T,   2, true><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T,   2, true><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case  1:
-                        reduce6<T,   1, true><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T,   1, true><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
                 }
             }
@@ -410,43 +456,43 @@ reduce(int size, int threads, int blocks,
                 switch (threads)
                 {
                     case 512:
-                        reduce6<T, 512, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T, 512, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case 256:
-                        reduce6<T, 256, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T, 256, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case 128:
-                        reduce6<T, 128, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T, 128, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case 64:
-                        reduce6<T,  64, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T,  64, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case 32:
-                        reduce6<T,  32, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T,  32, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case 16:
-                        reduce6<T,  16, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T,  16, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case  8:
-                        reduce6<T,   8, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T,   8, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case  4:
-                        reduce6<T,   4, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T,   4, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case  2:
-                        reduce6<T,   2, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T,   2, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
 
                     case  1:
-                        reduce6<T,   1, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size);
+                        reduce6<T,   1, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
                         break;
                 }
             }
@@ -457,39 +503,71 @@ reduce(int size, int threads, int blocks,
 
 // Instantiate the reduction function for 3 types
 template void
-reduce<int>(int size, int threads, int blocks,
-            int whichKernel, int *d_idata, int *d_odata);
+reduce<int>(int nRows,int nCols, int threads, int blocks,
+		const int whichKernel, int *d_idata, int *d_odata);
 
 template void
-reduce<float>(int size, int threads, int blocks,
-              int whichKernel, float *d_idata, float *d_odata);
+reduce<float>(int nRows,int nCols, int threads, int blocks,
+              const int whichKernel, float *d_idata, float *d_odata);
 
 template void
-reduce<double>(int size, int threads, int blocks,
-               int whichKernel, double *d_idata, double *d_odata);
+reduce<double>(int nRows,int nCols, int threads, int blocks,
+		const int whichKernel, double *d_idata, double *d_odata);
 
 template <typename T>
 void normsOfRowSpaceKernel(T *d_indata, T *d_odata, int nRows, int nColumns) {
 	//calc square
-	int length = nRows * nColumns;
-    T* d_indata_copy;
-    cudaMalloc((void **)& d_indata_copy, sizeof(float) * length);
-    cudaMemcpy(d_indata_copy, d_indata, sizeof(float) * length, cudaMemcpyDeviceToDevice);
-	getNumBlocksAndThreads(whichKernel, nRows * nColumns, maxBlocks, maxThreads, numBlocks, numThreads);
-	int n_blocks = length/numThreads + (length%numThreads == 0 ? 0:1);
-	squareArray <<< n_blocks, numThreads >>> (d_indata_copy, length);
+	//int length = nRows * nColumns;
+    //T* d_indata_copy;
+//    cudaMalloc((void **)& d_indata_copy, sizeof(float) * length);
+    //cudaMemcpy(d_indata_copy, d_indata, sizeof(float) * length, cudaMemcpyDeviceToDevice);
+	//getNumBlocksAndThreads(whichKernel, nRows * nColumns, maxBlocks, maxThreads, numBlocks, numThreads);
+	//int n_blocks = length/numThreads + (length%numThreads == 0 ? 0:1);
+	//squareArray <<< n_blocks, numThreads >>> (d_indata_copy, length);
 	//reduce squared rows
 	getNumBlocksAndThreads(whichKernel, nColumns, maxBlocks, maxThreads, numBlocks, numThreads);
 
-	for (int i = 0; i < nRows; i++) {
-		reduce<T>(nColumns, numThreads, numBlocks,
-		              whichKernel, &d_indata_copy[i*nColumns], &d_odata[i]);
-	}
-	cudaFree(d_indata_copy);
+	reduce<T>(nRows, nColumns, numThreads, numBlocks, whichKernel, d_indata, d_odata);
+	//cudaFree(d_indata_copy);
 }
 
 template void
 normsOfRowSpaceKernel<float>(float *d_indata,float *d_odata, int nRows, int nColumns);
+
+//another cublas matrix multiplication approach, performance similar to thrust version.
+template<typename T>
+__global__ void initKernel(T * devPtr, const T val, const size_t nwords)
+{
+    int tidx = threadIdx.x + blockDim.x * blockIdx.x;
+    int stride = blockDim.x * gridDim.x;
+
+    for(; tidx < nwords; tidx += stride)
+        devPtr[tidx] = val;
+}
+void normsOfRowSpaceCublas(float *d_indata, float *d_odata, int nRows, int nColumns) {
+	float* d_indata_copy;
+	int length = nRows * nColumns;
+	cudaMalloc((void **)& d_indata_copy, sizeof(float) * length);
+	cudaMemcpy(d_indata_copy, d_indata, sizeof(float) * length, cudaMemcpyDeviceToDevice);
+//	getNumBlocksAndThreads(1, nRows * nColumns, maxBlocks, maxThreads, numBlocks, numThreads);
+	int n_blocks = length/maxThreads + (length%maxThreads == 0 ? 0:1);
+	squareArray <float><<< n_blocks, maxThreads >>> (d_indata_copy, length);
+	float* vec;
+	cudaMalloc((void **)& vec, sizeof(float) * nColumns);
+	n_blocks = nColumns/maxThreads + (length%maxThreads == 0 ? 0:1);
+	initKernel<float> <<<n_blocks, maxThreads >>> (vec, 1.0f, nColumns);
+//	cuMemsetD32((CUdeviceptr) vec, 1.0f, nColumns);
+	float alpha = 1.0f;
+	float beta = 0.0f;
+	cublasStatus_t status = cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+							 	1, nRows,nColumns, &alpha,
+								&vec[0], 1,
+								&d_indata_copy[0], nColumns,
+								&beta, &d_odata[0], 1);
+	cudaFree(vec);
+	cudaFree(d_indata_copy);
+}
+
 #endif
 
 thrust::device_vector<argMinType> minsOfRowSpace(thrust::device_vector<float> A, int nRows, int nColumns) {
@@ -535,6 +613,16 @@ void printMatrix(thrust::device_vector<T> A, int nRows, int nColumns) {
     std::cout << "\n";
 }
 
+template <typename T>
+void printMatrix(T* A, int nRows, int nColumns) {
+    for (size_t i = 0; i < nRows; i++) {
+        for (size_t j = 0; j < nColumns; j++) {
+            std::cout << A[i*nColumns+j] << " ";
+        }
+        std::cout << "\n";
+    }
+    std::cout << "\n";
+}
 /** Clear the device memory and shut down CUBLAS
  *
  */
@@ -580,7 +668,11 @@ void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensi
     cudaMalloc((void**)& p_device_codebook, sizeof(float) * nSomX*nSomY*nDimensions);
     cudaMalloc((void**)& p_device_codebook_norms, sizeof(float) * nSomX*nSomY);
     cudaMemcpy(p_device_codebook, codebook, sizeof(float) * nSomX*nSomY*nDimensions, cudaMemcpyHostToDevice);
-    normsOfRowSpaceKernel(p_device_codebook, p_device_codebook_norms, nSomX*nSomY, nDimensions);
+//    normsOfRowSpaceKernel(p_device_codebook, p_device_codebook_norms, nSomX*nSomY, nDimensions);
+    normsOfRowSpaceCublas(p_device_codebook, p_device_codebook_norms, nSomX*nSomY, nDimensions);
+//    dim3 dimBlock(maxThreads, 1, 1);
+//    dim3 dimGrid(maxBlocks, 1, 1);
+//    columnSquareSum<<<dimGrid, dimBlock>>>(p_device_codebook, p_device_codebook_norms, nSomX*nSomY, nDimensions);
 #endif
     thrust::device_vector<float> deviceGramMatrix(nSomX*nSomY*nVectorsPerRank, 0);
 
@@ -669,8 +761,24 @@ void initializeGpu(float *hostData, int nVectorsPerRank, int nDimensions, int nS
     cudaMalloc((void **)& p_device_data, sizeof(float) * nVectorsPerRank * nDimensions);
     cudaMemcpy(p_device_data, hostData, sizeof(float) * nVectorsPerRank * nDimensions, cudaMemcpyHostToDevice);
     cudaMalloc((void **)&p_device_data_norms, sizeof(float) * nVectorsPerRank);
-    normsOfRowSpaceKernel<float>(p_device_data, p_device_data_norms, nVectorsPerRank, nDimensions);
+//    normsOfRowSpaceKernel<float>(p_device_data, p_device_data_norms, nVectorsPerRank, nDimensions);
+//    thrust::device_ptr<float> dev_ptr = thrust::device_pointer_cast(p_device_data_norms);
+//    for(int i=1; i < nVectorsPerRank;i++){
+//    	cout<<dev_ptr[i]<<endl;
+//    }
 
+    //getNumBlocksAndThreads(whichKernel, nColumns, maxBlocks, maxThreads, numBlocks, numThreads);
+
+    //reduceRows<float><<<maxBlocks, maxThreads, 1>>>(p_device_data, p_device_data_norms, nVectorsPerRank, nDimensions);
+
+    normsOfRowSpaceCublas(p_device_data, p_device_data_norms, nVectorsPerRank, nDimensions);
+//    dim3 dimBlock(maxThreads, 1, 1);
+//    dim3 dimGrid(maxBlocks, 1, 1);
+//    columnSquareSum<<<dimGrid, dimBlock>>>(p_device_data, p_device_data_norms, nVectorsPerRank, nDimensions);
+    thrust::device_ptr<float> dev_ptr = thrust::device_pointer_cast(p_device_data_norms);
+    for(int i=0; i < nVectorsPerRank;i++){
+    	cout<<dev_ptr[i]<<endl;
+    }
 #endif
 }
 
