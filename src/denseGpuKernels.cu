@@ -51,9 +51,9 @@ cublasHandle_t handle;
 
 #ifdef OPT_CUDA
 //configure for reduction kernel
-const int maxThreads = 256;  // number of threads per block
+int maxThreads = 256;  // number of threads per block
 const int whichKernel = 6;
-const int maxBlocks = 64;
+int maxBlocks = 64;
 int numBlocks = 0;
 int numThreads = 0;
 
@@ -187,6 +187,14 @@ void getNumBlocksAndThreads(int whichKernel, int n, int maxBlocks, int maxThread
     }
 }
 
+void getNumBlocksAndThreadsReduceSquareSum(int nRows, int nCols, int &blocks, int &threads, int &rowsPerThread, int &totalThreads)
+{
+    blocks = ceil((float)nRows / maxThreads);
+    threads = maxThreads;
+    totalThreads = threads * blocks;
+    rowsPerThread = ceil((float)nRows/totalThreads);
+}
+
 template<typename T>
 __global__ void squareArray(T *d_array, int length) {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -235,30 +243,31 @@ bool isPow2(unsigned int x)
 
 template <class T>
 __global__ void
-reduceRows(T *g_idata, T *g_odata, int nRows, int nCols)
+reduceRowsSquareSum(T *g_idata, T *g_odata, int nRows, int nCols, int nRow_per_thread, int totalThread)
 {
+
 	int tid = threadIdx.x;
-	int i = blockDim.x * blockIdx.x + tid;
-	T *sdata = SharedMemory<T>();
-	sdata[tid] = (i < nRows * nCols) ? g_idata[i] *  g_idata[i] : 0;
-
-	//		int row = i/nCols;
-	//		int col = i%nCols;
-
-	__syncthreads();
-	// do reduction in shared mem
-	for (unsigned int s=1; s < blockDim.x; s *= 2)
-	{
-		// modulo arithmetic is slow!
-		if ((tid % (2*s)) == 0)
-		{
-			sdata[tid] += sdata[tid + s];
+	int idx = blockDim.x * blockIdx.x + tid;
+	//Calc reduce
+	for(int i = 0; i < nRow_per_thread; i++) {
+		T sum = 0;
+		T c = (T) 0.0;
+		int currentRow = idx+totalThread*i;
+		if(currentRow < nRows ) {
+			for(int j = 0; j < nCols; j++) {
+				float y = g_idata[currentRow * nCols + j] * g_idata[currentRow * nCols + j] - c;
+				float t = sum + y;
+				c = (t - sum) - y;
+				sum = t;
+			}
+			g_odata[currentRow] = sum;
 		}
-
-		__syncthreads();
 	}
-	if (tid == 0) g_odata[blockIdx.x] = sdata[0];
 }
+
+template
+__global__ void
+reduceRowsSquareSum<float>(float *g_idata, float *g_odata, int nRows, int nCols, int nRow_per_thread, int totalThread);
 
 /*
     This version adds multiple elements per thread sequentially.  This reduces the overall
@@ -667,9 +676,13 @@ void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensi
 #else
     cudaMalloc((void**)& p_device_codebook, sizeof(float) * nSomX*nSomY*nDimensions);
     cudaMalloc((void**)& p_device_codebook_norms, sizeof(float) * nSomX*nSomY);
+    cudaMemset((void**)& p_device_codebook_norms, 0, sizeof(float) * nSomX*nSomY);
     cudaMemcpy(p_device_codebook, codebook, sizeof(float) * nSomX*nSomY*nDimensions, cudaMemcpyHostToDevice);
+    int blockNum, threadNum, rowsPerThread, totalThreads;
+    getNumBlocksAndThreadsReduceSquareSum(nSomX*nSomY, nDimensions, blockNum, threadNum, rowsPerThread, totalThreads);
+    reduceRowsSquareSum<<<blockNum, threadNum, 1>>>(p_device_codebook, p_device_codebook_norms, nSomX*nSomY, nDimensions, rowsPerThread, totalThreads);
 //    normsOfRowSpaceKernel(p_device_codebook, p_device_codebook_norms, nSomX*nSomY, nDimensions);
-    normsOfRowSpaceCublas(p_device_codebook, p_device_codebook_norms, nSomX*nSomY, nDimensions);
+//    normsOfRowSpaceCublas(p_device_codebook, p_device_codebook_norms, nSomX*nSomY, nDimensions);
 //    dim3 dimBlock(maxThreads, 1, 1);
 //    dim3 dimGrid(maxBlocks, 1, 1);
 //    columnSquareSum<<<dimGrid, dimBlock>>>(p_device_codebook, p_device_codebook_norms, nSomX*nSomY, nDimensions);
@@ -758,9 +771,18 @@ void initializeGpu(float *hostData, int nVectorsPerRank, int nDimensions, int nS
     deviceCodebook = thrust::device_vector<float>(nSomX*nSomY*nDimensions,0);
     deviceCodebookNorms = thrust::device_vector<float>(nSomX*nSomY,0);
 #else
+    cudaDeviceProp prop;
+    int device;
+    cudaGetDevice(&device);
+    cudaGetDeviceProperties(&prop, device);
+    maxBlocks = prop.maxGridSize[0];
+    maxThreads = prop.maxThreadsPerBlock;
+    int blockNum, threadNum, rowsPerThread, totalThreads;
+    getNumBlocksAndThreadsReduceSquareSum(nVectorsPerRank, nDimensions, blockNum, threadNum, rowsPerThread, totalThreads);
     cudaMalloc((void **)& p_device_data, sizeof(float) * nVectorsPerRank * nDimensions);
     cudaMemcpy(p_device_data, hostData, sizeof(float) * nVectorsPerRank * nDimensions, cudaMemcpyHostToDevice);
     cudaMalloc((void **)&p_device_data_norms, sizeof(float) * nVectorsPerRank);
+	cudaMemset((void**)&p_device_data_norms, 0, sizeof(float) * nVectorsPerRank);
 //    normsOfRowSpaceKernel<float>(p_device_data, p_device_data_norms, nVectorsPerRank, nDimensions);
 //    thrust::device_ptr<float> dev_ptr = thrust::device_pointer_cast(p_device_data_norms);
 //    for(int i=1; i < nVectorsPerRank;i++){
@@ -769,9 +791,10 @@ void initializeGpu(float *hostData, int nVectorsPerRank, int nDimensions, int nS
 
     //getNumBlocksAndThreads(whichKernel, nColumns, maxBlocks, maxThreads, numBlocks, numThreads);
 
-    //reduceRows<float><<<maxBlocks, maxThreads, 1>>>(p_device_data, p_device_data_norms, nVectorsPerRank, nDimensions);
+    reduceRowsSquareSum<<<blockNum, threadNum, 1>>>(p_device_data, p_device_data_norms, nVectorsPerRank, nDimensions, rowsPerThread, totalThreads);
 
-    normsOfRowSpaceCublas(p_device_data, p_device_data_norms, nVectorsPerRank, nDimensions);
+//    normsOfRowSpaceCublas(p_device_data, p_device_data_norms, nVectorsPerRank, nDimensions);
+
 //    dim3 dimBlock(maxThreads, 1, 1);
 //    dim3 dimGrid(maxBlocks, 1, 1);
 //    columnSquareSum<<<dimGrid, dimBlock>>>(p_device_data, p_device_data_norms, nVectorsPerRank, nDimensions);
