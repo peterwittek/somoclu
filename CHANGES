@@ -1,5 +1,7 @@
 Since 1.4:
   - Better support for ICC.
+  - Instructions on Building Python interface with CUDA on Windows.
+  - Bug fixes: portability for R, using R RNG.
 
 Version 1.4: 2014-09-05
   - Better Windows support.
