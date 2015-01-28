@@ -44,20 +44,19 @@ float euclideanDistanceOnPlanarMap(const unsigned int som_x, const unsigned int 
     return sqrt(float(xdist*xdist+ydist*ydist));
 }
 
-float gaussianNeighborhood(float distance, float radius, float stddevs)
-{
+float gaussianNeighborhood(float distance, float radius, float stddevs) {
     float norm = (2 * (radius + 1)*(radius + 1)) / (stddevs*stddevs);
     return exp((-(float) distance * distance) / norm);
 }
 
-float getWeight(float distance, float radius, float scaling)
-{
-    if (distance <= radius)
-    {
+float getWeight(float distance, float radius, float scaling) {
+    if (true) {
         return scaling * gaussianNeighborhood(distance, radius, 2);
-    }
-    else
-    {
-        return 0.0;
+    } else {
+        if (distance <= radius){
+            return scaling * gaussianNeighborhood(distance, radius, 2);
+        } else {
+            return 0.0;
+        }
     }
 }
