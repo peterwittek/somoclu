@@ -1,7 +1,8 @@
 Version 1.4.1: 2015-01-28
   - Better support for ICC.
-  - Instructions on building Python interface with CUDA on Windows.
-  - Bug fixes: portability for R, using R RNG.
+  - Faster code when compiling with GCC.
+  - Building instructions and documentation improved.
+  - Bug fixes: portability for R, using native R random number generator.
 
 Version 1.4: 2014-09-05
   - Better Windows support.
