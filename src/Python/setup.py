@@ -50,8 +50,9 @@ setup(name='somoclu',
       maintainer="shichaogao",
       maintainer_email="xgdgsc@gmail.com",
       url="http://peterwittek.github.io/somoclu/",
-      platforms="unix",
-      description="a cluster-oriented implementation of self-organizing maps",
+      platforms=["unix", "windows"],
+      description="a massively parallel implementation of "
+      "self-organizing maps",
       ext_modules=[somoclu_module],
       py_modules=["somoclu"],
       install_requires=['numpy']
