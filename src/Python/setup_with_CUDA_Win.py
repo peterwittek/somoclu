@@ -43,7 +43,7 @@ somoclu_module = Extension('_somoclu',
 
 
 setup(name='somoclu',
-      version='1.4',
+      version='1.4.1',
       license='GPL3',
       author="peterwittek",
       author_email="",

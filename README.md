@@ -123,7 +123,7 @@ The R version is available on CRAN. You can install it with
 
 For using the MATLAB toolbox, define the location of the mex compiler in MEX_BIN. Then invoke makeMex.sh in the src/MATLAB folder.
 
-For more information on the respective interfaces, refer to the subfolders in src.
+For more information on the respective interfaces, including building with GPU support, refer to the subfolders in `src` ([R](https://github.com/peterwittek/somoclu/tree/master/src/Rscript), [Python](https://github.com/peterwittek/somoclu/tree/master/src/Python), [MATLAB](https://github.com/peterwittek/somoclu/tree/master/src/MATLAB)).
 
 Compilation & Installation
 ===
@@ -172,7 +172,7 @@ Somoclu looks for CUDA in /usr/local/cuda. If your installation is not there, th
 
 Windows
 ---
-Use the `somoclu.sln` under src/Windows/somoclu as an example visual studio 2013 solution. Modify the CUDA version or VC compiler version according to your needs. 
+Use the `somoclu.sln` under `src/Windows/somoclu` as an example visual studio 2013 solution. Modify the CUDA version or VC compiler version according to your needs. 
 
 The default solution enables all of OpenMP, MPI, and CUDA. The default MPI installation path is `C:\Program Files\Microsoft MPI`, modify the settings if yours is in a different path. The configuration default CUDA version is 6.5.  Disable MPI by removing `HAVE_MPI` macro in the project properties (`Properties -> Configuration Properties -> C/C++ -> Preprocessor`). Disable CUDA by removing `CUDA` macro in the solution properties.
 
