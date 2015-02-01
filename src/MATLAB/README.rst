@@ -8,9 +8,9 @@ BugReports: https://github.com/peterwittek/somoclu/issues
 
 License: GPL-3
 
-OS_type: unix
+OS_type: unix, windows
 
-Somoclu MATLAB Extension Build Guide:
+Somoclu MATLAB Extension Build Guide (Linux/Mac):
 ================================
 
 1. Follow the instructions to build Somoclu itself at: https://github.com/peterwittek/somoclu
@@ -61,3 +61,10 @@ Then modify ``~/.matlab/VERSION/mexopts.sh`` to use gcc as follows:
 3. change ``MACOSX_DEPLOYMENT_TARGET='10.9'`` where ``10.9`` is your OS X version number.
 
 an example is given at https://gist.github.com/xgdgsc/9832340, then you can follow the instruction step 2 at the top to build the extension and test.
+
+Building Mex Extension on Windows:
+===================================
+
+First, you should install some supported version of Visual Studio that includes the Visual C++ compiler by your MATLAB version like on `this <http://www.mathworks.com/support/compilers/R2013a/index.html?sec=win64/>`_ page. With MATLAB and Visual Studio installed properly, running ``mex -setup`` in CMD will prompt fpr available compilers and you can choose the appropriate version. 
+
+Then run the script in this folder makeMex.bat in CMD and the ``MexSomoclu.mexa64`` or ``MexSomoclu.mexa32`` is generated for use, you can test by running the ``mex_interface_test.m``.
