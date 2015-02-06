@@ -15,6 +15,8 @@ using namespace std;
 int maxThreads = 256;  // number of threads per block
 //const int whichKernel = 6;
 int maxBlocks = 64;
+int maxBlocks_y = 64;
+int maxBlocks_z = 64;
 int numBlocks = 0;
 int numThreads = 0;
 cudaDeviceProp prop;
@@ -150,8 +152,8 @@ reduce6(T *g_idata, T *g_odata, int nRows, int nCols)
     unsigned int i = blockIdx.x*blockSize*2 + threadIdx.x;
     unsigned int gridSize = blockSize*2*gridDim.x;
 
-    unsigned int idy = blockIdx.y;  //row number
-
+    unsigned int row = blockIdx.z * gridDim.y + blockIdx.y;
+    if(row < nRows) {
     T mySum = 0;
 
     // we reduce multiple elements per thread.  The number is determined by the
@@ -159,11 +161,11 @@ reduce6(T *g_idata, T *g_odata, int nRows, int nCols)
     // in a larger gridSize and therefore fewer elements per thread
     while (i < nCols)
     {
-    	mySum += g_idata[nCols*idy + i] * g_idata[nCols*idy + i];
+    	mySum += g_idata[nCols*row + i] * g_idata[nCols*row + i];
 
     	// ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
     	if (nIsPow2 || i + blockSize < nCols)
-    		mySum += g_idata[nCols*idy + i + blockSize] * g_idata[nCols*idy + i + blockSize];
+    		mySum += g_idata[nCols*row + i + blockSize] * g_idata[nCols*row + i + blockSize];
 
     	i += gridSize;
     }
@@ -252,8 +254,8 @@ reduce6(T *g_idata, T *g_odata, int nRows, int nCols)
 #endif
 
 // write result for this block to global mem
-    if (tid == 0) g_odata[idy] = mySum;
-
+    if (tid == 0) g_odata[row] = mySum;
+    }
 }
 template <class T>
 void
@@ -261,10 +263,14 @@ reduce(int nRows,int nCols, int threads, int blocks,
 		T *d_idata, T *d_odata)
 {
     dim3 dimBlock(threads, 1, 1);
-    dim3 dimGrid(blocks, nRows, 1);
+    int nDimz = ceil((float)nRows/maxBlocks_y);
+    int nDimy = nRows > maxBlocks_y? maxBlocks_y: nRows;
+    dim3 dimGrid(blocks, nDimy, nDimz);
     cout<<"rows:"<<nRows<<endl;
     cout<<"cols:"<<nCols<<endl;
     cout<<"blocks:"<<blocks<<endl;
+    cout<<"blocks_y:"<<nDimy<<endl;
+    cout<<"blocks_z:"<<nDimz<<endl;
     // when there is only one warp per block, we need to allocate two warps
     // worth of shared memory so that we don't index shared memory out of bounds
     int smemSize = (threads <= 32) ? 2 * threads * sizeof(T) : threads * sizeof(T);
@@ -275,6 +281,10 @@ reduce(int nRows,int nCols, int threads, int blocks,
     {
     	switch (threads)
     	{
+    	case 1024:
+    		reduce6<T, 1024, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, nRows, nCols);
+    		break;
+
     	case 512:
     		reduce6<T, 512, true><<< dimGrid, dimBlock, smemSize>>>(d_idata, d_odata, nRows, nCols);
     		break;
@@ -320,6 +330,10 @@ reduce(int nRows,int nCols, int threads, int blocks,
     {
     	switch (threads)
     	{
+    	case 1024:
+    		reduce6<T, 1024, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
+    		break;
+
     	case 512:
     		reduce6<T, 512, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, nRows, nCols);
     		break;
@@ -418,10 +432,13 @@ int main(int argc, char *argv[])
 		cudaGetDevice(&device);
 		cudaGetDeviceProperties(&prop, device);
 		maxBlocks = prop.maxGridSize[0];
+		maxBlocks_y = prop.maxGridSize[1];
+		maxBlocks_z = prop.maxGridSize[2];
 		maxThreads = prop.maxThreadsPerBlock;
 		cout<<"maxBlocks:"<<maxBlocks<<endl;
+		cout<<"maxBlocks.y:"<< maxBlocks_y<<endl;
+		cout<<"maxBlocks.z:"<< maxBlocks_z<<endl;
 		cout<<"maxThreads:"<<maxThreads<<endl;
-		cout<<"maxBlocks.y:"<< prop.maxGridSize[1]<<endl;
 
 		cudaMalloc((void **)& p_deviceData, sizeof(float) * row *col);
 		cudaMemcpy(p_deviceData, hostData, sizeof(float)*row*col, cudaMemcpyHostToDevice);
@@ -435,9 +452,10 @@ int main(int argc, char *argv[])
 		normsOfRowSpaceKernel(p_deviceData, p_reduced_device, row, col);
 		std::cout << "Time new: " << (std::clock() - start2) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
 		cudaMemcpy(p_reduced_host, p_reduced_device, sizeof(float)*row, cudaMemcpyDeviceToHost);
-		ofstream outfile1,outfile2;
+		ofstream outfile1,outfile2,outfile3;
 		outfile1.open("old.txt", ios::out);
 		outfile2.open("new.txt", ios::out);
+//		outfile3.open("data.txt", ios::out);
 		for(int i=0; i< deviceDataNorms.size() ; i++)
 		{
 			outfile1<<deviceDataNorms[i]<<endl;
@@ -446,9 +464,14 @@ int main(int argc, char *argv[])
 		{
 			outfile2<<p_reduced_host[i]<<endl;
 		}
+//		for(int i=0; i< row*col ; i++)
+//		{
+//			outfile3<<hostData[i]<<endl;
+//		}
 		outfile1.close();
 		outfile2.close();
 		delete[] p_reduced_host;
+		delete[] hostData;
 		cudaFree(p_reduced_device);
 		cudaFree(p_deviceData);
 	}
