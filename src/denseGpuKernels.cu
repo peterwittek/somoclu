@@ -184,12 +184,11 @@ void freeGpu()
  * @param nVectorsPerRank - the number of data points assigned to this GPU
  */
 
-void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensions, int nVectorsPerRank)
+void getBmusOnGpu(unsigned int *bmus, float *codebook, int nSomX, int nSomY, int nDimensions, int nVectorsPerRank)
 {
     deviceCodebook = thrust::device_vector<float>(codebook, codebook+nSomX*nSomY*nDimensions);
     deviceCodebookNorms = normsOfRowSpace<float>(deviceCodebook, nSomX*nSomY, nDimensions);
     thrust::device_vector<float> deviceGramMatrix(nSomX*nSomY*nVectorsPerRank, 0);
-
     //Calculate the inner products of the data vectors and the weight vectors
 
     float alpha = 1.0f;
@@ -348,10 +347,9 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
 #ifdef _WIN32
 	int* bmus = (int *)alloca(sizeof(int) * nVectorsPerRank * 2);
 #else
-    int bmus[nVectorsPerRank*2];
+    unsigned int *bmus = new unsigned int[nVectorsPerRank*2];
 #endif
     getBmusOnGpu(bmus, codebook, nSomX, nSomY, nDimensions, nVectorsPerRank);
-
     float *localNumerator = new float[nSomY*nSomX*nDimensions];
     float *localDenominator = new float[nSomY*nSomX];
 
@@ -406,6 +404,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
       globalBmus[i]=bmus[i];
     }
 #endif
+    delete [] bmus;
     delete [] localNumerator;
     delete [] localDenominator;
 }
