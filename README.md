@@ -143,6 +143,15 @@ Then follow the standard POSIX procedure:
     $ make
     $ make install
 
+Using Intel compilers
+
+    export CC=/path/of/intel/compiler/icc
+    export CXX=/path/of/intel/compiler/icpc
+    export OMPI_CC=/path/of/intel/compiler/icc
+    export OMPI_CXX=/path/of/intel/compiler/icpc
+    
+In order to use icc and icpc compilers, you have to set these variables
+so the mpic++ will invoke icpc instead of the default compiler.
 
 Options for configure
 
