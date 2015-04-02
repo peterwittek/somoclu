@@ -77,7 +77,7 @@ if test -z "${MPI_DIR}";	then
 	
 	AC_MSG_CHECKING([for MPI directory])
 	
-	
+	CANDIDATES=/usr
 	pathlibs="$(echo $LD_LIBRARY_PATH|sed -e 's/:/ /g')"
 	counter=1
 	end=no
@@ -112,46 +112,19 @@ if test -z "${MPI_DIR}";	then
 	do
 		DIR="$(echo $CANDIDATES | awk -v awk_var=$counter '{print $awk_var}' )"
 		if test -n "$DIR"; then
-		  DIR_COPY=$DIR
-		  until [test -z "$DIR_COPY" || test x"$FIND" = x"yes"]
-		  do
-			NUM="$(expr match "$DIR_COPY" 'openmpi')"
-			if test x"$NUM" = x"7"; then
-			  FIND=yes
-			  MPI_DIR=$DIR
-			  AC_MSG_RESULT([${MPI_DIR}])
-			  DIR=
-			fi
-			DIR_COPY="$(echo ${DIR_COPY:1})"
-		  done
+		  match="$(ls $DIR/include/mpi.h 2>/dev/null)"
+		  if test x"$match" = x"$DIR/include/mpi.h"; then
+			MPI_DIR=$DIR
+			AC_MSG_RESULT([${MPI_DIR}])
+			DIR=
+		  fi
 		fi
 		counter=$(($counter+1))
 	done
 	
-	# if openmpi root is not in LD_LIBRARY_PATH try to find it in /usr
 	if test -z "${MPI_DIR}";	then	
-		DIRS="$(find /usr -name mpi.h 2>/dev/null)"
-		counter=1
-		DIR=no
-		until [test -z "$DIR"]
-		do
-			DIR="$(echo $DIRS | awk -v awk_var=$counter '{print $awk_var}' )"
-			if test -n "$DIR"; then
-				match="$(echo ${DIR:(-13)})"
-				if test x"$match" = x"include/mpi.h"; then
-					index="$(echo ${#DIR})"
-					index=$(($index-14))
-					MPI_DIR="$(echo ${DIR:0:$index})"
-					AC_MSG_RESULT([${MPI_DIR}])
-					DIR=
-				fi
-			fi
-			counter=$(($counter+1))
-		done
-		if test -z "${MPI_DIR}"; then
-			AC_MSG_RESULT([${MPI_DIR}])
-			AC_MSG_ERROR([cannot find MPI directory])
-		fi
+		AC_MSG_RESULT([${MPI_DIR}])
+		AC_MSG_ERROR([cannot find MPI directory])
 	fi
 fi
 
