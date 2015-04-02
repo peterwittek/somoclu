@@ -77,7 +77,7 @@ if test -z "${MPI_DIR}";	then
 	
 	AC_MSG_CHECKING([for MPI directory])
 	
-	
+	CANDIDATES=/usr
 	pathlibs="$(echo $LD_LIBRARY_PATH|sed -e 's/:/ /g')"
 	counter=1
 	end=no
@@ -113,18 +113,12 @@ if test -z "${MPI_DIR}";	then
 	do
 		DIR="$(echo $CANDIDATES | awk -v awk_var=$counter '{print $awk_var}' )"
 		if test -n "$DIR"; then
-		  DIR_COPY=$DIR
-		  until [test -z "$DIR_COPY" || test x"$FIND" = x"yes"]
-		  do
-			NUM="$(expr match "$DIR_COPY" 'openmpi')"
-			if test x"$NUM" = x"7"; then
-			  FIND=yes
-			  MPI_DIR=$DIR
-			  AC_MSG_RESULT([${MPI_DIR}])
-			  DIR=
-			fi
-			DIR_COPY="$(echo ${DIR_COPY:1})"
-		  done
+		  match="$(ls $DIR/include/mpi.h 2>/dev/null)"
+		  if test x"$match" = x"$DIR/include/mpi.h"; then
+			MPI_DIR=$DIR
+			AC_MSG_RESULT([${MPI_DIR}])
+			DIR=
+		  fi
 		fi
 		counter=$(($counter+1))
 	done
