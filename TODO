@@ -1,5 +1,3 @@
   - Integration with data structures of SOM libraries in Python and R.
   - Implement hexagonal grid.
   - Reimplement GPU kernels in CUDA to replace Thrust (testing is currently in cuda_opt branch).
-  - MATLAB extension building on Windows
-  - Python 3 support

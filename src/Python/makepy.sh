@@ -19,5 +19,6 @@ cp ../../src/*.cpp ./src/src
 cp ../../src/*.cu ./src/src
 cp ../../src/Makefile.in ./src/src
 cp ../../data/rgbs.txt tests/
+swig -c++ -python somoclu.i
 python2 setup.py sdist
 #sudo python2 setup.py install
