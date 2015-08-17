@@ -6,8 +6,6 @@
 
 using namespace std;
 
-
-
 void trainWrapper(float *data, int data_length,
                   unsigned int nEpoch,
                   unsigned int nSomX, unsigned int nSomY,
@@ -15,16 +13,12 @@ void trainWrapper(float *data, int data_length,
                   unsigned int radius0, unsigned int radiusN,
                   string radiusCooling,
                   float scale0, float scaleN,
-                  string scaleCooling, unsigned int snapshots,
-                  unsigned int kernelType, string mapType,
-                  string initialCodebookFilename,
+                  string scaleCooling, unsigned int kernelType, string mapType,
+                  float *initialCodebook, int initialCodebook_size,
                   float *codebook, int codebook_size,
                   int *globalBmus, int globalBmus_size,
                   float *uMatrix, int uMatrix_size)
 {
-  ///
-  /// Codebook
-  ///
 
   int itask = 0;
   svm_node ** sparseData = NULL;
@@ -38,21 +32,15 @@ void trainWrapper(float *data, int data_length,
   if (itask == 0) {
       coreData.globalBmus = new int[coreData.globalBmus_size];
 
-      if (initialCodebookFilename.empty()){
+      if (initialCodebook_size == 1){
           initializeCodebook(0, coreData.codebook, nSomX, nSomY, nDimensions);
       } else {
-          unsigned int nSomXY = 0;
-          unsigned int tmpNDimensions = 0;
-          delete [] coreData.codebook;
-          coreData.codebook = readMatrix(initialCodebookFilename, nSomXY, tmpNDimensions);
-          if (tmpNDimensions != nDimensions) {
-              cerr << "Dimension of initial codebook does not match data!\n";
-//              my_abort(5);
-          } else if (nSomXY / nSomY != nSomX) {
-              cerr << "Dimension of initial codebook does not match specified SOM grid!\n";
-//              my_abort(6);
+          if (initialCodebook_size != nSomX*nSomY*nDimensions) {
+              cerr << "Dimension of initial codebook does not match data! " << initialCodebook_size << " " << nSomX*nSomY*nDimensions << "\n";
+              initializeCodebook(0, coreData.codebook, nSomX, nSomY, nDimensions);
+          } else { 
+              memcpy(coreData.codebook, initialCodebook, sizeof(float)*nSomX*nSomY*nDimensions);
           }
-          cout << "Read initial codebook: " << initialCodebookFilename << "\n";
       }
   }
 
@@ -88,7 +76,7 @@ void trainWrapper(float *data, int data_length,
 
       coreData = trainOneEpoch(itask, data, sparseData,
                                coreData, nEpoch, currentEpoch,
-                               snapshots > 0,
+                               false,
                                nSomX, nSomY,
                                nDimensions, nVectors,
                                nVectorsPerRank,
@@ -102,9 +90,6 @@ void trainWrapper(float *data, int data_length,
     }
 
   if (itask == 0) {
-      ///
-      /// Save U-mat
-      ///
       coreData.uMatrix = calculateUMatrix(coreData.codebook, nSomX, nSomY, nDimensions, mapType);
       coreData.uMatrix_size = nSomX * nSomY;
   }

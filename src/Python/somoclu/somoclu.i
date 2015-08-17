@@ -8,7 +8,8 @@
 %init %{
 import_array();
 %}
-%apply (float* INPLACE_ARRAY1, int DIM1) {(float* data, int data_length)}
+%apply (float* IN_ARRAY1, int DIM1) {(float* data, int data_length)}
+%apply (float* IN_ARRAY1, int DIM1) {(float* initialCodebook, int initialCodebook_size)}
 %apply (float* INPLACE_ARRAY1, int DIM1) {(float* codebook, int codebook_size)}
 %apply (int* INPLACE_ARRAY1, int DIM1) {(int* globalBmus, int globalBmus_size)}
 %apply (float* INPLACE_ARRAY1, int DIM1) {(float* uMatrix, int uMatrix_size)}
@@ -21,9 +22,9 @@ void trainWrapper(float *data, int data_length,
                   unsigned int radius0, unsigned int radiusN,
                   string radiusCooling,
                   float scale0, float scaleN,
-                  string scaleCooling, unsigned int snapshots,
+                  string scaleCooling,
                   unsigned int kernelType, string mapType,
-                  string initialCodebookFilename,
+                  float* initialCodebook, int initialCodebook_size,
                   float* codebook, int codebook_size,
                   int* globalBmus, int globalBmus_size,
                   float* uMatrix, int uMatrix_size);
