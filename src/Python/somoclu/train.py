@@ -1,6 +1,10 @@
 from __future__ import division, print_function
-from somoclu_wrap import trainWrapper
 import numpy as np
+import matplotlib.cm as cm
+from matplotlib.pylab import matshow
+
+from somoclu_wrap import trainWrapper
+
 
 class Somoclu(object):
 
@@ -19,16 +23,25 @@ class Somoclu(object):
         self.initialMap = initialMap
 
 
-    def train(self, nEpoch=10, radius0=0, radiusN=0, radiusCooling="linear",
-              scale0=0, scaleN=0.01, scaleCooling="linear",
+    def train(self, nEpoch=10, radius0=0, radiusN=1, radiusCooling="linear",
+              scale0=0.1, scaleN=0.01, scaleCooling="linear",
               kernelType=0, mapType="planar"):
         snapshots = 0
         initialCodebookFilename = ""
-        return trainWrapper(np.ravel(self.data), nEpoch, self.nSomX, self.nSomY,
-                            self.nDimensions, self.nVectors,
-                            radius0, radiusN,
-                            radiusCooling, scale0, scaleN,
-                            scaleCooling, snapshots,
-                            kernelType, mapType,
-                            initialCodebookFilename,
-                            self.codebook, self.globalBmus, self.uMatrix)
+        trainWrapper(np.ravel(self.data), nEpoch, self.nSomX, self.nSomY,
+                     self.nDimensions, self.nVectors, radius0, radiusN,
+                    radiusCooling, scale0, scaleN, scaleCooling, snapshots,
+                    kernelType, mapType, initialCodebookFilename,
+                    self.codebook, self.globalBmus, self.uMatrix)
+        self.uMatrix.shape = (self.nSomY, self.nSomX)
+        self.globalBmus.shape = (self.nVectors, 2)
+        self.codebook.shape = (self.nSomY, self.nSomX, self.nDimensions)
+
+    def view_component_planes(self, dimensions=None):
+        if dimensions is None:
+            dimensions = range(self.nDimensions)
+        for i in dimensions:
+            matshow(self.codebook[:,:,i], cmap=cm.Spectral_r)
+
+    def view_U_matrix(self):
+        matshow(self.uMatrix, cmap=cm.Spectral_r)
