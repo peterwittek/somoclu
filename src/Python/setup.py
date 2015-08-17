@@ -16,14 +16,14 @@ try:
 except AttributeError:
     numpy_include = numpy.get_numpy_include()
         
-sources_files=[	'src/src/somocluWrap.cpp',
-                'src/src/denseCpuKernels.cpp',
-                'src/src/io.cpp',
-                'src/src/sparseCpuKernels.cpp',
-                'src/src/mapDistanceFunctions.cpp',
-                'src/src/trainOneEpoch.cpp',
-                'src/src/uMatrix.cpp',
-                'somoclu_wrap.cxx']
+sources_files=[	'somoclu/src/somocluWrap.cpp',
+                'somoclu/src/denseCpuKernels.cpp',
+                'somoclu/src/io.cpp',
+                'somoclu/src/sparseCpuKernels.cpp',
+                'somoclu/src/mapDistanceFunctions.cpp',
+                'somoclu/src/trainOneEpoch.cpp',
+                'somoclu/src/uMatrix.cpp',
+                'somoclu/somoclu_wrap.cxx']
 if sys.platform.startswith('win'):
     extra_compile_args = ['-openmp']
     extra_link_args = []
@@ -33,9 +33,9 @@ else:
         '-lgomp'
     ]        
 
-somoclu_module = Extension('_somoclu',
+somoclu_module = Extension('_somoclu_wrap',
                            sources=sources_files,						   
-                           include_dirs=[numpy_include, 'src/src'],
+                           include_dirs=[numpy_include, 'src'],
                            extra_compile_args=extra_compile_args,
                            extra_link_args=extra_link_args
                            )
@@ -54,6 +54,7 @@ setup(name='somoclu',
       "self-organizing maps",
       ext_modules=[somoclu_module],
       py_modules=["somoclu"],
+      packages=["somoclu"],
       install_requires=['numpy']
       )
 

@@ -1,8 +1,8 @@
-%module somoclu
+%module somoclu_wrap
 %include "std_string.i"
 %{
 #define SWIG_FILE_WITH_INIT
-#include "src/src/somocluWrap.h"
+#include "src/somocluWrap.h"
 %}
 %include "numpy.i"
 %init %{
@@ -27,18 +27,3 @@ void trainWrapper(float *data, int data_length,
                   float* codebook, int codebook_size,
                   int* globalBmus, int globalBmus_size,
                   float* uMatrix, int uMatrix_size);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -21,19 +21,19 @@ except AttributeError:
     numpy_include = numpy.get_numpy_include()
 
 
-somoclu_module = Extension('_somoclu',
-                           sources=['somoclu_wrap.cxx',
-                                    'src/src/somocluWrap.cpp'],
-       #                    extra_objects=['src/src/somoclu.obj',
+somoclu_module = Extension('_somoclu_wrap',
+                           sources=['somoclu/somoclu_wrap.cxx',
+                                    'somoclu/src/somocluWrap.cpp'],
+       #                    extra_objects=['somoclu/src/somoclu.obj',
 							extra_objects=[
-                                          'src/src/denseCpuKernels.obj',
-                                          'src/src/io.obj',
-                                          'src/src/sparseCpuKernels.obj',
-                                          'src/src/training.obj',
-                                          'src/src/mapDistanceFunctions.obj',
-                                          'src/src/trainOneEpoch.obj',
-                                          'src/src/uMatrix.obj',
-                                          'src/src/denseGpuKernels.cu.obj'],
+                                          'somoclu/src/denseCpuKernels.obj',
+                                          'somoclu/src/io.obj',
+                                          'somoclu/src/sparseCpuKernels.obj',
+                                          'somoclu/src/training.obj',
+                                          'somoclu/src/mapDistanceFunctions.obj',
+                                          'somoclu/src/trainOneEpoch.obj',
+                                          'somoclu/src/uMatrix.obj',
+                                          'somoclu/src/denseGpuKernels.cu.obj'],
                            define_macros=[('CUDA', None)],
                            #PATH to CUDA library here, 64 for 64 bit
                            library_dirs=["C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v6.5/lib/x64"],
@@ -54,6 +54,7 @@ setup(name='somoclu',
       description="a cluster-oriented implementation of self-organizing maps",
       ext_modules=[somoclu_module],
       py_modules=["somoclu"],
+      packages=["somoclu"],
       install_requires=['numpy']
       )
 
