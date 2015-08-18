@@ -48,20 +48,19 @@ void train(int itask, float *data, svm_node **sparseData,
     ///
     /// Codebook
     ///
-    core_data coreData;
-    coreData.codebook = new float[nSomY*nSomX*nDimensions];
-    coreData.globalBmus = NULL;
-     coreData.uMatrix = NULL;    
+    float *codebook = new float[nSomY*nSomX*nDimensions];
+    int *globalBmus = NULL;
+    float *uMatrix = NULL;    
     if (itask == 0) {
-        coreData.globalBmus = new int[nVectorsPerRank*int(ceil(nVectors/(double)nVectorsPerRank))*2];
-        coreData.uMatrix = new float[nSomX*nSomY];
+        globalBmus = new int[nVectorsPerRank*int(ceil(nVectors/(double)nVectorsPerRank))*2];
+        uMatrix = new float[nSomX*nSomY];
         if (initialCodebookFilename.empty()){
-            initializeCodebook(0, coreData.codebook, nSomX, nSomY, nDimensions);
+            initializeCodebook(0, codebook, nSomX, nSomY, nDimensions);
         } else {
             unsigned int nSomXY = 0;
             unsigned int tmpNDimensions = 0;
-            delete [] coreData.codebook;
-            coreData.codebook = readMatrix(initialCodebookFilename, nSomXY, tmpNDimensions);
+            delete [] codebook;
+            codebook = readMatrix(initialCodebookFilename, nSomXY, tmpNDimensions);
             if (tmpNDimensions != nDimensions) {
                 cerr << "Dimension of initial codebook does not match data!\n";
                 my_abort(5);
@@ -101,19 +100,22 @@ void train(int itask, float *data, svm_node **sparseData,
         double epoch_time = MPI_Wtime();
 #endif        
 
-        trainOneEpoch(itask, data, sparseData, coreData, nEpoch, currentEpoch,
-                      snapshots > 0, nSomX, nSomY, nDimensions, nVectors,
-                      nVectorsPerRank, radius0, radiusN, radiusCooling,
+        trainOneEpoch(itask, data, sparseData, codebook, globalBmus, 
+                      nEpoch, currentEpoch,
+                      nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank, 
+                      radius0, radiusN, radiusCooling,
                       scale0, scaleN, scaleCooling, kernelType, mapType);
 
         if (snapshots > 0 && itask == 0) {
             cout << "Saving interim U-Matrix..." << endl;
+            calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, 
+                             mapType);
             stringstream sstm;
             sstm << outPrefix << "." << currentEpoch + 1;
-            saveUMatrix(sstm.str() + string(".umx"), coreData.uMatrix, nSomX, nSomY);
+            saveUMatrix(sstm.str() + string(".umx"), uMatrix, nSomX, nSomY);
             if (snapshots == 2){
-                saveBmus(sstm.str() + string(".bm"), coreData.globalBmus, nSomX, nSomY, nVectors); 
-                saveCodebook(sstm.str() + string(".wts"), coreData.codebook, nSomX, nSomY, nDimensions);                
+                saveBmus(sstm.str() + string(".bm"), globalBmus, nSomX, nSomY, nVectors); 
+                saveCodebook(sstm.str() + string(".wts"), codebook, nSomX, nSomY, nDimensions);                
             }
         }
         currentEpoch++;
@@ -147,23 +149,23 @@ void train(int itask, float *data, svm_node **sparseData,
         ///
         /// Save U-mat
         ///
-        calculateUMatrix(coreData.uMatrix, coreData.codebook, nSomX, nSomY, nDimensions, mapType);
-        int ret =  saveUMatrix(outPrefix + string(".umx"), coreData.uMatrix, nSomX, nSomY);        
+        calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType);
+        int ret =  saveUMatrix(outPrefix + string(".umx"), uMatrix, nSomX, nSomY);        
         if (ret < 0)
             cout << "    Failed to save u-matrix. !" << endl;
         else {
             cout << "    Done!" << endl;
         }
-        saveBmus(outPrefix + string(".bm"), coreData.globalBmus, nSomX, nSomY, nVectors); 
+        saveBmus(outPrefix + string(".bm"), globalBmus, nSomX, nSomY, nVectors); 
         ///
         /// Save codebook
         ///
-        saveCodebook(outPrefix + string(".wts"), coreData.codebook, nSomX, nSomY, nDimensions);
+        saveCodebook(outPrefix + string(".wts"), codebook, nSomX, nSomY, nDimensions);
     }
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
-    delete [] coreData.codebook;
-    delete [] coreData.globalBmus;
-    delete [] coreData.uMatrix;
+    delete [] codebook;
+    delete [] globalBmus;
+    delete [] uMatrix;
 }

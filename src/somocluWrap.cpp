@@ -64,8 +64,8 @@ void trainWrapper(float *data, int data_length,
   while ( currentEpoch < nEpoch ) {
 
       trainOneEpoch(itask, data, sparseData,
-                     coreData, nEpoch, currentEpoch,
-                     false,
+                     codebook, globalBmus,
+                     nEpoch, currentEpoch,
                      nSomX, nSomY,
                      nDimensions, nVectors,
                      nVectorsPerRank,

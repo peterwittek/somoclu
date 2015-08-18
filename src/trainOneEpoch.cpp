@@ -63,8 +63,8 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
 }
 
 void trainOneEpoch(int itask, float *data, svm_node **sparseData,
-           core_data coreData, unsigned int nEpoch, unsigned int currentEpoch,
-           bool enableCalculatingUMatrix,
+           float *codebook, int *globalBmus, 
+           unsigned int nEpoch, unsigned int currentEpoch,
            unsigned int nSomX, unsigned int nSomY,
            unsigned int nDimensions, unsigned int nVectors,
            unsigned int nVectorsPerRank,
@@ -106,7 +106,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
 #ifdef HAVE_MPI
     MPI_Bcast(&radius, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&scale, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(coreData.codebook, nSomY*nSomX*nDimensions, MPI_FLOAT,
+    MPI_Bcast(codebook, nSomY*nSomX*nDimensions, MPI_FLOAT,
               0, MPI_COMM_WORLD);
 #endif
 
@@ -117,23 +117,23 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
     default:
     case DENSE_CPU:
         trainOneEpochDenseCPU(itask, data, numerator, denominator,
-                              coreData.codebook, nSomX, nSomY, nDimensions,
+                              codebook, nSomX, nSomY, nDimensions,
                               nVectors, nVectorsPerRank, radius, scale,
-                              mapType, coreData.globalBmus);
+                              mapType, globalBmus);
         break;
 #ifdef CUDA
     case DENSE_GPU:
         trainOneEpochDenseGPU(itask, data, numerator, denominator,
-                              coreData.codebook, nSomX, nSomY, nDimensions,
+                              codebook, nSomX, nSomY, nDimensions,
                               nVectors, nVectorsPerRank, radius, scale,
-                              mapType, coreData.globalBmus);
+                              mapType, globalBmus);
         break;
 #endif
     case SPARSE_CPU:
         trainOneEpochSparseCPU(itask, sparseData, numerator, denominator,
-                               coreData.codebook, nSomX, nSomY, nDimensions,
+                               codebook, nSomX, nSomY, nDimensions,
                                nVectors, nVectorsPerRank, radius, scale,
-                               mapType, coreData.globalBmus);
+                               mapType, globalBmus);
         break;
     }
 
@@ -154,14 +154,11 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                     float newWeight = numerator[som_y*nSomX*nDimensions
                                                 + som_x*nDimensions + d] / denom;
                     if (newWeight > 0.0) {
-                        coreData.codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] = newWeight;
+                        codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] = newWeight;
                     }
                 }
             }
         }
-    }
-    if (enableCalculatingUMatrix) {
-        calculateUMatrix(coreData.uMatrix, coreData.codebook, nSomX, nSomY, nDimensions, mapType);
     }
     if (itask == 0) {
         delete [] numerator;
