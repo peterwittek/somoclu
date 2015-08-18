@@ -62,7 +62,7 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
 #endif
 }
 
-core_data trainOneEpoch(int itask, float *data, svm_node **sparseData,
+void trainOneEpoch(int itask, float *data, svm_node **sparseData,
            core_data coreData, unsigned int nEpoch, unsigned int currentEpoch,
            bool enableCalculatingUMatrix,
            unsigned int nSomX, unsigned int nSomY,
@@ -161,11 +161,10 @@ core_data trainOneEpoch(int itask, float *data, svm_node **sparseData,
         }
     }
     if (enableCalculatingUMatrix) {
-        coreData.uMatrix = calculateUMatrix(coreData.codebook, nSomX, nSomY, nDimensions, mapType);
+        calculateUMatrix(coreData.uMatrix, coreData.codebook, nSomX, nSomY, nDimensions, mapType);
     }
     if (itask == 0) {
         delete [] numerator;
         delete [] denominator;
     }
-    return coreData;
 }

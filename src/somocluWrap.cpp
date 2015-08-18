@@ -14,7 +14,6 @@ void trainWrapper(float *data, int data_length,
                   string radiusCooling,
                   float scale0, float scaleN,
                   string scaleCooling, unsigned int kernelType, string mapType,
-                  float *initialCodebook, int initialCodebook_size,
                   float *codebook, int codebook_size,
                   int *globalBmus, int globalBmus_size,
                   float *uMatrix, int uMatrix_size)
@@ -24,23 +23,13 @@ void trainWrapper(float *data, int data_length,
   svm_node ** sparseData = NULL;
   core_data coreData;
   coreData.codebook_size = nSomY*nSomX*nDimensions;
-  coreData.codebook = new float[coreData.codebook_size];
-  coreData.globalBmus = NULL;
-  coreData.uMatrix = NULL;
+  coreData.codebook = codebook
+  coreData.globalBmus = globalBmus;
+  coreData.uMatrix = uMatrix;
   unsigned int nVectorsPerRank = nVectors;
-  coreData.globalBmus_size = nVectorsPerRank*int(ceil(nVectors/(double)nVectorsPerRank))*2;
   if (itask == 0) {
-      coreData.globalBmus = new int[coreData.globalBmus_size];
-
-      if (initialCodebook_size == 1){
+      if (codebook[0] == 1000 && codebook[1] == 2000) {
           initializeCodebook(0, coreData.codebook, nSomX, nSomY, nDimensions);
-      } else {
-          if (initialCodebook_size != nSomX*nSomY*nDimensions) {
-              cerr << "Dimension of initial codebook does not match data! " << initialCodebook_size << " " << nSomX*nSomY*nDimensions << "\n";
-              initializeCodebook(0, coreData.codebook, nSomX, nSomY, nDimensions);
-          } else { 
-              memcpy(coreData.codebook, initialCodebook, sizeof(float)*nSomX*nSomY*nDimensions);
-          }
       }
   }
 
@@ -74,23 +63,23 @@ void trainWrapper(float *data, int data_length,
 
   while ( currentEpoch < nEpoch ) {
 
-      coreData = trainOneEpoch(itask, data, sparseData,
-                               coreData, nEpoch, currentEpoch,
-                               false,
-                               nSomX, nSomY,
-                               nDimensions, nVectors,
-                               nVectorsPerRank,
-                               radius0, radiusN,
-                               radiusCooling,
-                               scale0, scaleN,
-                               scaleCooling,
-                               kernelType, mapType);
+      trainOneEpoch(itask, data, sparseData,
+                     coreData, nEpoch, currentEpoch,
+                     false,
+                     nSomX, nSomY,
+                     nDimensions, nVectors,
+                     nVectorsPerRank,
+                     radius0, radiusN,
+                     radiusCooling,
+                     scale0, scaleN,
+                     scaleCooling,
+                     kernelType, mapType);
 
-      currentEpoch++;
+      ++currentEpoch;
     }
 
   if (itask == 0) {
-      coreData.uMatrix = calculateUMatrix(coreData.codebook, nSomX, nSomY, nDimensions, mapType);
+      calculateUMatrix(coreData.uMatrix, coreData.codebook, nSomX, nSomY, nDimensions, mapType);
       coreData.uMatrix_size = nSomX * nSomY;
   }
 #ifdef CUDA

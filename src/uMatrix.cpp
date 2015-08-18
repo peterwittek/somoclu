@@ -49,10 +49,10 @@ float get_distance(const float* vec1, const float* vec2,
  * @param nDimensions - dimensions of a data instance
  */
 
-float *calculateUMatrix(float *codebook, unsigned int nSomX,
-             unsigned int nSomY, unsigned int nDimensions, string mapType)
+float *calculateUMatrix(float *uMatrix, float *codebook, unsigned int nSomX,
+                        unsigned int nSomY, unsigned int nDimensions, 
+                        string mapType)
 {
-    float *uMatrix = new float[nSomX*nSomY];
     float min_dist = 1.5f;
     for (unsigned int som_y1 = 0; som_y1 < nSomY; som_y1++) {
         for (unsigned int som_x1 = 0; som_x1 < nSomX; som_x1++) {

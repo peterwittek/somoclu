@@ -51,10 +51,10 @@ void train(int itask, float *data, svm_node **sparseData,
     core_data coreData;
     coreData.codebook = new float[nSomY*nSomX*nDimensions];
     coreData.globalBmus = NULL;
-    coreData.uMatrix = NULL;    
+     coreData.uMatrix = NULL;    
     if (itask == 0) {
         coreData.globalBmus = new int[nVectorsPerRank*int(ceil(nVectors/(double)nVectorsPerRank))*2];
-        
+        coreData.uMatrix = new float[nSomX*nSomY];
         if (initialCodebookFilename.empty()){
             initializeCodebook(0, coreData.codebook, nSomX, nSomY, nDimensions);
         } else {
@@ -101,17 +101,10 @@ void train(int itask, float *data, svm_node **sparseData,
         double epoch_time = MPI_Wtime();
 #endif        
 
-        coreData = trainOneEpoch(itask, data, sparseData,
-                                 coreData, nEpoch, currentEpoch,
-                                 snapshots > 0,
-                                 nSomX, nSomY,
-                                 nDimensions, nVectors,
-                                 nVectorsPerRank,
-                                 radius0, radiusN,
-                                 radiusCooling,
-                                 scale0, scaleN,
-                                 scaleCooling,
-                                 kernelType, mapType);
+        trainOneEpoch(itask, data, sparseData, coreData, nEpoch, currentEpoch,
+                      snapshots > 0, nSomX, nSomY, nDimensions, nVectors,
+                      nVectorsPerRank, radius0, radiusN, radiusCooling,
+                      scale0, scaleN, scaleCooling, kernelType, mapType);
 
         if (snapshots > 0 && itask == 0) {
             cout << "Saving interim U-Matrix..." << endl;
@@ -154,7 +147,7 @@ void train(int itask, float *data, svm_node **sparseData,
         ///
         /// Save U-mat
         ///
-        coreData.uMatrix = calculateUMatrix(coreData.codebook, nSomX, nSomY, nDimensions, mapType);
+        calculateUMatrix(coreData.uMatrix, coreData.codebook, nSomX, nSomY, nDimensions, mapType);
         int ret =  saveUMatrix(outPrefix + string(".umx"), coreData.uMatrix, nSomX, nSomY);        
         if (ret < 0)
             cout << "    Failed to save u-matrix. !" << endl;

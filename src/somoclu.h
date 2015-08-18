@@ -64,22 +64,23 @@ float euclideanDistanceOnToroidMap(const unsigned int som_x, const unsigned int 
 float euclideanDistanceOnPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y); 
 float getWeight(float distance, float radius, float scaling);
 int saveCodebook(string cbFileName, float *codebook, 
-                unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions);
-float *calculateUMatrix(float *codebook, unsigned int nSomX,
-             unsigned int nSomY, unsigned int nDimensions, string mapType);
+                 unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions);
+float *calculateUMatrix(float* uMatrix, float *codebook, unsigned int nSomX,
+                        unsigned int nSomY, unsigned int nDimensions, 
+                        string mapType);
 int saveUMatrix(string fname, float *uMatrix, unsigned int nSomX, 
-              unsigned int nSomY);
+                unsigned int nSomY);
 int saveBmus(string filename, int *bmus, unsigned int nSomX, 
              unsigned int nSomY, unsigned int nVectors);              
 //void printMatrix(float *A, int nRows, int nCols);
 float *readMatrix(const string inFilename, 
                   unsigned int &nRows, unsigned int &nCols);
 void readSparseMatrixDimensions(const string filename, unsigned int &nRows, 
-                            unsigned int &nColumns);
+                                unsigned int &nColumns);
 svm_node** readSparseMatrixChunk(const string filename, unsigned int nRows, 
                                  unsigned int nRowsToRead, 
                                  unsigned int rowOffset);
-core_data trainOneEpoch(int itask, float *data, svm_node **sparseData,
+void trainOneEpoch(int itask, float *data, svm_node **sparseData,
            core_data coreData, unsigned int nEpoch, unsigned int currentEpoch,
            bool enableCalculatingUMatrix,
            unsigned int nSomX, unsigned int nSomY,
@@ -108,11 +109,11 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nVectorsPerRank, float radius, 
                            float scale, string mapType, int *globalBmus);
 void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator, 
-                           float *denominator, float *codebook, 
-                           unsigned int nSomX, unsigned int nSomY, 
-                           unsigned int nDimensions, unsigned int nVectors,
-                           unsigned int nVectorsPerRank, float radius, 
-                           float scale, string mapType, int *globalBmus);
+                            float *denominator, float *codebook, 
+                            unsigned int nSomX, unsigned int nSomY, 
+                            unsigned int nDimensions, unsigned int nVectors,
+                            unsigned int nVectorsPerRank, float radius, 
+                            float scale, string mapType, int *globalBmus);
 void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
                         unsigned int nSomY, unsigned int nDimensions);
 
