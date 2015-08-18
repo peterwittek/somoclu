@@ -7,14 +7,13 @@ Rsomoclu.train <-
            nSomX, nSomY,
            radius0, radiusN,
            radiusCooling, scale0, scaleN,
-           scaleCooling, snapshots,
+           scaleCooling,
            kernelType, mapType
   )
   {
     res <- .Call("Rtrain", input_data, nEpoch,
                  nSomX, nSomY, radius0, radiusN,
                  radiusCooling, scale0, scaleN,
-                 scaleCooling, snapshots, kernelType,
-                mapType)
+                 scaleCooling, kernelType, mapType)
     res
   }

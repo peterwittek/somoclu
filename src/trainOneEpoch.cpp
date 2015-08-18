@@ -1,9 +1,10 @@
-#include"somoclu.h"
-#include<cmath>
-#include<stdlib.h>
+#include <cmath>
+#include <stdlib.h>
 #ifdef HAVE_R
-#include<R.h>
+#include <R.h>
 #endif
+
+#include "somoclu.h"
 
 float linearCooling(float start, float end, float nEpoch, float epoch) {
   float diff = (start - end) / (nEpoch-1);

@@ -1,6 +1,4 @@
-#include <iostream>
-#include <string.h>
-
+#include "somoclu.h"
 #include "somocluWrap.h"
 
 using namespace std;

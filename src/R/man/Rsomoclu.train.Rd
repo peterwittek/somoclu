@@ -37,7 +37,7 @@ Rsomoclu.train(input_data, nEpoch,
   \item{mapType}{Map type: planar or toroid (default: planar)}
   %% \item{initialCodebookFilename}{Specify an initial codebook for the map}
 }
-\references{Peter Wittek (2013). Somoclu: An Efficient Distributed
+\references{Peter Wittek, Shichao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Distributed
   Library for Self-Organizing Maps. arXiv:1305.1422.}
 \author{Peter Wittek, Shichao Gao}
 \examples{
@@ -56,11 +56,10 @@ scaleN <- 0.01
 scaleCooling <- "linear"
 kernelType <- 0
 mapType <- "planar"
-snapshots <- 0
 res <- Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                radius0, radiusN,
                radiusCooling, scale0, scaleN,
-               scaleCooling, snapshots,
+               scaleCooling,
                kernelType, mapType)
 res$codebook
 res$globalBmus
