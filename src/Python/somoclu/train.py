@@ -9,7 +9,7 @@ from somoclu_wrap import trainWrapper
 class Somoclu(object):
 
 
-    def __init__(self, data, nSomX, nSomY, initialMap = None):
+    def __init__(self, data, nSomX, nSomY, initialCodebook=None):
         if data.dtype != np.float32:
             print("Warning: data was not float32. A 32-bit copy was made")
             self.data = np.float32(data)
@@ -17,24 +17,30 @@ class Somoclu(object):
             self.data = data
         self.nVectors, self.nDimensions = data.shape
         self.nSomX, self.nSomY = nSomX, nSomY
-        self.codebook = np.zeros(nSomY * nSomX * self.nDimensions, dtype=np.float32)
         self.globalBmus = np.zeros(self.nVectors*2, dtype=np.intc)
         self.uMatrix = np.zeros(nSomX * nSomY, dtype=np.float32)
-        self.initialMap = initialMap
+        if initialCodebook is None:
+            self.codebook = np.zeros(self.nSomY*self.nSomX*self.nDimensions,
+                                     dtype=np.float32)
+            self.codebook[0:2] = [1000, 2000]
+        elif initialCodebook.size != self.nSomX*self.nSomY*self.nDimensions:
+            raise Exception("Invalid size for initial codebook")
+        else:
+            if initialCodebook.dtype != np.float32:
+                print("Warning: initialCodebook was not float32. A 32-bit copy was made")
+                self.codebook = np.float32(initialCodebook)
+            else:
+                self.codebook = initialCodebook
 
 
     def train(self, nEpoch=10, radius0=0, radiusN=1, radiusCooling="linear",
               scale0=0.1, scaleN=0.01, scaleCooling="linear",
-              kernelType=0, mapType="planar", initialCodebook=None):
-        if initialCodebook is None:
-            initialCodebook = np.float32([1.0])
-        elif initialCodebook.size != self.nSomX*self.nSomY*self.nDimensions:
-            raise Exception("Invalid size for initial codebook")
+              kernelType=0, mapType="planar"):
         trainWrapper(np.ravel(self.data), nEpoch, self.nSomX, self.nSomY,
                      self.nDimensions, self.nVectors, radius0, radiusN,
                     radiusCooling, scale0, scaleN, scaleCooling,
-                    kernelType, mapType, np.ravel(initialCodebook),
-                    self.codebook, self.globalBmus, self.uMatrix)
+                    kernelType, mapType, self.codebook, self.globalBmus,
+                    self.uMatrix)
         self.uMatrix.shape = (self.nSomY, self.nSomX)
         self.globalBmus.shape = (self.nVectors, 2)
         self.codebook.shape = (self.nSomY, self.nSomX, self.nDimensions)

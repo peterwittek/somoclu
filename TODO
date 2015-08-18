@@ -1,5 +1,4 @@
   - Integration with data structures of SOM libraries in Python, R, and MATLAB.
-  - Be able to pass an initial map from the wrappers.
   - Persistent object in C++ to improve efficiency of wrappers.
   - Improve documentation of wrappers. Python documentation should go to https://readthedocs.org/.
   - Upload to MATLAB FileExchange.
