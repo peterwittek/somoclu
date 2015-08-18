@@ -16,12 +16,11 @@ try:
 except AttributeError:
     numpy_include = numpy.get_numpy_include()
         
-sources_files=[	'somoclu/src/somocluWrap.cpp',
-                'somoclu/src/denseCpuKernels.cpp',
+sources_files=[ 'somoclu/src/denseCpuKernels.cpp',
                 'somoclu/src/io.cpp',
                 'somoclu/src/sparseCpuKernels.cpp',
                 'somoclu/src/mapDistanceFunctions.cpp',
-                'somoclu/src/trainOneEpoch.cpp',
+                'somoclu/src/training.cpp',
                 'somoclu/src/uMatrix.cpp',
                 'somoclu/somoclu_wrap.cxx']
 if sys.platform.startswith('win'):

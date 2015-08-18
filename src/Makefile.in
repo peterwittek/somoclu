@@ -33,7 +33,7 @@ MPI_LIBS       = @MPI_LIBS@
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
-LIBOBJS=sparseCpuKernels.o io.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o trainOneEpoch.o
+LIBOBJS=sparseCpuKernels.o io.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o
 
 ifdef CUDA_LIBS
 	LIBOBJS+=denseGpuKernels.cu.co
@@ -46,6 +46,7 @@ all: somoclu
 lib: $(LIBOBJS)
 	$(CXX) $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o libsomoclu.so $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 	
+somoclu: CXXFLAGS+= -DCLI
 somoclu: $(OBJS)
 	$(CXX) $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -o $@ $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 

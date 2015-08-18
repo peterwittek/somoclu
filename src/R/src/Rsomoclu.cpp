@@ -3,7 +3,7 @@
 using namespace std;
 using namespace Rcpp;
 
-#include"somocluWrap.h"
+#include"somoclu.h"
 
 RcppExport SEXP Rtrain(SEXP data_p,
                        SEXP nEpoch_p,
@@ -43,12 +43,12 @@ RcppExport SEXP Rtrain(SEXP data_p,
   float* codebook = new float[codebook_size];
   int* globalBmus = new int[globalBmus_size];
   float* uMatrix = new float[uMatrix_size];
-  trainWrapper(data, data_length, nEpoch, nSomX, nSomY,
-               nDimensions, nVectors, radius0, radiusN,
-               radiusCooling, scale0, scaleN, scaleCooling,
-               kernelType, mapType,
-               codebook, codebook_size, globalBmus, globalBmus_size,
-               uMatrix, uMatrix_size);
+  train(data, data_length, nEpoch, nSomX, nSomY,
+        nDimensions, nVectors, radius0, radiusN,
+        radiusCooling, scale0, scaleN, scaleCooling,
+        kernelType, mapType,
+        codebook, codebook_size, globalBmus, globalBmus_size,
+        uMatrix, uMatrix_size);
   Rcpp::NumericVector codebook_vec(codebook_size);
   Rcpp::NumericVector globalBmus_vec(globalBmus_size);
   Rcpp::NumericVector uMatrix_vec(uMatrix_size);

@@ -12,5 +12,6 @@ cp ../../src/*.cpp ./somoclu/src/
 cp ../../src/*.cu ./somoclu/src/
 cp ../../data/rgbs.txt tests/
 swig -c++ -python somoclu/somoclu.i
-python2 setup.py sdist
+python2 setup.py build
+cp  build/lib.linux-x86_64-2.7/_somoclu_wrap.so somoclu/
 #sudo python2 setup.py install

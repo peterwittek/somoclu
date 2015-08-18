@@ -1,6 +1,5 @@
-
 #include "mex.h"
-#include "somocluWrap.h"
+#include "somoclu.h"
 
 void
 mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
@@ -52,25 +51,15 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
       scaleCooling = "";
     }
   mxFree(scaleCooling_c);
-  unsigned int snapshots = (unsigned int) mxGetPr(prhs[10])[0];
-  unsigned int kernelType = (unsigned int) mxGetPr(prhs[11])[0];
+  unsigned int kernelType = (unsigned int) mxGetPr(prhs[10])[0];
   string mapType;
-  char* mapType_c = mxArrayToString(prhs[12]);
+  char* mapType_c = mxArrayToString(prhs[11]);
   if(mapType_c != NULL){
       mapType = mapType_c;
     }else{
       mapType = "";
     }
   mxFree(mapType_c);
-
-  char* initialCodebookFilename_c = mxArrayToString(prhs[13]);
-  string initialCodebookFilename;
-  if(initialCodebookFilename_c != NULL){
-      initialCodebookFilename = initialCodebookFilename_c;
-    }else{
-      initialCodebookFilename = "";
-    }
-  mxFree(initialCodebookFilename_c);
 
   int codebook_size =  nSomY * nSomX * nDimensions;
   int globalBmus_size = nVectors * 2;
@@ -79,12 +68,12 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
   int* globalBmus = new int[globalBmus_size];
   float* uMatrix = new float[uMatrix_size];
   //Call train routine
-  trainWrapper(data, data_length, nEpoch, nSomX, nSomY,
-               nDimensions, nVectors, radius0, radiusN,
-               radiusCooling, scale0, scaleN, scaleCooling,
-               snapshots, kernelType, mapType, initialCodebookFilename,
-               codebook, codebook_size, globalBmus, globalBmus_size,
-               uMatrix, uMatrix_size);
+  train(data, data_length, nEpoch, nSomX, nSomY,
+        nDimensions, nVectors, radius0, radiusN,
+        radiusCooling, scale0, scaleN, scaleCooling,
+        kernelType, mapType, 
+        codebook, codebook_size, globalBmus, globalBmus_size,
+        uMatrix, uMatrix_size);
 
   /* Examine output (left-hand-side) arguments. */
   //mexPrintf("\n\nThere are %d left-hand-side argument(s).\n", nlhs);

@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.cm as cm
 from matplotlib.pylab import matshow
 
-from somoclu_wrap import trainWrapper
+import somoclu_wrap
 
 
 class Somoclu(object):
@@ -36,11 +36,11 @@ class Somoclu(object):
     def train(self, nEpoch=10, radius0=0, radiusN=1, radiusCooling="linear",
               scale0=0.1, scaleN=0.01, scaleCooling="linear",
               kernelType=0, mapType="planar"):
-        trainWrapper(np.ravel(self.data), nEpoch, self.nSomX, self.nSomY,
-                     self.nDimensions, self.nVectors, radius0, radiusN,
-                    radiusCooling, scale0, scaleN, scaleCooling,
-                    kernelType, mapType, self.codebook, self.globalBmus,
-                    self.uMatrix)
+        somoclu_wrap.train(np.ravel(self.data), nEpoch, self.nSomX, self.nSomY,
+                           self.nDimensions, self.nVectors, radius0, radiusN,
+                           radiusCooling, scale0, scaleN, scaleCooling,
+                           kernelType, mapType, self.codebook, self.globalBmus,
+                           self.uMatrix)
         self.uMatrix.shape = (self.nSomY, self.nSomX)
         self.globalBmus.shape = (self.nVectors, 2)
         self.codebook.shape = (self.nSomY, self.nSomX, self.nDimensions)

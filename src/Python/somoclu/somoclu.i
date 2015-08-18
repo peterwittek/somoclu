@@ -2,7 +2,7 @@
 %include "std_string.i"
 %{
 #define SWIG_FILE_WITH_INIT
-#include "src/somocluWrap.h"
+#include "src/somoclu.h"
 %}
 %include "numpy.i"
 %init %{
@@ -14,15 +14,15 @@ import_array();
 %apply (float* INPLACE_ARRAY1, int DIM1) {(float* uMatrix, int uMatrix_size)}
 
 using namespace std;
-void trainWrapper(float *data, int data_length,
-                  unsigned int nEpoch,
-                  unsigned int nSomX, unsigned int nSomY,
-                  unsigned int nDimensions, unsigned int nVectors,
-                  unsigned int radius0, unsigned int radiusN,
-                  string radiusCooling,
-                  float scale0, float scaleN,
-                  string scaleCooling,
-                  unsigned int kernelType, string mapType,
-                  float* codebook, int codebook_size,
-                  int* globalBmus, int globalBmus_size,
-                  float* uMatrix, int uMatrix_size);
+void train(float *data, int data_length,
+           unsigned int nEpoch,
+           unsigned int nSomX, unsigned int nSomY,
+           unsigned int nDimensions, unsigned int nVectors,
+           unsigned int radius0, unsigned int radiusN,
+           string radiusCooling,
+           float scale0, float scaleN,
+           string scaleCooling,
+           unsigned int kernelType, string mapType,
+           float* codebook, int codebook_size,
+           int* globalBmus, int globalBmus_size,
+           float* uMatrix, int uMatrix_size);

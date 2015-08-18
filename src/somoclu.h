@@ -17,8 +17,6 @@
  *
  */
 #include <string>
-#include <algorithm>
-
 using namespace std;
 
 #ifndef SOMOCLU_H
@@ -48,17 +46,6 @@ struct svm_node
 	float value;
 };
 
-/// Core data structures
-struct core_data
-{
-	float *codebook;
-	int *globalBmus;
-	float *uMatrix;
-	int codebook_size;
-	int globalBmus_size;
-	int uMatrix_size;
-};
-
 
 float euclideanDistanceOnToroidMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y, const unsigned int nSomX, const unsigned int nSomY);
 float euclideanDistanceOnPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y); 
@@ -72,7 +59,6 @@ int saveUMatrix(string fname, float *uMatrix, unsigned int nSomX,
                 unsigned int nSomY);
 int saveBmus(string filename, int *bmus, unsigned int nSomX, 
              unsigned int nSomY, unsigned int nVectors);              
-//void printMatrix(float *A, int nRows, int nCols);
 float *readMatrix(const string inFilename, 
                   unsigned int &nRows, unsigned int &nCols);
 void readSparseMatrixDimensions(const string filename, unsigned int &nRows, 
@@ -91,7 +77,20 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
            float scale0, float scaleN,
            string scaleCooling,
            unsigned int kernelType, string mapType);                             
+void train(float *data, int data_length,
+           unsigned int nEpoch,
+           unsigned int nSomX, unsigned int nSomY,
+           unsigned int nDimensions, unsigned int nVectors,
+           unsigned int radius0, unsigned int radiusN,
+           string radiusCooling,
+           float scale0, float scaleN,
+           string scaleCooling,
+           unsigned int kernelType, string mapType,
+           float* codebook, int codebook_size,
+           int* globalBmus, int globalBmus_size,
+           float* uMatrix, int uMatrix_size);
 void train(int itask, float *data, svm_node **sparseData, 
+           float *codebook, int *globalBmus, float *uMatrix,
            unsigned int nSomX, unsigned int nSomY, 
            unsigned int nDimensions, unsigned int nVectors, 
            unsigned int nVectorsPerRank, unsigned int nEpoch, 
@@ -99,9 +98,13 @@ void train(int itask, float *data, svm_node **sparseData,
            string radiusCooling,
            float scale0, float scaleN,
            string scaleCooling,
-           string outPrefix, unsigned int snapshots, 
-           unsigned int kernelType, string mapType,
-           string initialCodebookFilename);
+           unsigned int kernelType, string mapType
+#ifdef CLI           
+           , string outPrefix, unsigned int snapshots);
+#else
+           );
+#endif
+
 void trainOneEpochDenseCPU(int itask, float *data, float *numerator, 
                            float *denominator, float *codebook, 
                            unsigned int nSomX, unsigned int nSomY, 

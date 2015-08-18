@@ -184,38 +184,89 @@ int main(int argc, char** argv)
         cout << endl;
     }
 
-#ifdef CUDA
-    if (kernelType == DENSE_GPU) {
-        setDevice(rank, nProcs);
-        initializeGpu(data, nVectorsPerRank, nDimensions, nSomX, nSomY);
+    ///
+    /// Codebook
+    ///
+    float *codebook = new float[nSomY*nSomX*nDimensions];
+    int *globalBmus = NULL;
+    float *uMatrix = NULL;    
+    if (rank == 0) {
+        globalBmus = new int[nVectorsPerRank*int(ceil(nVectors/(double)nVectorsPerRank))*2];
+        uMatrix = new float[nSomX*nSomY];
+        if (initialCodebookFilename.empty()){
+            initializeCodebook(0, codebook, nSomX, nSomY, nDimensions);
+        } else {
+            unsigned int nSomXY = 0;
+            unsigned int tmpNDimensions = 0;
+            delete [] codebook;
+            codebook = readMatrix(initialCodebookFilename, nSomXY, tmpNDimensions);
+            if (tmpNDimensions != nDimensions) {
+                cerr << "Dimension of initial codebook does not match data!\n";
+                my_abort(5);
+            } else if (nSomXY / nSomY != nSomX) {
+                cerr << "Dimension of initial codebook does not match specified SOM grid!\n";
+                my_abort(6);
+            }
+            cout << "Read initial codebook: " << initialCodebookFilename << "\n";
+        }
     }
-#endif
 
 #ifdef HAVE_MPI 
     MPI_Barrier(MPI_COMM_WORLD);
-#endif
+    double training_time = MPI_Wtime();
+#endif    
+
     // TRAINING
-    train(rank, data, sparseData, nSomX, nSomY,
+    train(rank, data, sparseData, codebook, globalBmus, uMatrix, nSomX, nSomY,
           nDimensions, nVectors, nVectorsPerRank,
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
-          outPrefix, snapshots, kernelType, mapType,
-          initialCodebookFilename);
+          kernelType, mapType,
+          outPrefix, snapshots);
+
+#ifdef HAVE_MPI
+    MPI_Barrier(MPI_COMM_WORLD);
+    training_time = MPI_Wtime() - training_time;
+    if (rank == 0) {
+        cerr << "Total training Time: " << training_time << endl;
+    }
+#endif
+    ///
+    /// Save SOM map and u-mat
+    ///
+    if (rank == 0) {
+        ///
+        /// Save U-mat
+        ///
+        calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType);
+        int ret =  saveUMatrix(outPrefix + string(".umx"), uMatrix, nSomX, nSomY);        
+        if (ret < 0)
+            cout << "    Failed to save u-matrix. !" << endl;
+        else {
+            cout << "    Done!" << endl;
+        }
+        saveBmus(outPrefix + string(".bm"), globalBmus, nSomX, nSomY, nVectors); 
+        ///
+        /// Save codebook
+        ///
+        saveCodebook(outPrefix + string(".wts"), codebook, nSomX, nSomY, nDimensions);
+    }
+#ifdef HAVE_MPI
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
 
     if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
         delete [] data;
     } else {
         delete [] sparseData;
     }
+    delete [] codebook;
+    delete [] globalBmus;
+    delete [] uMatrix;
 #ifdef HAVE_MPI 
     profile_time = MPI_Wtime() - profile_time;
     if (rank == 0) {
         cerr << "Total Execution Time: " << profile_time << endl;
-    }
-#endif
-#ifdef CUDA
-    if (kernelType == DENSE_GPU) {
-        freeGpu();
     }
 #endif
 #ifdef HAVE_MPI 
