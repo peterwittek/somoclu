@@ -1,8 +1,8 @@
 \name{Rsomoclu.train}
 \alias{Rsomoclu.train}
-\title{Train function for somoclu}
+\title{Train function for Somoclu}
 \description{
-  A function call to somoclu to train the Self Organizing Map.
+  A function call to Somoclu to train the Self Organizing Map.
 }
 \usage{
 Rsomoclu.train(input_data, nEpoch, 
