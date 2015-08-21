@@ -53,41 +53,36 @@ thrust::device_vector<float> deviceCodebookNorms;
 
 // convert a linear index to a row index
 template <typename T>
-struct linear_index_to_row_index : public thrust::unary_function<T,T>
-{
+struct linear_index_to_row_index : public thrust::unary_function<T, T> {
     T C; // number of columns
 
     __host__ __device__
     linear_index_to_row_index(T C) : C(C) {}
 
     __host__ __device__
-    T operator()(T i)
-    {
+    T operator()(T i) {
         return i / C;
     }
 };
 
 // note: functor inherits from unary_function
 template <typename T>
-struct square : public thrust::unary_function<T,T>
-{
+struct square : public thrust::unary_function<T, T> {
     __host__ __device__
-    T operator()(T x) const
-    {
-        return x*x;
+    T operator()(T x) const {
+        return x * x;
     }
 };
 
-typedef thrust::tuple<int,float> argMinType;
+typedef thrust::tuple<int, float> argMinType;
 
-struct argMin : public thrust::binary_function<argMinType,argMinType,argMinType>
-{
+struct argMin : public thrust::binary_function<argMinType, argMinType, argMinType> {
     __host__ __device__
-    argMinType operator()(const argMinType& a, const argMinType& b) const
-    {
+    argMinType operator()(const argMinType& a, const argMinType& b) const {
         if (thrust::get<1>(a) < thrust::get<1>(b)) {
             return a;
-        } else {
+        }
+        else {
             return b;
         }
     }
@@ -102,7 +97,7 @@ thrust::device_vector<T> normsOfRowSpace(thrust::device_vector<T> A, int nRows, 
     // compute row sums by summing values with equal row indices
     thrust::reduce_by_key
     (thrust::make_transform_iterator(thrust::counting_iterator<int>(0), linear_index_to_row_index<int>(nColumns)),
-     thrust::make_transform_iterator(thrust::counting_iterator<int>(0), linear_index_to_row_index<int>(nColumns)) + (nRows*nColumns),
+     thrust::make_transform_iterator(thrust::counting_iterator<int>(0), linear_index_to_row_index<int>(nColumns)) + (nRows * nColumns),
      thrust::make_transform_iterator(A.begin(), square<T>()),
      row_indices.begin(),
      row_sums.begin(),
@@ -120,8 +115,8 @@ thrust::device_vector<argMinType> minsOfRowSpace(thrust::device_vector<float> A,
     // compute row sums by summing values with equal row indices
     thrust::reduce_by_key
     (thrust::make_transform_iterator(thrust::counting_iterator<int>(0), linear_index_to_row_index<int>(nColumns)),
-     thrust::make_transform_iterator(thrust::counting_iterator<int>(0), linear_index_to_row_index<int>(nColumns)) + (nRows*nColumns),
-     thrust::make_zip_iterator(thrust::make_tuple(thrust::counting_iterator<int>(0),A.begin())),
+     thrust::make_transform_iterator(thrust::counting_iterator<int>(0), linear_index_to_row_index<int>(nColumns)) + (nRows * nColumns),
+     thrust::make_zip_iterator(thrust::make_tuple(thrust::counting_iterator<int>(0), A.begin())),
      row_indices.begin(),
      row_sums.begin(),
      thrust::equal_to<int>(),
@@ -130,16 +125,15 @@ thrust::device_vector<argMinType> minsOfRowSpace(thrust::device_vector<float> A,
 }
 
 template <int BLOCK_DIM>
-__global__ void euclidean(float *anorm2, float *bnorm2, float *M, int height, int width)
-{
+__global__ void euclidean(float *anorm2, float *bnorm2, float *M, int height, int width) {
     unsigned int xIndex = blockIdx.x * BLOCK_DIM + threadIdx.x;
     unsigned int yStartIndex = blockIdx.y * BLOCK_DIM;
     if (xIndex < width) {
         float bNormForX = bnorm2[xIndex];
-        unsigned int yEndIndex=(yStartIndex+BLOCK_DIM < height ? yStartIndex+BLOCK_DIM : height);
-        for (unsigned int yIndex=yStartIndex; yIndex<yEndIndex; yIndex++) {
-            unsigned int index=yIndex*width+xIndex;
-            M[index] = anorm2[yIndex]-2*M[index]+bNormForX;
+        unsigned int yEndIndex = (yStartIndex + BLOCK_DIM < height ? yStartIndex + BLOCK_DIM : height);
+        for (unsigned int yIndex = yStartIndex; yIndex < yEndIndex; yIndex++) {
+            unsigned int index = yIndex * width + xIndex;
+            M[index] = anorm2[yIndex] - 2 * M[index] + bNormForX;
         }
     }
 }
@@ -148,7 +142,7 @@ template <typename T>
 void printMatrix(thrust::device_vector<T> A, int nRows, int nColumns) {
     for (size_t i = 0; i < nRows; i++) {
         for (size_t j = 0; j < nColumns; j++) {
-            std::cout << A[i*nColumns+j] << " ";
+            std::cout << A[i * nColumns + j] << " ";
         }
         std::cout << "\n";
     }
@@ -158,8 +152,7 @@ void printMatrix(thrust::device_vector<T> A, int nRows, int nColumns) {
 /** Clear the device memory and shut down CUBLAS
  *
  */
-void freeGpu()
-{
+void freeGpu() {
     deviceData.clear();
     deviceDataNorms.clear();
     deviceCodebook.clear();
@@ -184,21 +177,20 @@ void freeGpu()
  * @param nVectorsPerRank - the number of data points assigned to this GPU
  */
 
-void getBmusOnGpu(unsigned int *bmus, float *codebook, int nSomX, int nSomY, int nDimensions, int nVectorsPerRank)
-{
-    deviceCodebook = thrust::device_vector<float>(codebook, codebook+nSomX*nSomY*nDimensions);
-    deviceCodebookNorms = normsOfRowSpace<float>(deviceCodebook, nSomX*nSomY, nDimensions);
-    thrust::device_vector<float> deviceGramMatrix(nSomX*nSomY*nVectorsPerRank, 0);
+void getBmusOnGpu(unsigned int *bmus, float *codebook, int nSomX, int nSomY, int nDimensions, int nVectorsPerRank) {
+    deviceCodebook = thrust::device_vector<float>(codebook, codebook + nSomX * nSomY * nDimensions);
+    deviceCodebookNorms = normsOfRowSpace<float>(deviceCodebook, nSomX * nSomY, nDimensions);
+    thrust::device_vector<float> deviceGramMatrix(nSomX * nSomY * nVectorsPerRank, 0);
     //Calculate the inner products of the data vectors and the weight vectors
 
     float alpha = 1.0f;
     float beta = 0.0f;
 
     cublasStatus_t status = cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N,
-                                        nSomX*nSomY, nVectorsPerRank, nDimensions,
+                                        nSomX * nSomY, nVectorsPerRank, nDimensions,
                                         &alpha, thrust::raw_pointer_cast(&deviceCodebook[0]), nDimensions,
                                         thrust::raw_pointer_cast(&deviceData[0]), nDimensions,
-                                        &beta,  thrust::raw_pointer_cast(&deviceGramMatrix[0]), nSomX*nSomY);
+                                        &beta,  thrust::raw_pointer_cast(&deviceGramMatrix[0]), nSomX * nSomY);
 
     if (status != CUBLAS_STATUS_SUCCESS) {
         cerr << "!!!! kernel execution error.\n";
@@ -207,25 +199,25 @@ void getBmusOnGpu(unsigned int *bmus, float *codebook, int nSomX, int nSomY, int
 
     //All components of the vectorized Euclidean distance are available
     // 32 is a magic number, this is the block size that works best on Tesla C2050
-    int BLOCK_DIM=32;
-    dim3 grid((nSomX*nSomY+BLOCK_DIM-1)/BLOCK_DIM, (nVectorsPerRank+BLOCK_DIM-1)/BLOCK_DIM,1);
-    dim3 threads(BLOCK_DIM,1,1);
-    if (BLOCK_DIM==32) {
-        euclidean<32><<<grid, threads>>>(thrust::raw_pointer_cast(&deviceDataNorms[0]),
-                                         thrust::raw_pointer_cast(&deviceCodebookNorms[0]),
-                                         thrust::raw_pointer_cast(&deviceGramMatrix[0]),
-                                         nVectorsPerRank, nSomX*nSomY);
+    int BLOCK_DIM = 32;
+    dim3 grid((nSomX * nSomY + BLOCK_DIM - 1) / BLOCK_DIM, (nVectorsPerRank + BLOCK_DIM - 1) / BLOCK_DIM, 1);
+    dim3 threads(BLOCK_DIM, 1, 1);
+    if (BLOCK_DIM == 32) {
+        euclidean<32> <<< grid, threads>>>(thrust::raw_pointer_cast(&deviceDataNorms[0]),
+                                           thrust::raw_pointer_cast(&deviceCodebookNorms[0]),
+                                           thrust::raw_pointer_cast(&deviceGramMatrix[0]),
+                                           nVectorsPerRank, nSomX * nSomY);
     }
     //Finding minimums
-    thrust::host_vector<argMinType> minsOfA=minsOfRowSpace(deviceGramMatrix, nVectorsPerRank, nSomX*nSomY);
+    thrust::host_vector<argMinType> minsOfA = minsOfRowSpace(deviceGramMatrix, nVectorsPerRank, nSomX * nSomY);
     CUDA_CHECK(cudaDeviceSynchronize());
 
     //Getting back SOM coordinates from minimums
-    for (int i=0; i<nVectorsPerRank; i++) {
-        argMinType tmp=minsOfA[i];
-        int somCoordinate=thrust::get<0>(tmp) % (nSomX*nSomY);
-        bmus[i*2] = somCoordinate % nSomX;
-        bmus[i*2+1] = somCoordinate / nSomX;
+    for (int i = 0; i < nVectorsPerRank; i++) {
+        argMinType tmp = minsOfA[i];
+        int somCoordinate = thrust::get<0>(tmp) % (nSomX * nSomY);
+        bmus[i * 2] = somCoordinate % nSomX;
+        bmus[i * 2 + 1] = somCoordinate / nSomX;
     }
 }
 
@@ -235,18 +227,17 @@ void getBmusOnGpu(unsigned int *bmus, float *codebook, int nSomX, int nSomY, int
  * @param width - dimensions of a data instance
  */
 
-void initializeGpu(float *hostData, int nVectorsPerRank, int nDimensions, int nSomX, int nSomY)
-{
+void initializeGpu(float *hostData, int nVectorsPerRank, int nDimensions, int nSomX, int nSomY) {
     /* Initialize CUBLAS */
     cublasStatus_t status = cublasCreate(&handle);
     if (status != CUBLAS_STATUS_SUCCESS) {
         cerr << "!!!! CUBLAS initialization error\n";
         my_abort(-1);
     }
-    deviceData = thrust::device_vector<float>(hostData, hostData+nVectorsPerRank*nDimensions);
+    deviceData = thrust::device_vector<float>(hostData, hostData + nVectorsPerRank * nDimensions);
     deviceDataNorms = normsOfRowSpace<float>(deviceData, nVectorsPerRank, nDimensions);
-    deviceCodebook = thrust::device_vector<float>(nSomX*nSomY*nDimensions,0);
-    deviceCodebookNorms = thrust::device_vector<float>(nSomX*nSomY,0);
+    deviceCodebook = thrust::device_vector<float>(nSomX * nSomY * nDimensions, 0);
+    deviceCodebookNorms = thrust::device_vector<float>(nSomX * nSomY, 0);
 }
 
 /** Check and initialize a device attached to a node
@@ -255,16 +246,15 @@ void initializeGpu(float *hostData, int nVectorsPerRank, int nDimensions, int nS
  */
 
 /// Note that this function was lifted from http://code.google.com/p/gpmr/
-void setDevice(int commRank, int commSize)
-{
+void setDevice(int commRank, int commSize) {
     int devCount;
-    int deviceNum=0;
+    int deviceNum = 0;
     CUDA_CHECK(cudaGetDeviceCount(&devCount));
-#ifdef HAVE_MPI  
+#ifdef HAVE_MPI
 #ifdef _WIN32
-	FILE * fp = popen("hostname.exe", "r");
+    FILE * fp = popen("hostname.exe", "r");
 #else
-	FILE * fp = popen("/bin/hostname", "r");
+    FILE * fp = popen("/bin/hostname", "r");
 #endif
     char buf[1024];
     if (fgets(buf, 1023, fp) == NULL) strcpy(buf, "localhost");
@@ -272,8 +262,7 @@ void setDevice(int commRank, int commSize)
     string host = buf;
     host = host.substr(0, host.size() - 1);
     strcpy(buf, host.c_str());
-    if (commRank == 0)
-    {
+    if (commRank == 0) {
         map<string, vector<int> > hosts;
         map<string, int> devCounts;
         hosts[buf].push_back(0);
@@ -281,17 +270,14 @@ void setDevice(int commRank, int commSize)
 
         MPI_Status stat;
         MPI_Request req;
-        for (int i = 1; i < commSize; ++i)
-        {
+        for (int i = 1; i < commSize; ++i) {
             MPI_Recv(buf, 1024, MPI_CHAR, i, 0, MPI_COMM_WORLD, &stat);
             MPI_Recv(&devCount, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &stat);
 
             // check to make sure each process on each node reports the same number of devices.
             hosts[buf].push_back(i);
-            if (devCounts.find(buf) != devCounts.end())
-            {
-                if (devCounts[buf] != devCount)
-                {
+            if (devCounts.find(buf) != devCounts.end()) {
+                if (devCounts[buf] != devCount) {
                     printf("Error, device count mismatch %d != %d on %s\n", devCounts[buf], devCount, buf);
                     fflush(stdout);
                 }
@@ -299,10 +285,8 @@ void setDevice(int commRank, int commSize)
             else devCounts[buf] = devCount;
         }
         // check to make sure that we don't have more jobs on a node than we have GPUs.
-        for (map<string, vector<int> >::iterator it = hosts.begin(); it != hosts.end(); ++it)
-        {
-            if (it->second.size() > static_cast<unsigned int>(devCounts[it->first]))
-            {
+        for (map<string, vector<int> >::iterator it = hosts.begin(); it != hosts.end(); ++it) {
+            if (it->second.size() > static_cast<unsigned int>(devCounts[it->first])) {
                 printf("Error, more jobs running on '%s' than devices - %d jobs > %d devices.\n",
                        it->first.c_str(), static_cast<int>(it->second.size()), devCounts[it->first]);
                 fflush(stdout);
@@ -312,18 +296,15 @@ void setDevice(int commRank, int commSize)
 
         // send out the device number for each process to use.
         MPI_Irecv(&deviceNum, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &req);
-        for (map<string, vector<int> >::iterator it = hosts.begin(); it != hosts.end(); ++it)
-        {
-            for (unsigned int i = 0; i < it->second.size(); ++i)
-            {
+        for (map<string, vector<int> >::iterator it = hosts.begin(); it != hosts.end(); ++it) {
+            for (unsigned int i = 0; i < it->second.size(); ++i) {
                 int devID = i;
                 MPI_Send(&devID, 1, MPI_INT, it->second[i], 0, MPI_COMM_WORLD);
             }
         }
         MPI_Wait(&req, &stat);
     }
-    else
-    {
+    else {
         // send out the hostname and device count for your local node, then get back the device number you should use.
         MPI_Status stat;
         MPI_Send(buf, strlen(buf) + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
@@ -331,7 +312,7 @@ void setDevice(int commRank, int commSize)
         MPI_Recv(&deviceNum, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &stat);
     }
     MPI_Barrier(MPI_COMM_WORLD);
-#endif    
+#endif
     CUDA_CHECK(cudaSetDevice(deviceNum));
 }
 
@@ -342,26 +323,25 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                            unsigned int nSomX, unsigned int nSomY,
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius,
-                           float scale, string mapType, string gridType, 
-                           bool compact_support, int *globalBmus)
-{
+                           float scale, string mapType, string gridType,
+                           bool compact_support, int *globalBmus) {
 #ifdef _WIN32
-	int* bmus = (int *)alloca(sizeof(int) * nVectorsPerRank * 2);
+    int* bmus = (int *)alloca(sizeof(int) * nVectorsPerRank * 2);
 #else
-    unsigned int *bmus = new unsigned int[nVectorsPerRank*2];
+    unsigned int *bmus = new unsigned int[nVectorsPerRank * 2];
 #endif
     getBmusOnGpu(bmus, codebook, nSomX, nSomY, nDimensions, nVectorsPerRank);
-    float *localNumerator = new float[nSomY*nSomX*nDimensions];
-    float *localDenominator = new float[nSomY*nSomX];
+    float *localNumerator = new float[nSomY * nSomX * nDimensions];
+    float *localDenominator = new float[nSomY * nSomX];
 
     #pragma omp parallel default(shared)
     {
         #pragma omp for
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-                localDenominator[som_y*nSomX + som_x] = 0.0;
+                localDenominator[som_y * nSomX + som_x] = 0.0;
                 for (unsigned int d = 0; d < nDimensions; d++)
-                    localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] = 0.0;
+                    localNumerator[som_y * nSomX * nDimensions + som_x * nDimensions + d] = 0.0;
             }
         }
         /// Accumulate denoms and numers
@@ -369,49 +349,52 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 for (unsigned int n = 0; n < nVectorsPerRank; n++) {
-                    if (itask*nVectorsPerRank+n<nVectors) {
+                    if (itask * nVectorsPerRank + n < nVectors) {
                         float dist = 0.0f;
                         if (gridType == "square") {
                             if (mapType == "planar") {
-                                dist = euclideanDistanceOnPlanarMap(som_x, som_y, bmus[2*n], bmus[2*n+1]);
-                            } else if (mapType == "toroid") {
-                                dist = euclideanDistanceOnToroidMap(som_x, som_y, bmus[2*n], bmus[2*n+1], nSomX, nSomY);
+                                dist = euclideanDistanceOnPlanarMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1]);
                             }
-                        } else {
+                            else if (mapType == "toroid") {
+                                dist = euclideanDistanceOnToroidMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1], nSomX, nSomY);
+                            }
+                        }
+                        else {
                             if (mapType == "planar") {
-                                dist = euclideanDistanceOnHexagonalPlanarMap(som_x, som_y, bmus[2*n], bmus[2*n+1]);
-                            } else if (mapType == "toroid") {
-                                dist = euclideanDistanceOnHexagonalToroidMap(som_x, som_y, bmus[2*n], bmus[2*n+1], nSomX, nSomY);
-                            }                          
+                                dist = euclideanDistanceOnHexagonalPlanarMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1]);
+                            }
+                            else if (mapType == "toroid") {
+                                dist = euclideanDistanceOnHexagonalToroidMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1], nSomX, nSomY);
+                            }
                         }
                         float neighbor_fuct = getWeight(dist, radius, scale, compact_support);
 
                         for (unsigned int d = 0; d < nDimensions; d++) {
-                            localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] +=
+                            localNumerator[som_y * nSomX * nDimensions + som_x * nDimensions + d] +=
                                 1.0f * neighbor_fuct
-                                * (*(data + n*nDimensions + d));
+                                * (*(data + n * nDimensions + d));
                         }
-                        localDenominator[som_y*nSomX + som_x] += neighbor_fuct;
+                        localDenominator[som_y * nSomX + som_x] += neighbor_fuct;
                     }
                 }
             }
         }
     }
-#ifdef HAVE_MPI         
+#ifdef HAVE_MPI
     MPI_Reduce(localNumerator, numerator,
-               nSomY*nSomX*nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+               nSomY * nSomX * nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(localDenominator, denominator,
-               nSomY*nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Gather(bmus, nVectorsPerRank*2, MPI_INT, globalBmus, nVectorsPerRank*2, MPI_INT, 0, MPI_COMM_WORLD);
+               nSomY * nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
 #else
-    for (unsigned int i=0; i < nSomY*nSomX*nDimensions; ++i) {
+    for (unsigned int i = 0; i < nSomY * nSomX * nDimensions; ++i) {
         numerator[i] = localNumerator[i];
     }
-    for (unsigned int i=0; i < nSomY*nSomX; ++i) {
+    for (unsigned int i = 0; i < nSomY * nSomX; ++i) {
         denominator[i] = localDenominator[i];
     }
-    for (unsigned int i=0; i < 2*nVectorsPerRank; ++i) {
-      globalBmus[i]=bmus[i];
+    for (unsigned int i = 0; i < 2 * nVectorsPerRank; ++i) {
+        globalBmus[i] = bmus[i];
     }
 #endif
     delete [] bmus;

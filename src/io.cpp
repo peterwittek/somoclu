@@ -35,24 +35,24 @@ using namespace std;
  * @param nSomY - dimensions of SOM map in the y direction
  * @param nDimensions - dimensions of a data instance
  */
-int saveCodebook(string cbFilename, float *codebook, unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions)
-{
+int saveCodebook(string cbFilename, float *codebook, unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions) {
     FILE* file = fopen(cbFilename.c_str(), "wt");
     cout << "    Saving Codebook " << cbFilename << endl;
     fprintf(file, "%%%d %d\n", nSomY, nSomX);
     fprintf(file, "%%%d\n", nDimensions);
-    if (file!=0) {
+    if (file != 0) {
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 for (unsigned int d = 0; d < nDimensions; d++) {
-                    fprintf(file, "%0.10f ", codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d]);
+                    fprintf(file, "%0.10f ", codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d]);
                 }
                 fprintf(file, "\n");
             }
         }
         fclose(file);
         return 0;
-    } else {
+    }
+    else {
         return 1;
     }
 }
@@ -64,20 +64,20 @@ int saveCodebook(string cbFilename, float *codebook, unsigned int nSomX, unsigne
  * @param nSomY - dimensions of SOM map in the y direction
  * @param nVectors - the number of vectors
  */
-int saveBmus(string filename, int *bmus, unsigned int nSomX, unsigned int nSomY, unsigned int nVectors)
-{
+int saveBmus(string filename, int *bmus, unsigned int nSomX, unsigned int nSomY, unsigned int nVectors) {
     FILE* file = fopen(filename.c_str(), "wt");
     cout << "    Saving best matching units " << filename << endl;
     fprintf(file, "%%%d %d\n", nSomY, nSomX);
     fprintf(file, "%%%d\n", nVectors);
-    if (file!=0) {
+    if (file != 0) {
         for (unsigned int i = 0; i < nVectors; ++i) {
             // ESOM Tools swaps x and y!
-            fprintf(file, "%d %d %d\n", i, bmus[2*i+1], bmus[2*i]);
+            fprintf(file, "%d %d %d\n", i, bmus[2 * i + 1], bmus[2 * i]);
         }
         fclose(file);
         return 0;
-    } else {
+    }
+    else {
         return 1;
     }
 }
@@ -92,8 +92,7 @@ int saveBmus(string filename, int *bmus, unsigned int nSomX, unsigned int nSomY,
  */
 
 int saveUMatrix(string fname, float *uMatrix, unsigned int nSomX,
-             unsigned int nSomY)
-{
+                unsigned int nSomY) {
 
     FILE* fp = fopen(fname.c_str(), "wt");
     fprintf(fp, "%%");
@@ -102,7 +101,7 @@ int saveUMatrix(string fname, float *uMatrix, unsigned int nSomX,
     if (fp != 0) {
         for (unsigned int som_y1 = 0; som_y1 < nSomY; som_y1++) {
             for (unsigned int som_x1 = 0; som_x1 < nSomX; som_x1++) {
-                fprintf(fp, " %f", uMatrix[som_y1*nSomX+som_x1]);
+                fprintf(fp, " %f", uMatrix[som_y1 * nSomX + som_x1]);
             }
             fprintf(fp, "\n");
         }
@@ -113,15 +112,14 @@ int saveUMatrix(string fname, float *uMatrix, unsigned int nSomX,
         return -2;
 }
 
-void getMatrixDimensions(string inFilename, unsigned int &nRows, unsigned int &nColumns) 
-{
+void getMatrixDimensions(string inFilename, unsigned int &nRows, unsigned int &nColumns) {
     ifstream file;
     file.open(inFilename.c_str());
     if (file.is_open()) {
         string line;
         float tmp;
-        while(getline(file,line)) {
-            if (line.substr(0,1) == "#") {
+        while(getline(file, line)) {
+            if (line.substr(0, 1) == "#") {
                 continue;
             }
             std::istringstream iss(line);
@@ -133,31 +131,33 @@ void getMatrixDimensions(string inFilename, unsigned int &nRows, unsigned int &n
             nRows++;
         }
         file.close();
-    } else {
+    }
+    else {
         std::cerr << "Input file could not be opened!\n";
         my_abort(-1);
     }
 }
 
-unsigned int *readLrnHeader(string inFilename, unsigned int &nRows, unsigned int &nColumns)
-{
+unsigned int *readLrnHeader(string inFilename, unsigned int &nRows, unsigned int &nColumns) {
     ifstream file;
     file.open(inFilename.c_str());
     string line;
     unsigned int currentColumn = 0;
     unsigned int nAllColumns = 0;
     unsigned int *columnMap = NULL;
-    while(getline(file,line)) {
-        if (line.substr(0,1) == "#") {
+    while(getline(file, line)) {
+        if (line.substr(0, 1) == "#") {
             continue;
         }
-        if (line.substr(0,1) == "%") {
-            std::istringstream iss(line.substr(1,line.length()));
+        if (line.substr(0, 1) == "%") {
+            std::istringstream iss(line.substr(1, line.length()));
             if (nRows == 0) {
                 iss >> nRows;
-            } else if (nAllColumns == 0) {
+            }
+            else if (nAllColumns == 0) {
                 iss >> nAllColumns;
-            } else if (columnMap == NULL) {
+            }
+            else if (columnMap == NULL) {
                 columnMap = new unsigned int[nAllColumns];
                 unsigned int itmp = 0;
                 currentColumn = 0;
@@ -167,7 +167,8 @@ unsigned int *readLrnHeader(string inFilename, unsigned int &nRows, unsigned int
                         ++nColumns;
                     }
                 }
-            } else {
+            }
+            else {
                 break;
             }
         }
@@ -176,25 +177,26 @@ unsigned int *readLrnHeader(string inFilename, unsigned int &nRows, unsigned int
     return columnMap;
 }
 
-unsigned int *readWtsHeader(string inFilename, unsigned int &nRows, unsigned int &nColumns)
-{
+unsigned int *readWtsHeader(string inFilename, unsigned int &nRows, unsigned int &nColumns) {
     ifstream file;
     file.open(inFilename.c_str());
     string line;
-    while(getline(file,line)) {
-        if (line.substr(0,1) == "#") {
+    while(getline(file, line)) {
+        if (line.substr(0, 1) == "#") {
             continue;
         }
-        if (line.substr(0,1) == "%") {
-            std::istringstream iss(line.substr(1,line.length()));
+        if (line.substr(0, 1) == "%") {
+            std::istringstream iss(line.substr(1, line.length()));
             if (nRows == 0) {
                 iss >> nRows;
                 unsigned int nSomY = 0;
                 iss >> nSomY;
-                nRows = nRows*nSomY;
-            } else if (nColumns == 0) {
+                nRows = nRows * nSomY;
+            }
+            else if (nColumns == 0) {
                 iss >> nColumns;
-            } else {
+            }
+            else {
                 break;
             }
         }
@@ -203,7 +205,7 @@ unsigned int *readWtsHeader(string inFilename, unsigned int &nRows, unsigned int
     unsigned int *columnMap = new unsigned int[nColumns];
     for (unsigned int i = 0; i < nColumns; ++i) {
         columnMap[i] = 1;
-    }    
+    }
     return columnMap;
 }
 
@@ -213,15 +215,16 @@ unsigned int *readWtsHeader(string inFilename, unsigned int &nRows, unsigned int
  * @param nColumns - returns the number of columns
  * @return the matrix
  */
-float *readMatrix(string inFilename, unsigned int &nRows, unsigned int &nColumns)
-{
+float *readMatrix(string inFilename, unsigned int &nRows, unsigned int &nColumns) {
     float *data = NULL;
     unsigned int *columnMap = NULL;
-    if (inFilename.compare(inFilename.size()-3, 3, "lrn") == 0) {
+    if (inFilename.compare(inFilename.size() - 3, 3, "lrn") == 0) {
         columnMap = readLrnHeader(inFilename, nRows, nColumns);
-    } else if (inFilename.compare(inFilename.size()-3, 3, "wts") == 0) {
+    }
+    else if (inFilename.compare(inFilename.size() - 3, 3, "wts") == 0) {
         columnMap = readWtsHeader(inFilename, nRows, nColumns);
-    } else {
+    }
+    else {
         getMatrixDimensions(inFilename, nRows, nColumns);
         columnMap = new unsigned int[nColumns];
         for (unsigned int i = 0; i < nColumns; ++i) {
@@ -235,12 +238,12 @@ float *readMatrix(string inFilename, unsigned int &nRows, unsigned int &nColumns
     unsigned int j = 0;
     unsigned int currentColumn = 0;
 
-    while(getline(file,line)) {
-        if ( (line.substr(0,1) == "#") | (line.substr(0,1) == "%") ) {
+    while(getline(file, line)) {
+        if ( (line.substr(0, 1) == "#") | (line.substr(0, 1) == "%") ) {
             continue;
         }
         if (data == NULL) {
-            data = new float[nRows*nColumns];
+            data = new float[nRows * nColumns];
         }
         std::istringstream iss(line);
         currentColumn = 0;
@@ -262,17 +265,17 @@ void readSparseMatrixDimensions(string filename, unsigned int &nRows,
     file.open(filename.c_str());
     if (file.is_open()) {
         string line;
-        int max_index=-1;
-        while(getline(file,line)) {
-            if (line.substr(0,1) == "#") {
+        int max_index = -1;
+        while(getline(file, line)) {
+            if (line.substr(0, 1) == "#") {
                 continue;
             }
             stringstream linestream(line);
             string value;
             int dummy_index;
-            while(getline(linestream,value,' ')) {
-                int separator=value.find(":");
-                istringstream myStream(value.substr(0,separator));
+            while(getline(linestream, value, ' ')) {
+                int separator = value.find(":");
+                istringstream myStream(value.substr(0, separator));
                 myStream >> dummy_index;
                 if(dummy_index > max_index) {
                     max_index = dummy_index;
@@ -280,9 +283,10 @@ void readSparseMatrixDimensions(string filename, unsigned int &nRows,
             }
             ++nRows;
         }
-        nColumns=max_index+1;
+        nColumns = max_index + 1;
         file.close();
-    } else {
+    }
+    else {
         std::cerr << "Input file could not be opened!\n";
         my_abort(-1);
     }
@@ -294,34 +298,34 @@ svm_node** readSparseMatrixChunk(string filename, unsigned int nRows,
     ifstream file;
     file.open(filename.c_str());
     string line;
-    for (unsigned int i=0; i<rowOffset; i++) {
+    for (unsigned int i = 0; i < rowOffset; i++) {
         getline(file, line);
     }
-    if (rowOffset+nRowsToRead >= nRows) {
-        nRowsToRead = nRows-rowOffset;
+    if (rowOffset + nRowsToRead >= nRows) {
+        nRowsToRead = nRows - rowOffset;
     }
     svm_node **x_matrix = new svm_node *[nRowsToRead];
-    for(unsigned int i=0; i<nRowsToRead; i++) {
+    for(unsigned int i = 0; i < nRowsToRead; i++) {
         getline(file, line);
-        if (line.substr(0,1) == "#") {
+        if (line.substr(0, 1) == "#") {
             --i;
             continue;
         }
         stringstream tmplinestream(line);
         string value;
         int elements = 0;
-        while(getline(tmplinestream,value,' ')) {
+        while(getline(tmplinestream, value, ' ')) {
             elements++;
         }
         elements++; // To account for the closing dummy node in the row
         x_matrix[i] = new svm_node[elements];
         stringstream linestream(line);
-        int j=0;
-        while(getline(linestream,value,' ')) {
-            int separator=value.find(":");
-            istringstream myStream(value.substr(0,separator));
+        int j = 0;
+        while(getline(linestream, value, ' ')) {
+            int separator = value.find(":");
+            istringstream myStream(value.substr(0, separator));
             myStream >> x_matrix[i][j].index;
-            istringstream myStream2(value.substr(separator+1));
+            istringstream myStream2(value.substr(separator + 1));
             myStream2 >> x_matrix[i][j].value;
             j++;
         }
@@ -334,10 +338,9 @@ svm_node** readSparseMatrixChunk(string filename, unsigned int nRows,
 /** Shut down MPI cleanly if something goes wrong
  * @param err - error code to print
  */
-void my_abort(int err)
-{
+void my_abort(int err) {
     cerr << "Aborted\n";
-#ifdef HAVE_MPI    
+#ifdef HAVE_MPI
     MPI_Abort(MPI_COMM_WORLD, err);
 #else
     exit(err);

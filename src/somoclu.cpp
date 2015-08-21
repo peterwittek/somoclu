@@ -52,7 +52,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                         string *scaleCooling,
                         unsigned int *nSomX, unsigned int *nSomY,
                         unsigned int *kernelType, string *mapType,
-                        unsigned int *snapshots, 
+                        unsigned int *snapshots,
                         string *gridType, unsigned int *compactSupport,
                         string *initialCodebookFilename);
 
@@ -62,8 +62,8 @@ int main(int argc, char** argv)
 {
     int rank = 0;
     int nProcs = 1;
-    
-#ifdef HAVE_MPI  
+
+#ifdef HAVE_MPI
     ///
     /// MPI init
     ///
@@ -85,13 +85,13 @@ int main(int argc, char** argv)
     string radiusCooling;
     float scale0 = 0.0;
     float scaleN = 0.0;
-    string scaleCooling;    
+    string scaleCooling;
     unsigned int snapshots = 0;
     string inFilename;
     string initialCodebookFilename;
     string outPrefix;
 
-    if (rank==0) {
+    if (rank == 0) {
         processCommandLine(argc, argv, &inFilename, &outPrefix,
                            &nEpoch, &radius0, &radiusN, &radiusCooling,
                            &scale0, &scaleN, &scaleCooling,
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
         }
 #endif
     }
-#ifdef HAVE_MPI 
+#ifdef HAVE_MPI
     MPI_Bcast(&nEpoch, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&radius0, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -116,21 +116,21 @@ int main(int argc, char** argv)
 
     char *inFilenameCStr = new char[255];
     if (rank == 0) {
-        strcpy(inFilenameCStr,inFilename.c_str());
+        strcpy(inFilenameCStr, inFilename.c_str());
     }
     MPI_Bcast(inFilenameCStr, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
     inFilename = inFilenameCStr;
 
     char *mapTypeCStr = new char[255];
     if (rank == 0) {
-        strcpy(mapTypeCStr,mapType.c_str());
+        strcpy(mapTypeCStr, mapType.c_str());
     }
     MPI_Bcast(mapTypeCStr, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
     mapType = mapTypeCStr;
 
     char *gridTypeCStr = new char[255];
     if (rank == 0) {
-        strcpy(gridTypeCStr,gridType.c_str());
+        strcpy(gridTypeCStr, gridType.c_str());
     }
     MPI_Bcast(gridTypeCStr, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
     gridType = gridTypeCStr;
@@ -145,49 +145,51 @@ int main(int argc, char** argv)
     if(rank == 0 ) {
         if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
             dataRoot = readMatrix(inFilename, nVectors, nDimensions);
-        } else {
+        }
+        else {
             readSparseMatrixDimensions(inFilename, nVectors, nDimensions);
         }
     }
-#ifdef HAVE_MPI 
+#ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Bcast(&nVectors, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nDimensions, 1, MPI_INT, 0, MPI_COMM_WORLD);
 #endif
-    unsigned int nVectorsPerRank = ceil(nVectors / (1.0*nProcs));
-    
+    unsigned int nVectorsPerRank = ceil(nVectors / (1.0 * nProcs));
+
     // Allocate a buffer on each node
     float* data = NULL;
     svm_node **sparseData;
     sparseData = NULL;
 
     if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
-#ifdef HAVE_MPI         
+#ifdef HAVE_MPI
         // Dispatch a portion of the input data to each node
-        data = new float[nVectorsPerRank*nDimensions];        
-        MPI_Scatter(dataRoot, nVectorsPerRank*nDimensions, MPI_FLOAT,
-                    data, nVectorsPerRank*nDimensions, MPI_FLOAT,
+        data = new float[nVectorsPerRank * nDimensions];
+        MPI_Scatter(dataRoot, nVectorsPerRank * nDimensions, MPI_FLOAT,
+                    data, nVectorsPerRank * nDimensions, MPI_FLOAT,
                     0, MPI_COMM_WORLD);
 #else
         data = dataRoot;
-#endif                    
-    } else {
+#endif
+    }
+    else {
         int currentRankProcessed = 0;
         while (currentRankProcessed < nProcs) {
             if (rank == currentRankProcessed) {
-                sparseData=readSparseMatrixChunk(inFilename, nVectors, nVectorsPerRank,
-                                                 rank*nVectorsPerRank);
+                sparseData = readSparseMatrixChunk(inFilename, nVectors, nVectorsPerRank,
+                                                   rank * nVectorsPerRank);
             }
             currentRankProcessed++;
-#ifdef HAVE_MPI             
+#ifdef HAVE_MPI
             MPI_Barrier(MPI_COMM_WORLD);
-#endif            
+#endif
         }
     }
 
     if(rank == 0) {
         // No need for root data any more if compiled with MPI
-#ifdef HAVE_MPI                 
+#ifdef HAVE_MPI
         if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
             delete [] dataRoot;
         }
@@ -201,15 +203,16 @@ int main(int argc, char** argv)
     ///
     /// Codebook
     ///
-    float *codebook = new float[nSomY*nSomX*nDimensions];
+    float *codebook = new float[nSomY * nSomX * nDimensions];
     int *globalBmus = NULL;
-    float *uMatrix = NULL;    
+    float *uMatrix = NULL;
     if (rank == 0) {
-        globalBmus = new int[nVectorsPerRank*int(ceil(nVectors/(double)nVectorsPerRank))*2];
-        uMatrix = new float[nSomX*nSomY];
-        if (initialCodebookFilename.empty()){
+        globalBmus = new int[nVectorsPerRank * int(ceil(nVectors / (double)nVectorsPerRank)) * 2];
+        uMatrix = new float[nSomX * nSomY];
+        if (initialCodebookFilename.empty()) {
             initializeCodebook(0, codebook, nSomX, nSomY, nDimensions);
-        } else {
+        }
+        else {
             unsigned int nSomXY = 0;
             unsigned int tmpNDimensions = 0;
             delete [] codebook;
@@ -217,17 +220,18 @@ int main(int argc, char** argv)
             if (tmpNDimensions != nDimensions) {
                 cerr << "Dimension of initial codebook does not match data!\n";
                 my_abort(5);
-            } else if (nSomXY / nSomY != nSomX) {
+            }
+            else if (nSomXY / nSomY != nSomX) {
                 cerr << "Dimension of initial codebook does not match specified SOM grid!\n";
                 my_abort(6);
             }
             cout << "Read initial codebook: " << initialCodebookFilename << "\n";
         }
     }
-#ifdef HAVE_MPI 
+#ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
     double training_time = MPI_Wtime();
-#endif    
+#endif
     // TRAINING
     train(rank, data, sparseData, codebook, globalBmus, uMatrix, nSomX, nSomY,
           nDimensions, nVectors, nVectorsPerRank,
@@ -253,13 +257,13 @@ int main(int argc, char** argv)
         ///
         calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
                          gridType);
-        int ret =  saveUMatrix(outPrefix + string(".umx"), uMatrix, nSomX, nSomY);        
+        int ret =  saveUMatrix(outPrefix + string(".umx"), uMatrix, nSomX, nSomY);
         if (ret < 0)
             cout << "    Failed to save u-matrix. !" << endl;
         else {
             cout << "    Done!" << endl;
         }
-        saveBmus(outPrefix + string(".bm"), globalBmus, nSomX, nSomY, nVectors); 
+        saveBmus(outPrefix + string(".bm"), globalBmus, nSomX, nSomY, nVectors);
         ///
         /// Save codebook
         ///
@@ -271,19 +275,20 @@ int main(int argc, char** argv)
 
     if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
         delete [] data;
-    } else {
+    }
+    else {
         delete [] sparseData;
     }
     delete [] codebook;
     delete [] globalBmus;
     delete [] uMatrix;
-#ifdef HAVE_MPI 
+#ifdef HAVE_MPI
     profile_time = MPI_Wtime() - profile_time;
     if (rank == 0) {
         cerr << "Total Execution Time: " << profile_time << endl;
     }
 #endif
-#ifdef HAVE_MPI 
+#ifdef HAVE_MPI
     MPI_Finalize();
 #endif
     return 0;
@@ -327,7 +332,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                         string *scaleCooling,
                         unsigned int *nSomX, unsigned int *nSomY,
                         unsigned int *kernelType, string *mapType,
-                        unsigned int *snapshots, 
+                        unsigned int *snapshots,
                         string *gridType, unsigned int *compactSupport,
                         string *initialCodebookFilename) {
 
@@ -346,8 +351,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     *scaleCooling = "linear";
     *gridType = "square";
     *compactSupport = 0;
-    static struct option long_options[] =
-    {
+    static struct option long_options[] = {
         {"rows",  required_argument, 0, 'y'},
         {"columns",    required_argument, 0, 'x'},
         {0, 0, 0, 0}
@@ -360,10 +364,10 @@ void processCommandLine(int argc, char** argv, string *inFilename,
         switch (c) {
         case 'c':
             *initialCodebookFilename = optarg;
-            break;          
+            break;
         case 'e':
             *nEpoch = atoi(optarg);
-            if (*nEpoch<=0) {
+            if (*nEpoch <= 0) {
                 cerr << "The argument of option -e should be a positive integer.\n";
                 my_abort(1);
             }
@@ -374,77 +378,77 @@ void processCommandLine(int argc, char** argv, string *inFilename,
             break;
         case 'k':
             *kernelType = atoi(optarg);
-            if (*kernelType>SPARSE_CPU) {
+            if (*kernelType > SPARSE_CPU) {
                 cerr << "The argument of option -k should be a valid kernel.\n";
                 my_abort(1);
             }
             break;
         case 'p':
             *compactSupport = atoi(optarg);
-            if (*compactSupport!=0&&*compactSupport!=1) {
+            if (*compactSupport != 0 && *compactSupport != 1) {
                 cerr << "The argument of option -g should be either 0 (false) or 1 (true).\n";
                 my_abort(1);
             }
             break;
         case 'm':
             *mapType = optarg;
-            if (*mapType!="planar"&&*mapType!="toroid") {
+            if (*mapType != "planar" && *mapType != "toroid") {
                 cerr << "The argument of option -m should be either planar or toroid.\n";
                 my_abort(1);
             }
             break;
         case 'g':
             *gridType = optarg;
-            if (*gridType!="square"&&*gridType!="hexagonal") {
+            if (*gridType != "square" && *gridType != "hexagonal") {
                 cerr << "The argument of option -h should be either square or hexagonal.\n";
                 my_abort(1);
             }
             break;
         case 'r':
             *radius0 = atoi(optarg);
-            if (*radius0<=0) {
+            if (*radius0 <= 0) {
                 cerr << "The argument of option -r should be a positive integer.\n";
                 my_abort(1);
             }
             break;
         case 'R':
             *radiusN = atoi(optarg);
-            if (*radiusN<=0) {
+            if (*radiusN <= 0) {
                 cerr << "The argument of option -R should be a positive integer.\n";
                 my_abort(1);
             }
             break;
         case 't':
             *radiusCooling = optarg;
-            if (*radiusCooling!="linear"&&*radiusCooling!="exponential") {
+            if (*radiusCooling != "linear" && *radiusCooling != "exponential") {
                 cerr << "The argument of option -t should be linear or exponential.\n";
                 my_abort(1);
             }
             break;
         case 'l':
             *scale0 = atof(optarg);
-            if (*scale0<=0) {
+            if (*scale0 <= 0) {
                 cerr << "The argument of option -l should be a positive float.\n";
                 my_abort(1);
             }
             break;
         case 'L':
             *scaleN = atof(optarg);
-            if (*scaleN<=0) {
+            if (*scaleN <= 0) {
                 cerr << "The argument of option -L should be a positive float.\n";
                 my_abort(1);
             }
             break;
         case 'T':
             *scaleCooling = optarg;
-            if (*scaleCooling!="linear"&&*scaleCooling!="exponential") {
+            if (*scaleCooling != "linear" && *scaleCooling != "exponential") {
                 cerr << "The argument of option -T should be linear or exponential.\n";
                 my_abort(1);
             }
-            break;            
+            break;
         case 's':
             *snapshots = atoi(optarg);
-            if (*snapshots>2) {
+            if (*snapshots > 2) {
                 cerr << "The argument of option -s should be 0, 1, or 2.\n";
                 my_abort(1);
             }
@@ -452,14 +456,14 @@ void processCommandLine(int argc, char** argv, string *inFilename,
             break;
         case 'x':
             *nSomX = atoi(optarg);
-            if (*nSomX<=0) {
+            if (*nSomX <= 0) {
                 cerr << "The argument of option -x should be a positive integer.\n";
                 my_abort(1);
             }
             break;
         case 'y':
             *nSomY = atoi(optarg);
-            if (*nSomY<=0) {
+            if (*nSomY <= 0) {
                 cerr << "The argument of option -y should be a positive integer.\n";
                 my_abort(1);
             }
@@ -470,11 +474,13 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                 cerr << "Option -" <<  optopt << " requires an argument.\n";
                 printUsage();
                 my_abort(1);
-            } else if (isprint (optopt)) {
+            }
+            else if (isprint (optopt)) {
                 cerr << "Unknown option `-" << optopt << "'.\n";
                 printUsage();
                 my_abort(1);
-            } else {
+            }
+            else {
                 cerr << "Unknown option character `\\x" << optopt << "'.\n";
                 printUsage();
                 my_abort(1);
@@ -483,7 +489,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
             abort ();
         }
     }
-    if (argc-optind!=2) {
+    if (argc - optind != 2) {
         cerr << "Incorrect number of mandatory parameters\n";
         printUsage();
         my_abort(1);

@@ -21,7 +21,7 @@
 #include <cstdlib>
 #ifdef CLI
 #include <iostream>
-#include <iomanip> 
+#include <iomanip>
 #include <sstream>
 #endif
 #ifdef HAVE_R
@@ -32,25 +32,25 @@
 using namespace std;
 
 void train(float *data, int data_length, unsigned int nEpoch,
-            unsigned int nSomX, unsigned int nSomY,
-            unsigned int nDimensions, unsigned int nVectors,
-            unsigned int radius0, unsigned int radiusN, string radiusCooling,
-            float scale0, float scaleN, string scaleCooling, 
-            unsigned int kernelType, string mapType,
-            string gridType, bool compact_support,
-            float *codebook, int codebook_size,
-            int *globalBmus, int globalBmus_size,
-            float *uMatrix, int uMatrix_size) {
+           unsigned int nSomX, unsigned int nSomY,
+           unsigned int nDimensions, unsigned int nVectors,
+           unsigned int radius0, unsigned int radiusN, string radiusCooling,
+           float scale0, float scaleN, string scaleCooling,
+           unsigned int kernelType, string mapType,
+           string gridType, bool compact_support,
+           float *codebook, int codebook_size,
+           int *globalBmus, int globalBmus_size,
+           float *uMatrix, int uMatrix_size) {
     train(0, data, NULL, codebook, globalBmus, uMatrix, nSomX, nSomY,
           nDimensions, nVectors, nVectors,
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
           gridType, compact_support
-#ifdef CLI           
-           , "", 0);
+#ifdef CLI
+          , "", 0);
 #else
-           );
+         );
 #endif
     calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
                      gridType);
@@ -65,14 +65,14 @@ void train(int itask, float *data, svm_node **sparseData,
            float scale0, float scaleN, string scaleCooling,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support
-#ifdef CLI           
+#ifdef CLI
            , string outPrefix, unsigned int snapshots)
 #else
-           )
+          )
 #endif
 {
     int nProcs = 1;
-#ifdef HAVE_MPI  
+#ifdef HAVE_MPI
     MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
 #endif
 #ifdef CUDA
@@ -99,56 +99,56 @@ void train(int itask, float *data, svm_node **sparseData,
         radiusN = 1;
     }
     if (scale0 == 0) {
-      scale0 = 0.1;
+        scale0 = 0.1;
     }
-        
+
     ///
     /// Training
     ///
     unsigned int currentEpoch = 0;             /// 0...nEpoch-1
     while ( currentEpoch < nEpoch ) {
 
-#ifdef HAVE_MPI      
+#ifdef HAVE_MPI
         double epoch_time = MPI_Wtime();
-#endif        
+#endif
 
-        trainOneEpoch(itask, data, sparseData, codebook, globalBmus, 
+        trainOneEpoch(itask, data, sparseData, codebook, globalBmus,
                       nEpoch, currentEpoch,
-                      nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank, 
+                      nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
                       radius0, radiusN, radiusCooling,
                       scale0, scaleN, scaleCooling, kernelType, mapType,
                       gridType, compact_support);
 #ifdef CLI
         if (snapshots > 0 && itask == 0) {
-            calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, 
+            calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions,
                              mapType, gridType);
             stringstream sstm;
             sstm << outPrefix << "." << currentEpoch + 1;
             saveUMatrix(sstm.str() + string(".umx"), uMatrix, nSomX, nSomY);
-            if (snapshots == 2){
-                saveBmus(sstm.str() + string(".bm"), globalBmus, nSomX, nSomY, nVectors); 
-                saveCodebook(sstm.str() + string(".wts"), codebook, nSomX, nSomY, nDimensions);                
+            if (snapshots == 2) {
+                saveBmus(sstm.str() + string(".bm"), globalBmus, nSomX, nSomY, nVectors);
+                saveCodebook(sstm.str() + string(".wts"), codebook, nSomX, nSomY, nDimensions);
             }
         }
 #endif
         ++currentEpoch;
 
 #ifdef CLI
-#ifdef HAVE_MPI        
+#ifdef HAVE_MPI
         if (itask == 0) {
             epoch_time = MPI_Wtime() - epoch_time;
             cerr << "Epoch Time: " << epoch_time << endl;
-            if ( (currentEpoch != nEpoch) && (currentEpoch % (nEpoch/100+1) != 0) ){}
-            else{
-              float ratio  =  currentEpoch/(float)nEpoch;
-              int   c      =  ratio * 50 + 1;
-              cout << std::setw(7) << (int)(ratio*100) << "% [";
-              for (int x=0; x<c; x++) cout << "=";
-              for (int x=c; x<50; x++) cout << " ";
-              cout << "]\n" << flush;
+            if ( (currentEpoch != nEpoch) && (currentEpoch % (nEpoch / 100 + 1) != 0) ) {}
+            else {
+                float ratio  =  currentEpoch / (float)nEpoch;
+                int   c      =  ratio * 50 + 1;
+                cout << std::setw(7) << (int)(ratio * 100) << "% [";
+                for (int x = 0; x < c; x++) cout << "=";
+                for (int x = c; x < 50; x++) cout << " ";
+                cout << "]\n" << flush;
             }
         }
-#endif        
+#endif
 #endif
     }
 #ifdef CUDA
@@ -159,21 +159,19 @@ void train(int itask, float *data, svm_node **sparseData,
 }
 
 float linearCooling(float start, float end, float nEpoch, float epoch) {
-  float diff = (start - end) / (nEpoch-1);
-  return start - (epoch * diff);
+    float diff = (start - end) / (nEpoch - 1);
+    return start - (epoch * diff);
 }
 
 float exponentialCooling(float start, float end, float nEpoch, float epoch) {
-  float diff = 0;
-  if (end == 0.0)
-  {
-      diff = -log(0.1) / nEpoch;
-  }
-  else
-  {
-      diff = -log(end / start) / nEpoch;
-  }
-  return start * exp(-epoch * diff);
+    float diff = 0;
+    if (end == 0.0) {
+        diff = -log(0.1) / nEpoch;
+    }
+    else {
+        diff = -log(end / start) / nEpoch;
+    }
+    return start * exp(-epoch * diff);
 }
 
 
@@ -187,8 +185,7 @@ float exponentialCooling(float start, float end, float nEpoch, float epoch) {
  */
 
 void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
-                        unsigned int nSomY, unsigned int nDimensions)
-{
+                        unsigned int nSomY, unsigned int nDimensions) {
     ///
     /// Fill initial random weights
     ///
@@ -201,12 +198,12 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
             for (unsigned int d = 0; d < nDimensions; d++) {
 #ifdef HAVE_R
-                int w = 0xFFF & (int) (RAND_MAX*unif_rand());
+                int w = 0xFFF & (int) (RAND_MAX * unif_rand());
 #else
                 int w = 0xFFF & rand();
 #endif
                 w -= 0x800;
-                codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] = (float)w / 4096.0f;
+                codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] = (float)w / 4096.0f;
             }
         }
     }
@@ -216,17 +213,17 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
 }
 
 void trainOneEpoch(int itask, float *data, svm_node **sparseData,
-           float *codebook, int *globalBmus, 
-           unsigned int nEpoch, unsigned int currentEpoch,
-           unsigned int nSomX, unsigned int nSomY,
-           unsigned int nDimensions, unsigned int nVectors,
-           unsigned int nVectorsPerRank,
-           unsigned int radius0, unsigned int radiusN,
-           string radiusCooling,
-           float scale0, float scaleN,
-           string scaleCooling,
-           unsigned int kernelType, string mapType, 
-           string gridType, bool compact_support){
+                   float *codebook, int *globalBmus,
+                   unsigned int nEpoch, unsigned int currentEpoch,
+                   unsigned int nSomX, unsigned int nSomY,
+                   unsigned int nDimensions, unsigned int nVectors,
+                   unsigned int nVectorsPerRank,
+                   unsigned int radius0, unsigned int radiusN,
+                   string radiusCooling,
+                   float scale0, float scaleN,
+                   string scaleCooling,
+                   unsigned int kernelType, string mapType,
+                   string gridType, bool compact_support) {
 
     float N = (float)nEpoch;
     float *numerator;
@@ -234,33 +231,35 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
     float scale = scale0;
     float radius = radius0;
     if (itask == 0) {
-        numerator = new float[nSomY*nSomX*nDimensions];
-        denominator = new float[nSomY*nSomX];
+        numerator = new float[nSomY * nSomX * nDimensions];
+        denominator = new float[nSomY * nSomX];
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-                denominator[som_y*nSomX + som_x] = 0.0;
+                denominator[som_y * nSomX + som_x] = 0.0;
                 for (unsigned int d = 0; d < nDimensions; d++) {
-                    numerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] = 0.0;
+                    numerator[som_y * nSomX * nDimensions + som_x * nDimensions + d] = 0.0;
                 }
             }
         }
 
         if (radiusCooling == "linear") {
-          radius = linearCooling(float(radius0), radiusN, N, currentEpoch);
-        } else {
-          radius = exponentialCooling(radius0, radiusN, N, currentEpoch);
+            radius = linearCooling(float(radius0), radiusN, N, currentEpoch);
+        }
+        else {
+            radius = exponentialCooling(radius0, radiusN, N, currentEpoch);
         }
         if (scaleCooling == "linear") {
-          scale = linearCooling(scale0, scaleN, N, currentEpoch);
-        } else {
-          scale = exponentialCooling(scale0, scaleN, N, currentEpoch);
+            scale = linearCooling(scale0, scaleN, N, currentEpoch);
+        }
+        else {
+            scale = exponentialCooling(scale0, scaleN, N, currentEpoch);
         }
 //        cout << "Epoch: " << currentEpoch << " Radius: " << radius << endl;
     }
 #ifdef HAVE_MPI
     MPI_Bcast(&radius, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&scale, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(codebook, nSomY*nSomX*nDimensions, MPI_FLOAT,
+    MPI_Bcast(codebook, nSomY * nSomX * nDimensions, MPI_FLOAT,
               0, MPI_COMM_WORLD);
 #endif
 
@@ -303,12 +302,12 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
 #endif
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-                float denom = denominator[som_y*nSomX + som_x];
+                float denom = denominator[som_y * nSomX + som_x];
                 for (unsigned int d = 0; d < nDimensions; d++) {
-                    float newWeight = numerator[som_y*nSomX*nDimensions
-                                                + som_x*nDimensions + d] / denom;
+                    float newWeight = numerator[som_y * nSomX * nDimensions
+                                                + som_x * nDimensions + d] / denom;
                     if (newWeight > 0.0) {
-                        codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] = newWeight;
+                        codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] = newWeight;
                     }
                 }
             }

@@ -26,9 +26,9 @@ float euclideanDistanceOnPlanarMap(const unsigned int som_x, const unsigned int 
     unsigned int y1 = std::min(som_y, y);
     unsigned int x2 = std::max(som_x, x);
     unsigned int y2 = std::max(som_y, y);
-    unsigned int xdist = x2-x1;
-    unsigned int ydist = y2-y1;
-    return sqrt(float(xdist*xdist+ydist*ydist));
+    unsigned int xdist = x2 - x1;
+    unsigned int ydist = y2 - y1;
+    return sqrt(float(xdist * xdist + ydist * ydist));
 }
 
 float euclideanDistanceOnToroidMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y, const unsigned int nSomX, const unsigned int nSomY) {
@@ -36,9 +36,9 @@ float euclideanDistanceOnToroidMap(const unsigned int som_x, const unsigned int 
     unsigned int y1 = std::min(som_y, y);
     unsigned int x2 = std::max(som_x, x);
     unsigned int y2 = std::max(som_y, y);
-    unsigned int xdist = std::min(x2-x1, x1+nSomX-x2);
-    unsigned int ydist = std::min(y2-y1, y1+nSomY-y2);
-    return sqrt(float(xdist*xdist+ydist*ydist));
+    unsigned int xdist = std::min(x2 - x1, x1 + nSomX - x2);
+    unsigned int ydist = std::min(y2 - y1, y1 + nSomY - y2);
+    return sqrt(float(xdist * xdist + ydist * ydist));
 }
 
 float euclideanDistanceOnHexagonalPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y) {
@@ -46,12 +46,12 @@ float euclideanDistanceOnHexagonalPlanarMap(const unsigned int som_x, const unsi
     unsigned int y1 = std::min(som_y, y);
     unsigned int x2 = std::max(som_x, x);
     unsigned int y2 = std::max(som_y, y);
-    unsigned int xdist = x2-x1;
-    unsigned int ydist = y2-y1;
-    if (ydist & 1){
+    unsigned int xdist = x2 - x1;
+    unsigned int ydist = y2 - y1;
+    if (ydist & 1) {
         xdist += ((y1 & 1) ? -0.5 : 0.5);
     }
-    return sqrt(float(xdist*xdist+ydist*ydist));
+    return sqrt(float(xdist * xdist + ydist * ydist));
 }
 
 float euclideanDistanceOnHexagonalToroidMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y, const unsigned int nSomX, const unsigned int nSomY) {
@@ -59,26 +59,28 @@ float euclideanDistanceOnHexagonalToroidMap(const unsigned int som_x, const unsi
     unsigned int y1 = std::min(som_y, y);
     unsigned int x2 = std::max(som_x, x);
     unsigned int y2 = std::max(som_y, y);
-    unsigned int xdist = std::min(x2-x1, x1+nSomX-x2);
-    unsigned int ydist = std::min(y2-y1, y1+nSomY-y2);
-    if (ydist & 1){
+    unsigned int xdist = std::min(x2 - x1, x1 + nSomX - x2);
+    unsigned int ydist = std::min(y2 - y1, y1 + nSomY - y2);
+    if (ydist & 1) {
         xdist += ((y1 & 1) ? -0.5 : 0.5);
     }
-    return sqrt(float(xdist*xdist+ydist*ydist));
+    return sqrt(float(xdist * xdist + ydist * ydist));
 }
 
 float gaussianNeighborhood(float distance, float radius, float stddevs) {
-    float norm = (2 * (radius + 1)*(radius + 1)) / (stddevs*stddevs);
+    float norm = (2 * (radius + 1) * (radius + 1)) / (stddevs * stddevs);
     return exp((-(float) distance * distance) / norm);
 }
 
-float getWeight(float distance, float radius, float scaling, bool compact_support=false) {
+float getWeight(float distance, float radius, float scaling, bool compact_support = false) {
     if (!compact_support) {
         return scaling * gaussianNeighborhood(distance, radius, 2);
-    } else {
-        if (distance <= radius){
+    }
+    else {
+        if (distance <= radius) {
             return scaling * gaussianNeighborhood(distance, radius, 2);
-        } else {
+        }
+        else {
             return 0.0;
         }
     }

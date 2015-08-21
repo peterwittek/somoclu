@@ -33,15 +33,14 @@
 
 float get_distance(float* codebook, float* data,
                    unsigned int som_y, unsigned int som_x, unsigned int nSomX,
-                   unsigned int nDimensions, unsigned int r)
-{
+                   unsigned int nDimensions, unsigned int r) {
     float distance = 0.0f;
     for (unsigned int d = 0; d < nDimensions; d++)
-        distance += (codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] -
-                     *(data + r*nDimensions + d))
+        distance += (codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] -
+                     * (data + r * nDimensions + d))
                     *
-                    (codebook[som_y*nSomX*nDimensions+som_x*nDimensions+d] -
-                     *(data + r*nDimensions + d));
+                    (codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] -
+                     * (data + r * nDimensions + d));
     return distance;
 }
 
@@ -51,8 +50,7 @@ float get_distance(float* codebook, float* data,
  */
 void get_bmu_coord(float* codebook, float* data,
                    unsigned int nSomY, unsigned int nSomX,
-                   unsigned int nDimensions, unsigned int* coords, unsigned int n)
-{
+                   unsigned int nDimensions, unsigned int* coords, unsigned int n) {
     float mindist = 9999.99;
     float dist = 0.0f;
 
@@ -77,11 +75,10 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nSomX, unsigned int nSomY,
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius,
-                           float scale, string mapType, string gridType, 
-                           bool compact_support, int *globalBmus)
-{
+                           float scale, string mapType, string gridType,
+                           bool compact_support, int *globalBmus) {
     unsigned int p1[2] = {0, 0};
-    unsigned int *bmus = new unsigned int[nVectorsPerRank*2];
+    unsigned int *bmus = new unsigned int[nVectorsPerRank * 2];
 #ifdef _OPENMP
     #pragma omp parallel default(shared) private(p1)
 #endif
@@ -90,21 +87,22 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
         #pragma omp for
 #endif
 #ifdef _WIN32
-		for (int n = 0; n < nVectorsPerRank; n++) {
+        for (int n = 0; n < nVectorsPerRank; n++) {
 #else
-	    for (unsigned int n = 0; n < nVectorsPerRank; n++) {
+        for (unsigned int n = 0; n < nVectorsPerRank; n++) {
 #endif
-            if (itask*nVectorsPerRank+n<nVectors) {
+            if (itask * nVectorsPerRank + n < nVectors) {
                 /// get the best matching unit
                 get_bmu_coord(codebook, data, nSomY, nSomX,
                               nDimensions, p1, n);
-                bmus[2*n] = p1[0]; bmus[2*n+1] = p1[1];
-              }
+                bmus[2 * n] = p1[0];
+                bmus[2 * n + 1] = p1[1];
+            }
         }
     }
 
-    float *localNumerator = new float[nSomY*nSomX*nDimensions];
-    float *localDenominator = new float[nSomY*nSomX];
+    float *localNumerator = new float[nSomY * nSomX * nDimensions];
+    float *localDenominator = new float[nSomY * nSomX];
 #ifdef _OPENMP
     #pragma omp parallel default(shared)
 #endif
@@ -113,14 +111,14 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
         #pragma omp for
 #endif
 #ifdef _WIN32
-      for (int som_y = 0; som_y < nSomY; som_y++) {
+        for (int som_y = 0; som_y < nSomY; som_y++) {
 #else
-      for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+        for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
 #endif
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-                localDenominator[som_y*nSomX + som_x] = 0.0;
+                localDenominator[som_y * nSomX + som_x] = 0.0;
                 for (unsigned int d = 0; d < nDimensions; d++)
-                    localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] = 0.0;
+                    localNumerator[som_y * nSomX * nDimensions + som_x * nDimensions + d] = 0.0;
             }
         }
         /// Accumulate denoms and numers
@@ -128,35 +126,38 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
         #pragma omp for
 #endif
 #ifdef _WIN32
-      for (int som_y = 0; som_y < nSomY; som_y++) {
+        for (int som_y = 0; som_y < nSomY; som_y++) {
 #else
-      for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+        for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
 #endif
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 for (unsigned int n = 0; n < nVectorsPerRank; n++) {
-                    if (itask*nVectorsPerRank+n<nVectors) {
+                    if (itask * nVectorsPerRank + n < nVectors) {
                         float dist = 0.0f;
                         if (gridType == "square") {
                             if (mapType == "planar") {
-                                dist = euclideanDistanceOnPlanarMap(som_x, som_y, bmus[2*n], bmus[2*n+1]);
-                            } else if (mapType == "toroid") {
-                                dist = euclideanDistanceOnToroidMap(som_x, som_y, bmus[2*n], bmus[2*n+1], nSomX, nSomY);
+                                dist = euclideanDistanceOnPlanarMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1]);
                             }
-                        } else {
+                            else if (mapType == "toroid") {
+                                dist = euclideanDistanceOnToroidMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1], nSomX, nSomY);
+                            }
+                        }
+                        else {
                             if (mapType == "planar") {
-                                dist = euclideanDistanceOnHexagonalPlanarMap(som_x, som_y, bmus[2*n], bmus[2*n+1]);
-                            } else if (mapType == "toroid") {
-                                dist = euclideanDistanceOnHexagonalToroidMap(som_x, som_y, bmus[2*n], bmus[2*n+1], nSomX, nSomY);
-                            }                          
+                                dist = euclideanDistanceOnHexagonalPlanarMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1]);
+                            }
+                            else if (mapType == "toroid") {
+                                dist = euclideanDistanceOnHexagonalToroidMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1], nSomX, nSomY);
+                            }
                         }
                         float neighbor_fuct = getWeight(dist, radius, scale, compact_support);
-                        
+
                         for (unsigned int d = 0; d < nDimensions; d++) {
-                            localNumerator[som_y*nSomX*nDimensions + som_x*nDimensions + d] +=
+                            localNumerator[som_y * nSomX * nDimensions + som_x * nDimensions + d] +=
                                 1.0f * neighbor_fuct
-                                * (*(data + n*nDimensions + d));
+                                * (*(data + n * nDimensions + d));
                         }
-                        localDenominator[som_y*nSomX + som_x] += neighbor_fuct;
+                        localDenominator[som_y * nSomX + som_x] += neighbor_fuct;
                     }
                 }
             }
@@ -164,20 +165,20 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
     }
 #ifdef HAVE_MPI
     MPI_Reduce(localNumerator, numerator,
-               nSomY*nSomX*nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+               nSomY * nSomX * nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(localDenominator, denominator,
-               nSomY*nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Gather(bmus, nVectorsPerRank*2, MPI_INT, globalBmus, nVectorsPerRank*2, MPI_INT, 0, MPI_COMM_WORLD);
+               nSomY * nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
 
 #else
-    for (unsigned int i=0; i < nSomY*nSomX*nDimensions; ++i) {
+    for (unsigned int i = 0; i < nSomY * nSomX * nDimensions; ++i) {
         numerator[i] = localNumerator[i];
     }
-    for (unsigned int i=0; i < nSomY*nSomX; ++i) {
+    for (unsigned int i = 0; i < nSomY * nSomX; ++i) {
         denominator[i] = localDenominator[i];
     }
-    for (unsigned int i=0; i < 2*nVectorsPerRank; ++i) {
-      globalBmus[i]=bmus[i];
+    for (unsigned int i = 0; i < 2 * nVectorsPerRank; ++i) {
+        globalBmus[i] = bmus[i];
     }
 #endif
     delete [] bmus;
