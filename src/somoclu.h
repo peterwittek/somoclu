@@ -56,7 +56,7 @@ int saveCodebook(string cbFileName, float *codebook,
                  unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions);
 float *calculateUMatrix(float* uMatrix, float *codebook, unsigned int nSomX,
                         unsigned int nSomY, unsigned int nDimensions, 
-                        string mapType);
+                        string mapType, string gridType);
 int saveUMatrix(string fname, float *uMatrix, unsigned int nSomX, 
                 unsigned int nSomY);
 int saveBmus(string filename, int *bmus, unsigned int nSomX, 

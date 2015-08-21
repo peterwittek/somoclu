@@ -251,7 +251,8 @@ int main(int argc, char** argv)
         ///
         /// Save U-mat
         ///
-        calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType);
+        calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
+                         gridType);
         int ret =  saveUMatrix(outPrefix + string(".umx"), uMatrix, nSomX, nSomY);        
         if (ret < 0)
             cout << "    Failed to save u-matrix. !" << endl;

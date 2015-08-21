@@ -52,7 +52,8 @@ void train(float *data, int data_length, unsigned int nEpoch,
 #else
            );
 #endif
-    calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType);
+    calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
+                     gridType);
 }
 
 void train(int itask, float *data, svm_node **sparseData,
@@ -120,7 +121,7 @@ void train(int itask, float *data, svm_node **sparseData,
 #ifdef CLI
         if (snapshots > 0 && itask == 0) {
             calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, 
-                             mapType);
+                             mapType, gridType);
             stringstream sstm;
             sstm << outPrefix << "." << currentEpoch + 1;
             saveUMatrix(sstm.str() + string(".umx"), uMatrix, nSomX, nSomY);
