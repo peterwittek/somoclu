@@ -5,7 +5,6 @@ from matplotlib.pylab import matshow
 
 import somoclu_wrap
 
-
 class Somoclu(object):
 
 
@@ -17,6 +16,7 @@ class Somoclu(object):
             self.data = data
         self.nVectors, self.nDimensions = data.shape
         self.nSomX, self.nSomY = nSomX, nSomY
+        self.gridType = "square"
         self.globalBmus = np.zeros(self.nVectors*2, dtype=np.intc)
         self.uMatrix = np.zeros(nSomX * nSomY, dtype=np.float32)
         if initialCodebook is None:
@@ -32,11 +32,12 @@ class Somoclu(object):
             else:
                 self.codebook = initialCodebook
 
-
     def train(self, nEpoch=10, radius0=0, radiusN=1, radiusCooling="linear",
               scale0=0.1, scaleN=0.01, scaleCooling="linear",
               kernelType=0, mapType="planar", gridType="square",
               compact_support=False):
+        check_parameters(radiusCooling, scaleCooling, kernelType, mapType,
+                         gridType)
         somoclu_wrap.train(np.ravel(self.data), nEpoch, self.nSomX, self.nSomY,
                            self.nDimensions, self.nVectors, radius0, radiusN,
                            radiusCooling, scale0, scaleN, scaleCooling,
@@ -54,3 +55,15 @@ class Somoclu(object):
 
     def view_U_matrix(self):
         matshow(self.uMatrix, cmap=cm.Spectral_r)
+
+def check_parameters(radiusCooling, scaleCooling, kernelType, mapType, gridType):
+    if radiusCooling != "linear" and radiusCooling!= "exponential":
+        raise Exception("Invalid parameter for radiusCooling: "+radiusCooling)
+    if scaleCooling != "linear" and scaleCooling!= "exponential":
+        raise Exception("Invalid parameter for scaleCooling: "+scaleCooling)
+    if mapType!= "planar" and scaleCooling!= "toroid":
+        raise Exception("Invalid parameter for mapType: "+mapType)
+    if gridType != "square" and scaleCooling!= "hexagonal":
+        raise Exception("Invalid parameter for gridType: "+gridType)
+    if kernelType!=0 and kernelType!=1:
+        raise Exception("Invalid parameter for kernelTye: "+kernelType)
