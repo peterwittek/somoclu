@@ -52,7 +52,9 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                         string *scaleCooling,
                         unsigned int *nSomX, unsigned int *nSomY,
                         unsigned int *kernelType, string *mapType,
-                        unsigned int *snapshots, string *initialCodebookFilename);
+                        unsigned int *snapshots, 
+                        string *gridType, unsigned int *compactSupport,
+                        string *initialCodebookFilename);
 
 /* -------------------------------------------------------------------------- */
 int main(int argc, char** argv)
@@ -76,6 +78,8 @@ int main(int argc, char** argv)
     unsigned int nSomY = 0;
     unsigned int kernelType = 0;
     string mapType;
+    string gridType;
+    unsigned int compactSupport;
     unsigned int radius0 = 0;
     unsigned int radiusN = 0;
     string radiusCooling;
@@ -93,6 +97,7 @@ int main(int argc, char** argv)
                            &scale0, &scaleN, &scaleCooling,
                            &nSomX, &nSomY,
                            &kernelType, &mapType, &snapshots,
+                           &gridType, &compactSupport,
                            &initialCodebookFilename);
 #ifndef CUDA
         if (kernelType == DENSE_GPU) {
@@ -107,6 +112,7 @@ int main(int argc, char** argv)
     MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&compactSupport, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     char *inFilenameCStr = new char[255];
     if (rank == 0) {
@@ -121,6 +127,14 @@ int main(int argc, char** argv)
     }
     MPI_Bcast(mapTypeCStr, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
     mapType = mapTypeCStr;
+
+    char *gridTypeCStr = new char[255];
+    if (rank == 0) {
+        strcpy(gridTypeCStr,gridType.c_str());
+    }
+    MPI_Bcast(gridTypeCStr, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
+    gridType = gridTypeCStr;
+
 
     double profile_time = MPI_Wtime();
 #endif
@@ -210,18 +224,17 @@ int main(int argc, char** argv)
             cout << "Read initial codebook: " << initialCodebookFilename << "\n";
         }
     }
-
 #ifdef HAVE_MPI 
     MPI_Barrier(MPI_COMM_WORLD);
     double training_time = MPI_Wtime();
 #endif    
-
     // TRAINING
     train(rank, data, sparseData, codebook, globalBmus, uMatrix, nSomX, nSomY,
           nDimensions, nVectors, nVectorsPerRank,
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
+          gridType, compactSupport == 1,
           outPrefix, snapshots);
 
 #ifdef HAVE_MPI
@@ -281,11 +294,13 @@ void printUsage() {
          "Arguments:\n" \
          "     -c FILENAME           Specify an initial codebook for the map.\n" \
          "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
+         "     -g TYPE               Grid type: square or hexagonal (default: square)\n"\
          "     -k NUMBER             Kernel type (default: " << KERNEL_TYPE << "): \n" \
          "                              0: Dense CPU\n" \
          "                              1: Dense GPU\n" \
          "                              2: Sparse CPU\n" \
          "     -m TYPE               Map type: planar or toroid (default: planar) \n" \
+         "     -p NUMBER             Compact support for map update (0: false, 1: true, default: 0)\n"\
          "     -t STRATEGY           Radius cooling strategy: linear or exponential (default: linear)\n" \
          "     -r NUMBER             Start radius (default: half of the map in direction min(x,y))\n" \
          "     -R NUMBER             End radius (default: 1)\n" \
@@ -311,7 +326,9 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                         string *scaleCooling,
                         unsigned int *nSomX, unsigned int *nSomY,
                         unsigned int *kernelType, string *mapType,
-                        unsigned int *snapshots, string *initialCodebookFilename) {
+                        unsigned int *snapshots, 
+                        string *gridType, unsigned int *compactSupport,
+                        string *initialCodebookFilename) {
 
     // Setting default values
     *nEpoch = N_EPOCH;
@@ -326,6 +343,8 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     *scale0 = 0.0;
     *scaleN = 0.01;
     *scaleCooling = "linear";
+    *gridType = "square";
+    *compactSupport = 0;
     static struct option long_options[] =
     {
         {"rows",  required_argument, 0, 'y'},
@@ -335,7 +354,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     int c;
     extern int optind, optopt;
     int option_index = 0;
-    while ((c = getopt_long (argc, argv, "hx:y:e:k:l:m:r:s:t:c:L:R:T:",
+    while ((c = getopt_long (argc, argv, "hx:y:e:g:k:l:m:p:r:s:t:c:L:R:T:",
                              long_options, &option_index)) != -1) {
         switch (c) {
         case 'c':
@@ -359,10 +378,24 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                 my_abort(1);
             }
             break;
+        case 'p':
+            *compactSupport = atoi(optarg);
+            if (*compactSupport!=0&&*compactSupport!=1) {
+                cerr << "The argument of option -g should be either 0 (false) or 1 (true).\n";
+                my_abort(1);
+            }
+            break;
         case 'm':
             *mapType = optarg;
             if (*mapType!="planar"&&*mapType!="toroid") {
                 cerr << "The argument of option -m should be either planar or toroid.\n";
+                my_abort(1);
+            }
+            break;
+        case 'g':
+            *gridType = optarg;
+            if (*gridType!="square"&&*gridType!="hexagonal") {
+                cerr << "The argument of option -h should be either square or hexagonal.\n";
                 my_abort(1);
             }
             break;

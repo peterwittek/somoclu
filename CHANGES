@@ -1,4 +1,6 @@
 Since 1.4.1:
+  - New: Option for hexagonal grid.
+  - New: Option for requesting compact support in updating the map.
   - New: Python and R interfaces now allow passing an initial codebook.
   - Changed: Reduced memory use in calculating U-matrices.
 

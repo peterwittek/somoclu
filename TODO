@@ -3,5 +3,4 @@
   - Improve documentation of wrappers. Python documentation should go to https://readthedocs.org/.
   - Pass a single-precision array from R without making a copy.
   - Upload to MATLAB FileExchange.
-  - Implement hexagonal grid.
   - Reimplement GPU kernels in CUDA to replace Thrust (testing is currently in cuda_opt branch).

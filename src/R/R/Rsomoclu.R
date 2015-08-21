@@ -8,7 +8,8 @@ Rsomoclu.train <-
            radius0, radiusN,
            radiusCooling, scale0, scaleN,
            scaleCooling,
-           kernelType, mapType, codebook=NULL) {
+           kernelType=0, mapType="planar", gridType="square", 
+           compactSupport=FALSE, codebook=NULL) {
     if (is.null(codebook)) {
       codebook <- numeric(nSomX*nSomY*dim(input_data)[2])
       codebook[1] <- 1000
@@ -17,6 +18,8 @@ Rsomoclu.train <-
     res <- .Call("Rtrain", input_data, nEpoch,
                  nSomX, nSomY, radius0, radiusN,
                  radiusCooling, scale0, scaleN,
-                 scaleCooling, kernelType, mapType, codebook)
+                 scaleCooling, kernelType, mapType,
+                 gridType, compactSupport,
+                 codebook)
     res
 }

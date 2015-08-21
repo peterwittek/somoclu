@@ -57,9 +57,19 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
   if(mapType_c != NULL){
       mapType = mapType_c;
     }else{
-      mapType = "";
+      mapType = "planar";
     }
   mxFree(mapType_c);
+
+  string gridType;
+  char* gridType_c = mxArrayToString(prhs[12]);
+  if(gridType_c != NULL){
+      gridType = gridType_c;
+    }else{
+      gridType = "square";
+    }
+  mxFree(gridType_c);
+  bool compactSupport = (bool) mxGetPr(prhs[13])[0];
 
   int codebook_size =  nSomY * nSomX * nDimensions;
   int globalBmus_size = nVectors * 2;
@@ -71,7 +81,7 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
   train(data, data_length, nEpoch, nSomX, nSomY,
         nDimensions, nVectors, radius0, radiusN,
         radiusCooling, scale0, scaleN, scaleCooling,
-        kernelType, mapType, 
+        kernelType, mapType, gridType, compactSupport,
         codebook, codebook_size, globalBmus, globalBmus_size,
         uMatrix, uMatrix_size);
 

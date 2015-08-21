@@ -35,11 +35,12 @@ class Somoclu(object):
 
     def train(self, nEpoch=10, radius0=0, radiusN=1, radiusCooling="linear",
               scale0=0.1, scaleN=0.01, scaleCooling="linear",
-              kernelType=0, mapType="planar"):
+              kernelType=0, mapType="planar", gridType="square",
+              compact_support=False):
         somoclu_wrap.train(np.ravel(self.data), nEpoch, self.nSomX, self.nSomY,
                            self.nDimensions, self.nVectors, radius0, radiusN,
                            radiusCooling, scale0, scaleN, scaleCooling,
-                           kernelType, mapType, self.codebook, self.globalBmus,
+                           kernelType, mapType, gridType, compact_support, self.codebook, self.globalBmus,
                            self.uMatrix)
         self.uMatrix.shape = (self.nSomY, self.nSomX)
         self.globalBmus.shape = (self.nVectors, 2)

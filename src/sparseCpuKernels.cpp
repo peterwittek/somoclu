@@ -84,7 +84,8 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                             unsigned int nSomX, unsigned int nSomY,
                             unsigned int nDimensions, unsigned int nVectors,
                             unsigned int nVectorsPerRank, float radius,
-                            float scale, string mapType, int *globalBmus)
+                            float scale, string mapType, string gridType, 
+                            bool compact_support, int *globalBmus)
 {
     int p1[2] = {0, 0};
     int *bmus = new int[nVectorsPerRank*2];
@@ -144,12 +145,20 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                 for (unsigned int n = 0; n < nVectorsPerRank; n++) {
                     if (itask*nVectorsPerRank+n<nVectors) {
                         float dist = 0.0f;
-                        if (mapType == "planar") {
-                            dist = euclideanDistanceOnPlanarMap(som_x, som_y, bmus[2*n], bmus[2*n+1]);
-                        } else if (mapType == "toroid") {
-                            dist = euclideanDistanceOnToroidMap(som_x, som_y, bmus[2*n], bmus[2*n+1], nSomX, nSomY);
+                        if (gridType == "square") {
+                            if (mapType == "planar") {
+                                dist = euclideanDistanceOnPlanarMap(som_x, som_y, bmus[2*n], bmus[2*n+1]);
+                            } else if (mapType == "toroid") {
+                                dist = euclideanDistanceOnToroidMap(som_x, som_y, bmus[2*n], bmus[2*n+1], nSomX, nSomY);
+                            }
+                        } else {
+                            if (mapType == "planar") {
+                                dist = euclideanDistanceOnHexagonalPlanarMap(som_x, som_y, bmus[2*n], bmus[2*n+1]);
+                            } else if (mapType == "toroid") {
+                                dist = euclideanDistanceOnHexagonalToroidMap(som_x, som_y, bmus[2*n], bmus[2*n+1], nSomX, nSomY);
+                            }                          
                         }
-                        float neighbor_fuct = getWeight(dist, radius, scale);
+                        float neighbor_fuct = getWeight(dist, radius, scale, compact_support);
                         unsigned int j=0;
                         while ( sparseData[n][j].index!=-1 ) {
                             localNumerator[som_y*nSomX*nDimensions +
