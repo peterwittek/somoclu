@@ -86,30 +86,6 @@ class Somoclu(object):
         plt.show()
         plt.clf()
 
-    def hit_map(self):
-        proj = self.project_data()
-        msz = (self.nSomX, self.nSomY)
-        coord_d = self.ind_to_xy(proj)
-        a = plt.hist2d(coord_d[:, 1], coord_d[:, 0], bins=(msz[1], msz[0]),
-                       alpha=.0, norm=LogNorm(), cmap=cm.jet)
-
-        x = np.arange(.5, msz[1]+.5, 1)
-        y = np.arange(.5, msz[0]+.5, 1)
-        X, Y = np.meshgrid(x, y)
-
-        area = a[0].T*50
-
-        plt.scatter(coord_d[:, 1]+.5, msz[0]-.5 - coord_d[:, 0], s=area,
-                    alpha=0.9, c='None', marker='o', cmap='jet', linewidths=3,
-                    edgecolor='r')
-        plt.scatter(coord_d[:, 1]+.5, msz[0]-.5-coord_d[:, 0], s=area,
-                    alpha=0.2, c='b', marker='o', cmap='jet', linewidths=3,
-                    edgecolor='r')
-        plt.xlim(0, msz[1])
-        plt.ylim(0, msz[0])
-
-        plt.show()
-
 
 def check_parameters(radiusCooling, scaleCooling, kernelType, mapType,
                      gridType):
