@@ -3,10 +3,10 @@ import numpy as np
 import matplotlib.cm as cm
 from matplotlib.pylab import matshow
 
-import somoclu_wrap
+from .somoclu_wrap import train as wrap_train
+
 
 class Somoclu(object):
-
 
     def __init__(self, data, nSomX, nSomY, initialCodebook=None):
         if data.dtype != np.float32:
@@ -27,7 +27,8 @@ class Somoclu(object):
             raise Exception("Invalid size for initial codebook")
         else:
             if initialCodebook.dtype != np.float32:
-                print("Warning: initialCodebook was not float32. A 32-bit copy was made")
+                print("Warning: initialCodebook was not float32. A 32-bit "
+                      "copy was made")
                 self.codebook = np.float32(initialCodebook)
             else:
                 self.codebook = initialCodebook
@@ -38,11 +39,12 @@ class Somoclu(object):
               compact_support=False):
         check_parameters(radiusCooling, scaleCooling, kernelType, mapType,
                          gridType)
-        somoclu_wrap.train(np.ravel(self.data), nEpoch, self.nSomX, self.nSomY,
-                           self.nDimensions, self.nVectors, radius0, radiusN,
-                           radiusCooling, scale0, scaleN, scaleCooling,
-                           kernelType, mapType, gridType, compact_support, self.codebook, self.globalBmus,
-                           self.uMatrix)
+        wrap_train(np.ravel(self.data), nEpoch, self.nSomX, self.nSomY,
+                   self.nDimensions, self.nVectors, radius0, radiusN,
+                   radiusCooling, scale0, scaleN, scaleCooling,
+                   kernelType, mapType, gridType, compact_support,
+                   self.codebook, self.globalBmus,
+                   self.uMatrix)
         self.uMatrix.shape = (self.nSomY, self.nSomX)
         self.globalBmus.shape = (self.nVectors, 2)
         self.codebook.shape = (self.nSomY, self.nSomX, self.nDimensions)
@@ -51,19 +53,21 @@ class Somoclu(object):
         if dimensions is None:
             dimensions = range(self.nDimensions)
         for i in dimensions:
-            matshow(self.codebook[:,:,i], cmap=cm.Spectral_r)
+            matshow(self.codebook[:, :, i], cmap=cm.Spectral_r)
 
     def view_U_matrix(self):
         matshow(self.uMatrix, cmap=cm.Spectral_r)
 
-def check_parameters(radiusCooling, scaleCooling, kernelType, mapType, gridType):
-    if radiusCooling != "linear" and radiusCooling!= "exponential":
+
+def check_parameters(radiusCooling, scaleCooling, kernelType, mapType,
+                     gridType):
+    if radiusCooling != "linear" and radiusCooling != "exponential":
         raise Exception("Invalid parameter for radiusCooling: "+radiusCooling)
-    if scaleCooling != "linear" and scaleCooling!= "exponential":
+    if scaleCooling != "linear" and scaleCooling != "exponential":
         raise Exception("Invalid parameter for scaleCooling: "+scaleCooling)
-    if mapType!= "planar" and scaleCooling!= "toroid":
+    if mapType != "planar" and mapType != "toroid":
         raise Exception("Invalid parameter for mapType: "+mapType)
-    if gridType != "square" and scaleCooling!= "hexagonal":
+    if gridType != "square" and gridType != "hexagonal":
         raise Exception("Invalid parameter for gridType: "+gridType)
-    if kernelType!=0 and kernelType!=1:
+    if kernelType != 0 and kernelType != 1:
         raise Exception("Invalid parameter for kernelTye: "+kernelType)
