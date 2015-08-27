@@ -1,7 +1,9 @@
 from __future__ import division, print_function
 import numpy as np
 import matplotlib.cm as cm
+import matplotlib.pyplot as plt
 from matplotlib.pylab import matshow
+from matplotlib.colors import LogNorm
 
 from .somoclu_wrap import train as wrap_train
 
@@ -54,9 +56,59 @@ class Somoclu(object):
             dimensions = range(self.nDimensions)
         for i in dimensions:
             matshow(self.codebook[:, :, i], cmap=cm.Spectral_r)
+        plt.clf()
 
-    def view_U_matrix(self):
-        matshow(self.uMatrix, cmap=cm.Spectral_r)
+    def view_U_matrix(self, colormap='spectral', colorbar=False,
+                      bestmatches=False, bestmatchcolors=None, labels=None):
+        # matshow(self.uMatrix, cmap=cm.Spectral_r)
+        plt.figure(figsize=(12, 7))
+        kw = {'origin': 'lower', 'aspect': 'equal'}
+        imgplot = plt.imshow(self.uMatrix, **kw)
+        imgplot.set_cmap(colormap)
+        if colorbar:
+            plt.colorbar(orientation="horizontal", shrink=0.5)
+        if bestmatches:
+            if bestmatchcolors is None:
+                colors = "white"
+            else:
+                colors = bestmatchcolors
+            plt.scatter(self.globalBmus.T[0], self.globalBmus.T[1], c=colors)
+        if labels is not None:
+            for label, x, y in zip(labels, self.globalBmus.T[0],
+                                   self.globalBmus.T[1]):
+                if label is not None:
+                    plt.annotate(label, xy=(x, y), xytext=(10, -5),
+                                 textcoords='offset points', ha='left',
+                                 va='bottom',
+                                 bbox=dict(boxstyle='round,pad=0.3',
+                                           fc='white', alpha=0.8))
+        plt.axis('off')
+        plt.show()
+        plt.clf()
+
+    def hit_map(self):
+        proj = self.project_data()
+        msz = (self.nSomX, self.nSomY)
+        coord_d = self.ind_to_xy(proj)
+        a = plt.hist2d(coord_d[:, 1], coord_d[:, 0], bins=(msz[1], msz[0]),
+                       alpha=.0, norm=LogNorm(), cmap=cm.jet)
+
+        x = np.arange(.5, msz[1]+.5, 1)
+        y = np.arange(.5, msz[0]+.5, 1)
+        X, Y = np.meshgrid(x, y)
+
+        area = a[0].T*50
+
+        plt.scatter(coord_d[:, 1]+.5, msz[0]-.5 - coord_d[:, 0], s=area,
+                    alpha=0.9, c='None', marker='o', cmap='jet', linewidths=3,
+                    edgecolor='r')
+        plt.scatter(coord_d[:, 1]+.5, msz[0]-.5-coord_d[:, 0], s=area,
+                    alpha=0.2, c='b', marker='o', cmap='jet', linewidths=3,
+                    edgecolor='r')
+        plt.xlim(0, msz[1])
+        plt.ylim(0, msz[0])
+
+        plt.show()
 
 
 def check_parameters(radiusCooling, scaleCooling, kernelType, mapType,
