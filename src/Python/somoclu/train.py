@@ -10,17 +10,22 @@ from .somoclu_wrap import train as wrap_train
 
 class Somoclu(object):
 
-    def __init__(self, data, nSomX, nSomY, initialCodebook=None):
-        if data.dtype != np.float32:
-            print("Warning: data was not float32. A 32-bit copy was made")
-            self.data = np.float32(data)
+    def __init__(self, nSomX, nSomY, data=None, initialCodebook=None):
+        if data is not None:
+                if data.dtype != np.float32:
+                    print("Warning: data was not float32. A 32-bit copy was "
+                          "made")
+                    self.data = np.float32(data)
+                else:
+                    self.data = data
+                self.nVectors, self.nDimensions = data.shape
         else:
-            self.data = data
-        self.nVectors, self.nDimensions = data.shape
+            self.nVectors = 0
+            self.nDimensions = 0
         self.nSomX, self.nSomY = nSomX, nSomY
         self.gridType = "square"
-        self.globalBmus = np.zeros(self.nVectors*2, dtype=np.intc)
-        self.uMatrix = np.zeros(nSomX * nSomY, dtype=np.float32)
+        self.bmus = np.zeros(self.nVectors*2, dtype=np.intc)
+        self.umatrix = np.zeros(nSomX * nSomY, dtype=np.float32)
         if initialCodebook is None:
             self.codebook = np.zeros(self.nSomY*self.nSomX*self.nDimensions,
                                      dtype=np.float32)
@@ -35,6 +40,33 @@ class Somoclu(object):
             else:
                 self.codebook = initialCodebook
 
+    def load_bmus(self, filename):
+        self.bmus = np.loadtxt(filename, comments='%')
+        if self.nVectors != 0 and len(self.bmus) != self.nVectors:
+            raise Exception("The number of best matching units does not match"
+                            "the number of data instances")
+        else:
+            self.nVectors = len(self.bmus)
+        if max(self.bmus[:, 1]) > self.nSomX - 1 or \
+                max(self.bmus[:, 2]) > self.nSomY - 1:
+            raise Exception("The dimensions of the best matching units do not"
+                            "match that of the map")
+
+    def load_umatrix(self, filename):
+        self.umatrix = np.loadtxt(filename, comments='%')
+        if self.umatrix.shape != (self.nSomX, self.nSomY):
+            raise Exception("The dimensions of the U-matrix do not "
+                            "match that of the map")
+
+    def load_codebook(self, filename):
+        self.codebook = np.loadtxt(filename, comments='%')
+        if self.nDimensions == 0:
+            self.nDimensions = self.codebook.shape[1]
+        if self.codebook.shape != (self.nSomY*self.nSomX, self.nDimensions):
+            raise Exception("The dimensions of the codebook do not "
+                            "match that of the map")
+        self.codebook.shape = (self.nSomY, self.nSomX, self.nDimensions)
+
     def train(self, nEpoch=10, radius0=0, radiusN=1, radiusCooling="linear",
               scale0=0.1, scaleN=0.01, scaleCooling="linear",
               kernelType=0, mapType="planar", gridType="square",
@@ -45,10 +77,10 @@ class Somoclu(object):
                    self.nDimensions, self.nVectors, radius0, radiusN,
                    radiusCooling, scale0, scaleN, scaleCooling,
                    kernelType, mapType, gridType, compact_support,
-                   self.codebook, self.globalBmus,
-                   self.uMatrix)
-        self.uMatrix.shape = (self.nSomY, self.nSomX)
-        self.globalBmus.shape = (self.nVectors, 2)
+                   self.codebook, self.bmus,
+                   self.umatrix)
+        self.umatrix.shape = (self.nSomY, self.nSomX)
+        self.bmus.shape = (self.nVectors, 2)
         self.codebook.shape = (self.nSomY, self.nSomX, self.nDimensions)
 
     def view_component_planes(self, dimensions=None):
@@ -58,12 +90,12 @@ class Somoclu(object):
             matshow(self.codebook[:, :, i], cmap=cm.Spectral_r)
         plt.clf()
 
-    def view_U_matrix(self, colormap='spectral', colorbar=False,
+    def view_umatrix(self, colormap='spectral', colorbar=False,
                       bestmatches=False, bestmatchcolors=None, labels=None):
-        # matshow(self.uMatrix, cmap=cm.Spectral_r)
+        # matshow(self.umatrix, cmap=cm.Spectral_r)
         plt.figure(figsize=(12, 7))
         kw = {'origin': 'lower', 'aspect': 'equal'}
-        imgplot = plt.imshow(self.uMatrix, **kw)
+        imgplot = plt.imshow(self.umatrix, **kw)
         imgplot.set_cmap(colormap)
         if colorbar:
             plt.colorbar(orientation="horizontal", shrink=0.5)
@@ -72,10 +104,10 @@ class Somoclu(object):
                 colors = "white"
             else:
                 colors = bestmatchcolors
-            plt.scatter(self.globalBmus.T[0], self.globalBmus.T[1], c=colors)
+            plt.scatter(self.bmus[:, 0], self.bmus[:, 1], c=colors)
         if labels is not None:
-            for label, x, y in zip(labels, self.globalBmus.T[0],
-                                   self.globalBmus.T[1]):
+            for label, x, y in zip(labels, self.bmus[:, 0],
+                                   self.bmus[:, 1]):
                 if label is not None:
                     plt.annotate(label, xy=(x, y), xytext=(10, -5),
                                  textcoords='offset points', ha='left',
