@@ -24,9 +24,9 @@ Somoclu MATLAB Extension Build Guide (Linux/Mac):
 where ``MEX_BIN`` is the path to the MATLAB installation mex binary.
 
 If you see errors like:
-  ::
-     nvcc fatal   : Unsupported gpu architecture 'compute_13'
-     mex: compile of ' "MexSomoclu.cpp"' failed.
+::
+  nvcc fatal: Unsupported gpu architecture 'compute_13'
+  mex: compile of ' "MexSomoclu.cpp"' failed.
 
 when using **CUDA 7**, which removed support for ``compute_13``, you may need to remove all ``-gencode=arch=compute_13,code=sm_13`` from ``mexopts.sh`` which is located usually at ``MATLAB_ROOT/toolbox/distcomp/gpu/extern/src/mex/glnxa64/``. Then run the previous build script ``makeMex.sh``.
 
