@@ -11,17 +11,25 @@ License: GPL-3
 OS_type: unix, windows
 
 Somoclu MATLAB Extension Build Guide (Linux/Mac):
-================================
+=============================================
 
-1. Follow the instructions to build Somoclu itself at: https://github.com/peterwittek/somoclu
+1. Follow the instructions to build Somoclu itself without MPI and CUDA at: https://github.com/peterwittek/somoclu
 
    **(OS X users see the Note below first)**
 
 2. Build MATLAB Extension by running:
    ::
       MEX_BIN="/usr/local/MATLAB/R2013a/bin/mex" ./makeMex.sh
-    
+
 where ``MEX_BIN`` is the path to the MATLAB installation mex binary.
+
+If you see errors like:
+
+::
+  nvcc fatal   : Unsupported gpu architecture 'compute_13'
+  mex: compile of ' "MexSomoclu.cpp"' failed.
+
+when using **CUDA 7**, which removed support for ``compute_13``, you may need to remove all ``-gencode=arch=compute_13,code=sm_13`` from ``mexopts.sh`` which is located usually at ``MATLAB_ROOT/toolbox/distcomp/gpu/extern/src/mex/glnxa64/``. Then run the previous build script ``makeMex.sh``.
 
 3. Then ``MexSomoclu.mexa64`` or ``MexSomoclu.mexa32`` is generated for use, you can test by running the ``mex_interface_test.m``.
 
@@ -39,7 +47,7 @@ and set environment using:
     export CPP=/usr/local/bin/cpp
     export LD=/usr/local/bin/gcc
     alias c++=/usr/local/bin/c++
-    alias g++=/usr/local/bin/g++	
+    alias g++=/usr/local/bin/g++
     alias gcc=/usr/local/bin/gcc
     alias cpp=/usr/local/bin/cpp
     alias ld=/usr/local/bin/gcc
@@ -65,6 +73,6 @@ an example is given at https://gist.github.com/xgdgsc/9832340, then you can foll
 Building Mex Extension on Windows:
 ===================================
 
-First, you should install some supported version of Visual Studio that includes the Visual C++ compiler by your MATLAB version like on `this <http://www.mathworks.com/support/compilers/R2013a/index.html?sec=win64/>`_ page. With MATLAB and Visual Studio installed properly, running ``mex -setup`` in CMD will prompt fpr available compilers and you can choose the appropriate version. 
+First, you should install some supported version of Visual Studio that includes the Visual C++ compiler by your MATLAB version like on `this <http://www.mathworks.com/support/compilers/R2013a/index.html?sec=win64/>`_ page. With MATLAB and Visual Studio installed properly, running ``mex -setup`` in CMD will prompt fpr available compilers and you can choose the appropriate version.
 
 Then run the script in this folder makeMex.bat in CMD and the ``MexSomoclu.mexa64`` or ``MexSomoclu.mexa32`` is generated for use, you can test by running the ``mex_interface_test.m``.
