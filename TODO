@@ -1,6 +1,6 @@
   - Integration with data structures of SOM libraries in Python, R, and MATLAB.
   - Persistent object in C++ to improve efficiency of wrappers.
   - Improve documentation of wrappers. Python documentation should go to https://readthedocs.org/.
-  - Pass a single-precision array from R without making a copy.
   - Upload to MATLAB FileExchange.
+  - Julia interface once v0.4 of the language is released and Cxx.jl matures.
   - Reimplement GPU kernels in CUDA to replace Thrust (testing is currently in cuda_opt branch).
