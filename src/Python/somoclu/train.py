@@ -4,7 +4,8 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from matplotlib.pylab import matshow
 import matplotlib.collections as mcoll
-import matplotlib.transforms as mtrans
+from matplotlib.patches import Circle
+from matplotlib.collections import PatchCollection
 
 from .somoclu_wrap import train as wrap_train
 
@@ -13,13 +14,12 @@ class Somoclu(object):
 
     def __init__(self, nSomX, nSomY, data=None, initialCodebook=None):
         if data is not None:
-                if data.dtype != np.float32:
-                    print("Warning: data was not float32. A 32-bit copy was "
-                          "made")
-                    self.data = np.float32(data)
-                else:
-                    self.data = data
-                self.nVectors, self.nDimensions = data.shape
+            if data.dtype != np.float32:
+                print("Warning: data was not float32. A 32-bit copy was made")
+                self.data = np.float32(data)
+            else:
+                self.data = data
+            self.nVectors, self.nDimensions = data.shape
         else:
             self.nVectors = 0
             self.nDimensions = 0
@@ -27,6 +27,10 @@ class Somoclu(object):
         self.gridType = "square"
         self.bmus = np.zeros(self.nVectors*2, dtype=np.intc)
         self.umatrix = np.zeros(nSomX * nSomY, dtype=np.float32)
+        self.kernelType = 0
+        self.radiusCooling = "linear"
+        self.mapType = "planar"
+        self.scaleCooling = "linear"
         if initialCodebook is None:
             self.codebook = np.zeros(self.nSomY*self.nSomX*self.nDimensions,
                                      dtype=np.float32)
@@ -124,98 +128,57 @@ class Somoclu(object):
     def _view_umatrixhex(self, colormap='spectral', colorbar=False,
                          bestmatches=False, bestmatchcolors=None, labels=None):
 
-        fig = plt.figure()
-        fig.figsize = (12, 7)
-        ax = fig.gca()
-
-        nx, ny = self.nSomX, self.nSomY
-
-        x = np.array(range(self.nSomX), float)
-        y = np.array(range(self.nSomY), float)
-        xmin = np.amin(x)
-        xmax = np.amax(x)
-        ymin = np.amin(y)
-        ymax = np.amax(y)
-        # to avoid issues with singular data, expand the min/max pairs
-        xmin, xmax = mtrans.nonsingular(xmin, xmax, expander=0.1)
-        ymin, ymax = mtrans.nonsingular(ymin, ymax, expander=0.1)
-
-        # In the x-direction, the hexagons exactly cover the region from
-        # xmin to xmax. Need some padding to avoid roundoff errors.
-        padding = 1.e-9 * (xmax - xmin)
-        xmin -= padding
-        xmax += padding
-        sx = (xmax - xmin) / nx
-        sy = (ymax - ymin) / ny
-
-        x = (x - xmin) / sx
-        y = (y - ymin) / sy
-        ix1 = np.round(x).astype(int)
-        iy1 = np.round(y).astype(int)
-        ix2 = np.floor(x).astype(int)
-        iy2 = np.floor(y).astype(int)
-
-        nx1 = nx + 1
-        ny1 = ny + 1
-        nx2 = nx
-        ny2 = ny
-        n = nx1 * ny1 + nx2 * ny2
-
-        d1 = (x - ix1) ** 2 + 3.0 * (y - iy1) ** 2
-        d2 = (x - ix2 - 0.5) ** 2 + 3.0 * (y - iy2 - 0.5) ** 2
-        bdist = (d1 < d2)
-        accum = np.zeros(n)
-        # Create appropriate views into "accum" array.
-        lattice1 = accum[:nx1 * ny1]
-        lattice2 = accum[nx1 * ny1:]
-        lattice1.shape = (nx1, ny1)
-        lattice2.shape = (nx2, ny2)
-
-        for i in range(len(x)):
-            if bdist[i]:
-                if ((ix1[i] >= 0) and (ix1[i] < nx1) and
-                        (iy1[i] >= 0) and (iy1[i] < ny1)):
-                    lattice1[ix1[i], iy1[i]] += 1
-            else:
-                if ((ix2[i] >= 0) and (ix2[i] < nx2) and
-                        (iy2[i] >= 0) and (iy2[i] < ny2)):
-                    lattice2[ix2[i], iy2[i]] += 1
-        accum = np.hstack((lattice1.astype(float).ravel(),
-                           lattice2.astype(float).ravel()))
-        good_idxs = ~np.isnan(accum)
-
-        offsets = np.zeros((n, 2), float)
-        offsets[:nx1 * ny1, 0] = np.repeat(np.arange(nx1), ny1)
-        offsets[:nx1 * ny1, 1] = np.tile(np.arange(ny1), nx1)
-        offsets[nx1 * ny1:, 0] = np.repeat(np.arange(nx2) + 0.5, ny2)
-        offsets[nx1 * ny1:, 1] = np.tile(np.arange(ny2), nx2) + 0.5
-        offsets[:, 0] *= sx
-        offsets[:, 1] *= sy
-        offsets[:, 0] += xmin
-        offsets[:, 1] += ymin
-        # remove accumulation bins with no data
-        offsets = offsets[good_idxs, :]
-        polygon = np.zeros((6, 2), float)
-        polygon[:, 0] = sx * np.array([0.5, 0.5, 0.0, -0.5, -0.5, 0.0])
-        polygon[:, 1] = sy * np.array([-0.5, 0.5, 1.0, 0.5, -0.5, -1.0])
-        polygons = np.expand_dims(polygon, 0) + np.expand_dims(offsets, 1)
         umatrix_min = self.umatrix.min()
         umatrix_max = self.umatrix.max()
         cmap = plt.get_cmap(colormap)
-        facecolors = [cmap((i-umatrix_min)/(umatrix_max)*255)
-                      for i in self.umatrix.reshape(self.umatrix.size)]
+        nx, ny = self.nSomX, self.nSomY
+        sx = 1.1
+        sy = 1.1
+        offsets = np.zeros((nx*ny, 2))
+        facecolors = []
+        for y in range(ny):
+            for x in range(nx):
+                if y % 2 == 0:
+                    offsets[y*nx + x] = [x+0.5, 2*y]
+                    facecolors.append(cmap((self.umatrix[y, x]-umatrix_min) /
+                                           (umatrix_max)*255))
+                else:
+                    offsets[y*nx + x] = [x, 2*y]
+                    facecolors.append(cmap((self.umatrix[y, x]-umatrix_min) /
+                                           (umatrix_max)*255))
+        polygon = np.zeros((6, 2), float)
+        polygon[:, 0] = sx * np.array([0.5, 0.5, 0.0, -0.5, -0.5, 0.0])
+        polygon[:, 1] = sy * np.array([-np.sqrt(3)/6, np.sqrt(3)/6,
+                                       np.sqrt(3)/2+np.sqrt(3)/6,
+                                       np.sqrt(3)/6, -np.sqrt(3)/6,
+                                       -np.sqrt(3)/2-np.sqrt(3)/6])
+        polygons = np.expand_dims(polygon, 0) + np.expand_dims(offsets, 1)
+
+        fig = plt.figure()
+        fig.figsize = (12, 12)
+        ax = fig.gca()
         collection = mcoll.PolyCollection(
             polygons,
             offsets=offsets,
             facecolors=facecolors,
-            edgecolors='white',
-            linewidths=0.2,
-            transOffset=mtrans.IdentityTransform(),
+            edgecolors=facecolors,
+            linewidths=1.0,
             offset_position="data")
-        corners = ((xmin, ymin), (xmax, ymax))
+        ax.add_collection(collection, autolim=False)
+        if bestmatches:
+            if bestmatchcolors is None:
+                colors = "white"
+            else:
+                colors = bestmatchcolors
+            patches = []
+            for x, y in self.bmus:
+                coords = offsets[y*nx + x]
+                patches += [Circle((coords[0], coords[1]), 0.3)]
+            p = PatchCollection(patches, facecolors=colors, edgecolors=colors)
+            ax.add_collection(p)
+        corners = ((-0.5, -0.5), (nx + 0.5, 2*ny + 0.5))
         ax.update_datalim(corners)
         ax.autoscale_view(tight=True)
-        ax.add_collection(collection, autolim=False)
         plt.axis('off')
         plt.show()
         plt.clf()
