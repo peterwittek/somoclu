@@ -30,6 +30,25 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     int nEpoch = (int) mxGetPr(prhs[1])[0];
     unsigned int nSomX = (unsigned int) mxGetPr(prhs[2])[0];
     unsigned int nSomY = (unsigned int) mxGetPr(prhs[3])[0];
+
+
+    int codebook_size =  nSomY * nSomX * nDimensions;
+    int globalBmus_size = nVectors * 2;
+    int uMatrix_size = nSomX * nSomY;
+    float* codebook = new float[codebook_size];
+    int* globalBmus = new int[globalBmus_size];
+    float* uMatrix = new float[uMatrix_size];
+
+    double * pCodebook = mxGetPr(prhs[14]);
+    if(pCodebook != NULL) {
+    	for(int i = 0; i < uMatrix_size; i++) {
+    		for(int j = 0; j < nDimensions; j++) {
+    			codebook[i * nDimensions + j] = (float) pCodebook[j * uMatrix_size + i];
+    			//mexPrintf("%f\n",data[i * nDimensions + j] );
+    		}
+    	}
+    }
+
     unsigned int radius0 = (unsigned int) mxGetPr(prhs[4])[0];
     unsigned int radiusN = (unsigned int) mxGetPr(prhs[5])[0];
     char* radiusCooling_c = mxArrayToString(prhs[6]);
@@ -74,12 +93,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     mxFree(gridType_c);
     bool compactSupport = (bool) mxGetPr(prhs[13])[0];
 
-    int codebook_size =  nSomY * nSomX * nDimensions;
-    int globalBmus_size = nVectors * 2;
-    int uMatrix_size = nSomX * nSomY;
-    float* codebook = new float[codebook_size];
-    int* globalBmus = new int[globalBmus_size];
-    float* uMatrix = new float[uMatrix_size];
+
     //Call train routine
     train(data, data_length, nEpoch, nSomX, nSomY,
           nDimensions, nVectors, radius0, radiusN,
@@ -94,11 +108,12 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         mexErrMsgIdAndTxt( "MATLAB:mexfunction:inputOutputMismatch",
                            "Cannot specify more outputs than inputs.\n");
 
-
-    plhs[0] = mxCreateDoubleMatrix(codebook_size, 1, mxREAL);
+    plhs[0] = mxCreateDoubleMatrix(nSomY * nSomX, nDimensions, mxREAL);
     double* codebook_p = mxGetPr(plhs[0]);
-    for(int i = 0; i < codebook_size; i++) {
-        codebook_p[i] = (double) codebook[i];
+    for(int i=0; i < uMatrix_size; i++) {
+    	for(int j=0; j < nDimensions; j++) {
+    		codebook_p[j * uMatrix_size + i] = codebook[i * nDimensions + j];
+    	}
     }
 
     if(globalBmus != NULL) {

@@ -1,4 +1,4 @@
-function [sMap, sTrain] = somoclu_train(sMap, D, varargin)
+function [sMap, sTrain, globalBmus, uMatrix] = somoclu_train(sMap, D, varargin)
 %somoclu_train  Use somoclu to train the Self-Organizing Map.
 %
 % [sM,sT] = somoclu_train(sM, D, [[argID,] value, ...])
@@ -20,6 +20,7 @@ function [sMap, sTrain] = somoclu_train(sMap, D, varargin)
 %   'msize'       (vector) map size
 %   'radius0'  'radius_ini'    (scalar) Start radius (default: half of the map in direction min(x,y))
 %   'radiusN' 'radius_fin' (scalar) End radius (default: 1)
+%   'radius'      (vector) neighborhood radiuses, length 1, 2 
 %   'radiusCooling'       (string) Radius cooling strategy: linear or exponential (default: linear)
 %   'scale0' 'alpha_ini'   (scalar) Starting learning rate (default: 0.1)
 %   'scaleN'    (scalar)Finishing learning rate (default: 0.01)
@@ -29,6 +30,7 @@ function [sMap, sTrain] = somoclu_train(sMap, D, varargin)
 %   'gridType' 'lattice'  (string)  Grid type: square or hexagonal (default: square)
 %   'compactSupport'  Compact support for map update (0: false, 1: true, default: 0)
 %   'nEpoch' 'trainlen' (scalar)  Maximum number of epochs
+%   'sTrain','som_train '  = 'train'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check arguments
 
@@ -71,6 +73,17 @@ alpha      = [];
 tracking   = 1;
 tlen_type  = 'epochs';
 
+sTopol.lattice = 'square';
+sTopol.shape = 'planar';
+sTrain.radius_ini = 0;
+sTrain.radius_fin = 1;
+sTrain.radius_cooling = 'linear';
+sTrain.alpha_type = 'linear';
+sTrain.kernel_type = 0;
+sTrain.compact_support = false;
+sTrain.scale0 = 0.1
+sTrain.scaleN = 0.01
+
 i=1; 
 while i<=length(varargin), 
   argok = 1; 
@@ -81,14 +94,27 @@ while i<=length(varargin),
      case {'gridType', 'lattice'}, i=i+1; sTopol.lattice = varargin{i};
      case {'mapType', 'shape'}, i=i+1; sTopol.shape = varargin{i};
      case {'nEpoch', 'trainlen'}, i=i+1; sTrain.trainlen = varargin{i};
-     case 'sample_order', i=i+1; sample_order_type = varargin{i};
      case {'radius0', 'radius_ini'}, i=i+1; sTrain.radius_ini = varargin{i};
+     case 'radiusCooling', i=i+1; sTrain.radius_cooling = varargin{i};
      case {'radiusN', 'radius_fin'}, i=i+1; sTrain.radius_fin = varargin{i};
+     case 'radius', 
+      i=i+1; 
+      l = length(varargin{i}); 
+      if l==1, 
+        sTrain.radius_ini = varargin{i}; 
+      else 
+        sTrain.radius_ini = varargin{i}(1); 
+        sTrain.radius_fin = varargin{i}(end);
+%         if l>2, radius = varargin{i}; tlen_type = 'samples'; end
+      end 
      case {'scaleCooling', 'alpha_type'}, i=i+1; sTrain.alpha_type = varargin{i};
-     case {'scale0', 'alpha_ini'}, i=i+1; sTrain.alpha_ini = varargin{i};
+     case {'scale0', 'alpha_ini'}, i=i+1; sTrain.scale0 = varargin{i};
+     case 'scaleN', i=i+1; sTrain.scaleN = varargin{i};
      case {'sTrain','train','som_train'}, i=i+1; sTrain = varargin{i};
+     case 'kernelType', i=i+1; sTrain.kernel_type = varargin{i};
+     case 'compactSupport', i=i+1; sTrain.compact_support = varargin{i};
       % unambiguous values
-     case {'inv','linear','power'}, sTrain.alpha_type = varargin{i}; 
+%      case {'inv','linear','power'}, sTrain.alpha_type = varargin{i}; 
      case {'hexa','rect'}, sTopol.lattice = varargin{i};
      case {'sheet','cyl','toroid'}, sTopol.shape = varargin{i}; 
      otherwise argok=0; 
@@ -111,3 +137,13 @@ while i<=length(varargin),
   end
   i = i+1; 
 end
+
+[sMap.codebook, globalBmus, uMatrix] = MexSomoclu(D, sTrain.trainlen, ...
+sTopol.msize(1), sTopol.msize(2), ...
+sTrain.radius_ini, sTrain.radius_fin, ...
+sTrain.radius_cooling,  sTrain.scale0, sTrain.scaleN, ...
+sTrain.alpha_type, ...
+sTrain.kernel_type, sTopol.shape, sTopol.lattice, ...
+sTrain.compact_support, sMap.codebook);
+
+sTrain = som_set(sTrain,'time',datestr(now,0));

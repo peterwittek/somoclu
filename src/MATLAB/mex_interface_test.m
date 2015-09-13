@@ -1,10 +1,7 @@
-data = importdata('../../data/rgbs.txt');
-nSomX = 50;
-nSomY = 50;
-dataSize = size(data);
-nVectors = dataSize(1);
-nDimensions = dataSize(2);
-nEpoch = 10;
+D = importdata('../../data/rgbs.txt');
+msize = [50 50];
+sMap  = som_randinit(D, 'msize', msize);
+nEpoch = 100;
 radius0 = 0;
 radiusN = 0;
 radiusCooling = 'linear';
@@ -15,8 +12,10 @@ kernelType = 0;
 mapType = 'planar';
 gridType = 'square';
 compactSupport = false;
-[codebook, globalBmus, uMatrix] = MexSomoclu(data, nEpoch, nSomX, nSomY, ...
-radius0, radiusN, ...
-radiusCooling, scale0, scaleN, ...
-scaleCooling, ...
-kernelType, mapType, gridType, compactSupport);
+[sMap, sTrain, globalBmus, uMatrix] = somoclu_train(sMap, D, 'msize', msize, 'radius0', radius0, ...
+    'radiusN', radiusN, 'radiusCooling', radiusCooling, ...
+    'scale0', scale0, 'scaleN', scaleN, 'scaleCooling', scaleCooling, ...
+    'kernelType', kernelType, 'mapType', mapType, ...
+    'gridType', gridType, 'compactSupport', compactSupport, ...
+    'nEpoch', nEpoch);
+    
