@@ -44,20 +44,20 @@ Note for Mac OS X users:
 
 As of OS X 10.9, gcc is just symlink to clang. To build somoclu and this extension correctly, it is recommended to install gcc using something like:
 ::
-   $ brew install gcc48
+   $ brew install gcc --without-multilib
 
 and set environment using:
 ::
-    export CC=/usr/local/bin/gcc
-    export CXX=/usr/local/bin/g++
-    export CPP=/usr/local/bin/cpp
-    export LD=/usr/local/bin/gcc
-    alias c++=/usr/local/bin/c++
-    alias g++=/usr/local/bin/g++
-    alias gcc=/usr/local/bin/gcc
-    alias cpp=/usr/local/bin/cpp
-    alias ld=/usr/local/bin/gcc
-    alias cc=/usr/local/bin/gcc
+    export CC=/usr/local/bin/gcc-5
+    export CXX=/usr/local/bin/g++-5
+    export CPP=/usr/local/bin/cpp-5
+    export LD=/usr/local/bin/gcc-5
+    alias c++=/usr/local/bin/c++-5
+    alias g++=/usr/local/bin/g++-5
+    alias gcc=/usr/local/bin/gcc-5
+    alias cpp=/usr/local/bin/cpp-5
+    alias ld=/usr/local/bin/gcc-5
+    alias cc=/usr/local/bin/gcc-5
 
 Then follow the instructions at https://github.com/peterwittek/somoclu to build somoclu itself.
 
