@@ -41,8 +41,9 @@ You can rename ``libstdc++.so.6*`` under ``MATLAB_ROOT/sys/os/glnxa64`` to solve
 
 Note for Mac OS X users:
 ================================
-
-As of OS X 10.9, gcc is just symlink to clang. To build somoclu and this extension correctly, it is recommended to install gcc using something like:
+Using GCC
+---------------
+As of OS X 10.10, gcc is just symlink to clang. To build somoclu and this extension using GCC, it is recommended to install gcc using something like:
 ::
    $ brew install gcc --without-multilib
 
@@ -58,13 +59,41 @@ and set environment using:
     alias cpp=/usr/local/bin/cpp-5
     alias ld=/usr/local/bin/gcc-5
     alias cc=/usr/local/bin/gcc-5
+    
+before running ``./configure`` .
 
 Then follow the instructions at https://github.com/peterwittek/somoclu to build somoclu itself.
 
+
+Using clang-omp
+---------------
+To install clang-omp, follow instructions at http://clang-omp.github.io/. And set environment using:
+::
+    export CC=/usr/local/bin/clang-omp
+    export CXX=/usr/local/bin/clang-omp++
+    export CPP=/usr/local/bin/clang-omp++
+    export LD=/usr/local/bin/clang-omp
+    alias c++=/usr/local/bin/clang-omp++
+    alias g++=/usr/local/bin/clang-omp++
+    alias gcc=/usr/local/bin/clang-omp
+    alias cpp=/usr/local/bin/clang-omp++
+    alias ld=/usr/local/bin/clang-omp
+    alias cc=/usr/local/bin/clang-omp
+    export PATH=/usr/local/bin/:$PATH
+    export C_INCLUDE_PATH=/usr/local/include/:$C_INCLUDE_PATH
+    export CPLUS_INCLUDE_PATH=/usr/local/include/:$CPLUS_INCLUDE_PATH
+    export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH
+    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
+
+before running ``./configure`` .
+
+
 Building Mex Extension on OS X:
 ===============================
-
-To build the extension on OS X, we need to make mex use gcc instead of the default clang compiler. So we need to copy ``MATLAB_ROOT/bin/mexopts.sh`` to ``~/.matlab/VERSION/mexopts.sh`` , replace ``MATLAB_ROOT`` with your installation path of MATLAB and replace ``VERSION`` with your MATLAB version in that folder. Example:
+Using GCC
+---------------
+To build the extension on OS X, we need to make mex use gcc instead of the default clang compiler which doesn' t support openmp (As of OSX 10.10.5). We need to copy ``MATLAB_ROOT/bin/mexopts.sh`` to ``~/.matlab/VERSION/mexopts.sh`` , replace ``MATLAB_ROOT`` with your installation path of MATLAB and replace ``VERSION`` with your MATLAB version in that folder. Example:
 ::
    cp /Applications/MATLAB_R2013a.app/bin/mexopts.sh ~/.matlab/R2013a/mexopts.sh
 
@@ -75,6 +104,13 @@ Then modify ``~/.matlab/VERSION/mexopts.sh`` to use gcc as follows:
 3. change ``MACOSX_DEPLOYMENT_TARGET='10.9'`` where ``10.9`` is your OS X version number.
 
 an example is given at https://gist.github.com/xgdgsc/9832340, then you can follow the instruction step 2 at the top to build the extension and test.
+  
+
+Using clang-omp
+---------------
+Similar to above GCC approach, we need to make mex use clang-omp by modifying ``~/.matlab/VERSION/mexopts.sh``, an example is given at https://gist.github.com/xgdgsc/6cfeda967ee44fef4603 . Note ``CXXFLAGS = -std=c++11``, ``LDFLAGS="$LDFLAGS -fopenmp"``
+
+Then you can follow the instruction step 2 at the top to build the extension and test. If you encounter errors including ``libiomp5.dylib`` when running the test after build, renaming the file packed with MATLAB under ``/Applications/MATLAB_R2013a.app/sys/os/maci64/libiomp5.dylib`` would fix it.
 
 Building Mex Extension on Windows:
 ===================================
