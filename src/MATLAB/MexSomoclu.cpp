@@ -1,8 +1,15 @@
 #include "mex.h"
 #include "somoclu.h"
 
+#ifdef CUDA
+#include "gpu/mxGPUArray.h"
+#endif
+
 void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+#ifdef CUDA
+	mxInitGPU();
+#endif
     int        i;
 
     /* Examine input (right-hand-side) arguments. */
@@ -117,21 +124,26 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
 
     if(globalBmus != NULL) {
-        plhs[1] = mxCreateDoubleMatrix(globalBmus_size, 1, mxREAL);
-        double* globalBmus_p = mxGetPr(plhs[1]);
-        for(int i = 0; i < globalBmus_size; i++) {
-            globalBmus_p[i] = (double) globalBmus[i];
-        }
+    	plhs[1] = mxCreateDoubleMatrix(nVectors, 2, mxREAL);
+    	double* globalBmus_p = mxGetPr(plhs[1]);
+    	for(int i=0; i < nVectors; i++) {
+    		for(int j=0; j < 2; j++) {
+    			globalBmus_p[j * nVectors + i] = (double) globalBmus[i * 2 + j];
+    		}
+    	}
     }
+
     else {
         plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
         *mxGetPr(plhs[1]) = 1;
     }
 
-    plhs[2] = mxCreateDoubleMatrix(uMatrix_size, 1, mxREAL);
+    plhs[2] = mxCreateDoubleMatrix(nSomX, nSomY, mxREAL);
     double* uMatrix_p = mxGetPr(plhs[2]);
-    for(int i = 0; i < uMatrix_size; i++) {
-        uMatrix_p[i] = (double) uMatrix[i];
+    for(int i=0; i < nSomX; i++) {
+    	for(int j=0; j < nSomY; j++) {
+    		uMatrix_p[j * nSomX + i] = uMatrix[i * nSomY + j];
+    	}
     }
     delete[] codebook;
     delete[] globalBmus;

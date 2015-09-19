@@ -199,7 +199,6 @@ Instructions on building Python extension with CUDA support on Windows is at [he
 
 Known Issues
 ===
-The MATLAB CUDA interface crashes with unknown reasons.
 
 R interface with CUDA support on Windows cannot be properly built. The CUDA code that requires VC to compile, whereas Rcpp requires GCC to compile, and linking cannot be done without error. Though the linking completes, a function call results in wrong/inaccessible values and crashes the R session.
 

@@ -13,15 +13,19 @@ OS_type: unix, windows
 Somoclu MATLAB Extension Build Guide (Linux/Mac):
 =============================================
 
-1. Follow the instructions to build Somoclu itself without MPI and CUDA at: https://github.com/peterwittek/somoclu
+1. Follow the instructions to build Somoclu itself without MPI, with/without CUDA at: https://github.com/peterwittek/somoclu
 
    **(OS X users see the Note below first)**
 
 2. Build MATLAB Extension by running:
    ::
-      MEX_BIN="/usr/local/MATLAB/R2013a/bin/mex" ./makeMex.sh
+      MATLAB_ROOT="/usr/local/MATLAB/R2013a/" ./makeMex.sh
 
-where ``MEX_BIN`` is the path to the MATLAB installation mex binary.
+   with CUDA:
+   ::
+      MATLAB_ROOT="/usr/local/MATLAB/R2013a/" ./makeMex-GPU.sh
+
+where ``MATLAB_ROOT`` is the path to the MATLAB installation.
 
 If you see errors like:
 ::
