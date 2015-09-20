@@ -6,4 +6,5 @@ MEX_BIN="$MATLAB_ROOT/bin/mex"
 if [ -z "$CUDA_LIB" ]
     then CUDA_LIB="/opt/cuda/lib64"
 fi
-$MEX_BIN -I"$MATLAB_ROOT/toolbox/distcomp/gpu/extern/include/" -I../ MexSomoclu.cpp -DCUDA ../denseCpuKernels.o ../io.o ../sparseCpuKernels.o ../training.o ../mapDistanceFunctions.o ../uMatrix.o ../denseGpuKernels.cu.co -lgomp -L$CUDA_LIB -lcudart -lcublas -lnvblas -lmwgpu
+cp -f ../denseGpuKernels.cu.co ../denseGpuKernels.cu.o
+$MEX_BIN -I"$MATLAB_ROOT/toolbox/distcomp/gpu/extern/include/" -I../ MexSomoclu.cpp -DCUDA ../denseCpuKernels.o ../io.o ../sparseCpuKernels.o ../training.o ../mapDistanceFunctions.o ../uMatrix.o ../denseGpuKernels.cu.o -lgomp -L$CUDA_LIB -lcudart -lcublas -lnvblas -lmwgpu

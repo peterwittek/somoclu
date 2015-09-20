@@ -34,7 +34,7 @@ If you see errors like:
 
 when using **CUDA 7**, which removed support for ``compute_13``, you may need to remove all ``-gencode=arch=compute_13,code=sm_13`` from ``mexopts.sh`` which is located usually at ``MATLAB_ROOT/toolbox/distcomp/gpu/extern/src/mex/glnxa64/``. Then run the previous build script ``makeMex.sh``.
 
-3. Then ``MexSomoclu.mexa64`` or ``MexSomoclu.mexa32`` is generated for use, you can test by running the ``mex_interface_test.m``.
+3. Then ``MexSomoclu.mexa64`` or ``MexSomoclu.mexa32`` is generated for use, you can test by installing som-toolbox from https://github.com/ilarinieminen/SOM-Toolbox, and running the ``mex_interface_test.m`` or ``mex_interface_test_gpu.m``.
 
 If you encounter errors like:
 ::
