@@ -36,8 +36,7 @@ class MyInstall(install):
         
 
 somoclu_module = Extension('_somoclu_wrap',
-                           sources=['somoclu/somoclu_wrap.cxx',
-                                    'somoclu/src/somocluWrap.cpp'],
+                           sources=['somoclu/somoclu_wrap.cxx'],
                            extra_objects=['somoclu/src/somoclu.o',
                                           'somoclu/src/denseCpuKernels.o',
                                           'somoclu/src/io.o',
@@ -56,7 +55,7 @@ somoclu_module = Extension('_somoclu_wrap',
 
 
 setup(name='somoclu',
-      version='1.4.1',
+      version='1.5',
       license='GPL3',
       author="peterwittek",
       author_email="",
@@ -64,7 +63,8 @@ setup(name='somoclu',
       maintainer_email="xgdgsc@gmail.com",
       url="http://peterwittek.github.io/somoclu/",
       platforms="unix",
-      description="a cluster-oriented implementation of self-organizing maps",
+      description="a massively parallel implementation of "
+      "self-organizing maps",
       ext_modules=[somoclu_module],
       py_modules=["somoclu"],
       packages=["somoclu"],      

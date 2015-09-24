@@ -22,8 +22,7 @@ except AttributeError:
 
 
 somoclu_module = Extension('_somoclu_wrap',
-                           sources=['somoclu/somoclu_wrap.cxx',
-                                    'somoclu/src/somocluWrap.cpp'],
+                           sources=['somoclu/somoclu_wrap.cxx'],
        #                    extra_objects=['somoclu/src/somoclu.obj',
 							extra_objects=[
                                           'somoclu/src/denseCpuKernels.obj',
@@ -43,7 +42,7 @@ somoclu_module = Extension('_somoclu_wrap',
 
 
 setup(name='somoclu',
-      version='1.4.1',
+      version='1.5',
       license='GPL3',
       author="peterwittek",
       author_email="",
