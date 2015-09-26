@@ -173,7 +173,7 @@ class Somoclu(object):
     def view_component_planes(self, dimensions=None, figsize=None,
                               colormap=cm.Spectral_r, colorbar=False,
                               bestmatches=False, bestmatchcolors=None,
-                              labels=None, filename=None):
+                              labels=None, zoom=None, filename=None):
         """Observe the component planes in the codebook of the SOM.
 
         :param dimensions: Optional parameter to specify along which dimension
@@ -195,6 +195,10 @@ class Somoclu(object):
         :type bestmatchcolors: list of int.
         :param labels: Optional parameter to specify the label of each point.
         :type labels: list of str.
+        :param zoom: Optional parameter to zoom into a region on the map. The
+                     first two coordinates of the tuple are the row limits, the
+                     second tuple contains the column limits.
+        :type zoom: ((int, int), (int, int))
         :param filename: If specified, the plot will not be shown but saved to
                          this file.
         :type filename: str.
@@ -207,11 +211,11 @@ class Somoclu(object):
         for i in dimensions:
             self._view_matrix(self.codebook[:, :, i], figsize, colormap,
                               colorbar, bestmatches, bestmatchcolors, labels,
-                              filename)
+                              zoom, filename)
 
     def view_umatrix(self, figsize=None, colormap=cm.Spectral_r,
                      colorbar=False, bestmatches=False, bestmatchcolors=None,
-                     labels=None, filename=None):
+                     labels=None, zoom=None, filename=None):
         """Plot the U-matrix of the trained map.
 
         :param figsize: Optional parameter to specify the size of the figure.
@@ -228,6 +232,10 @@ class Somoclu(object):
         :type bestmatchcolors: list of int.
         :param labels: Optional parameter to specify the label of each point.
         :type labels: list of str.
+        :param zoom: Optional parameter to zoom into a region on the map. The
+                     first two coordinates of the tuple are the row limits, the
+                     second tuple contains the column limits.
+        :type zoom: ((int, int), (int, int))
         :param filename: If specified, the plot will not be shown but saved to
                          this file.
         :type filename: str.
@@ -236,25 +244,33 @@ class Somoclu(object):
             raise Exception("The U-matrix is not available. Either train a map"
                             " or load a U-matrix from a file")
         self._view_matrix(self.umatrix, figsize, colormap, colorbar,
-                          bestmatches, bestmatchcolors, labels, filename)
+                          bestmatches, bestmatchcolors, labels, zoom, filename)
 
     def _view_matrix(self, matrix, figsize, colormap, colorbar, bestmatches,
-                     bestmatchcolors, labels, filename):
+                     bestmatchcolors, labels, zoom, filename):
         """Internal function to plot a map with best matching units and labels.
         """
+        if zoom is None:
+            zoom = ((0, self._n_rows), (0, self._n_columns))
         if figsize is None:
-            figsize = (6*float(self._n_columns/self._n_rows), 6)
+            figsize = (8, 8/float(zoom[1][1]/zoom[0][1]))
         fig = plt.figure(figsize=figsize)
         if self._grid_type == "hexagonal":
-            offsets = self._hexplot(matrix, fig, colormap)
-            bmu_coords = np.zeros(self.bmus.shape)
-            for i, (row, col) in enumerate(self.bmus):
-                bmu_coords[i] = offsets[col*self._n_columns + row]
+            offsets = _hexplot(matrix[zoom[0][0]:zoom[0][1],
+                                      zoom[1][0]:zoom[1][1]], fig, colormap)
+            filtered_bmus = self.filter_array(self.bmus, zoom)
+            filtered_bmus[:, 0] = filtered_bmus[:, 0] - zoom[1][0]
+            filtered_bmus[:, 1] = filtered_bmus[:, 1] - zoom[0][0]
+            bmu_coords = np.zeros(filtered_bmus.shape)
+            for i, (row, col) in enumerate(filtered_bmus):
+                bmu_coords[i] = offsets[col*zoom[1][1] + row]
         else:
-            plt.imshow(matrix, aspect='auto')
+            plt.imshow(matrix[zoom[0][0]:zoom[0][1], zoom[1][0]:zoom[1][1]],
+                       aspect='auto')
             plt.set_cmap(colormap)
-            bmu_coords = self.bmus
-
+            bmu_coords = self.filter_array(self.bmus, zoom)
+            bmu_coords[:, 0] = bmu_coords[:, 0] - zoom[1][0]
+            bmu_coords[:, 1] = bmu_coords[:, 1] - zoom[0][0]
         if colorbar:
             cmap = cm.ScalarMappable(cmap=colormap)
             cmap.set_array(matrix)
@@ -264,14 +280,14 @@ class Somoclu(object):
             if bestmatchcolors is None:
                 colors = "white"
             else:
-                colors = bestmatchcolors
+                colors = self.filter_array(bestmatchcolors, zoom)
             plt.scatter(bmu_coords[:, 0], bmu_coords[:, 1], c=colors)
 
         if labels is not None:
-            for label, row, col in zip(labels, bmu_coords[:, 0],
-                                       bmu_coords[:, 1]):
+            for label, col, row in zip(self.filter_array(labels, zoom),
+                                       bmu_coords[:, 0], bmu_coords[:, 1]):
                 if label is not None:
-                    plt.annotate(label, xy=(row, col), xytext=(10, -5),
+                    plt.annotate(label, xy=(col, row), xytext=(10, -5),
                                  textcoords='offset points', ha='left',
                                  va='bottom',
                                  bbox=dict(boxstyle='round,pad=0.3',
@@ -283,44 +299,13 @@ class Somoclu(object):
             plt.show()
         return plt
 
-    def _hexplot(self, matrix, fig, colormap):
-        """Internal function to plot a hexagonal map.
-        """
-        umatrix_min = matrix.min()
-        umatrix_max = matrix.max()
-        cmap = plt.get_cmap(colormap)
-        offsets = np.zeros((self._n_columns*self._n_rows, 2))
-        facecolors = []
-        for row in range(self._n_rows):
-            for col in range(self._n_columns):
-                if row % 2 == 0:
-                    offsets[row*self._n_columns + col] = [col+0.5, 2*row]
-                    facecolors.append(cmap((matrix[row, col]-umatrix_min) /
-                                           (umatrix_max)*255))
-                else:
-                    offsets[row*self._n_columns + col] = [col, 2*row]
-                    facecolors.append(cmap((matrix[row, col]-umatrix_min) /
-                                           (umatrix_max)*255))
-        polygon = np.zeros((6, 2), float)
-        polygon[:, 0] = 1.1 * np.array([0.5, 0.5, 0.0, -0.5, -0.5, 0.0])
-        polygon[:, 1] = 1.1 * np.array([-np.sqrt(3)/6, np.sqrt(3)/6,
-                                        np.sqrt(3)/2+np.sqrt(3)/6,
-                                        np.sqrt(3)/6, -np.sqrt(3)/6,
-                                        -np.sqrt(3)/2-np.sqrt(3)/6])
-        polygons = np.expand_dims(polygon, 0) + np.expand_dims(offsets, 1)
-        ax = fig.gca()
-        collection = mcoll.PolyCollection(
-            polygons,
-            offsets=offsets,
-            facecolors=facecolors,
-            edgecolors=facecolors,
-            linewidths=1.0,
-            offset_position="data")
-        ax.add_collection(collection, autolim=False)
-        corners = ((-0.5, -0.5), (self._n_columns + 0.5, 2*self._n_rows + 0.5))
-        ax.update_datalim(corners)
-        ax.autoscale_view(tight=True)
-        return offsets
+    def filter_array(self, a, zoom):
+        filtered_array = []
+        for index, bmu in enumerate(self.bmus):
+            if bmu[0] >= zoom[1][0] and bmu[0] < zoom[1][1] and \
+                    bmu[1] >= zoom[0][0] and bmu[1] < zoom[0][1]:
+                filtered_array.append(a[index])
+        return np.array(filtered_array)
 
     def _check_parameters(self):
         """Internal function to verify the basic parameters of the SOM.
@@ -362,3 +347,44 @@ def _check_cooling_parameters(radiuscooling, scalecooling):
     if scalecooling != "linear" and scalecooling != "exponential":
         raise Exception("Invalid parameter for scalecooling: " +
                         scalecooling)
+
+
+def _hexplot(matrix, fig, colormap):
+    """Internal function to plot a hexagonal map.
+    """
+    umatrix_min = matrix.min()
+    umatrix_max = matrix.max()
+    n_rows, n_columns = matrix.shape
+    cmap = plt.get_cmap(colormap)
+    offsets = np.zeros((n_columns*n_rows, 2))
+    facecolors = []
+    for row in range(n_rows):
+        for col in range(n_columns):
+            if row % 2 == 0:
+                offsets[row*n_columns + col] = [col+0.5, 2*n_rows-2*row]
+                facecolors.append(cmap((matrix[row, col]-umatrix_min) /
+                                       (umatrix_max)*255))
+            else:
+                offsets[row*n_columns + col] = [col, 2*n_rows-2*row]
+                facecolors.append(cmap((matrix[row, col]-umatrix_min) /
+                                       (umatrix_max)*255))
+    polygon = np.zeros((6, 2), float)
+    polygon[:, 0] = 1.1 * np.array([0.5, 0.5, 0.0, -0.5, -0.5, 0.0])
+    polygon[:, 1] = 1.1 * np.array([-np.sqrt(3)/6, np.sqrt(3)/6,
+                                    np.sqrt(3)/2+np.sqrt(3)/6,
+                                    np.sqrt(3)/6, -np.sqrt(3)/6,
+                                    -np.sqrt(3)/2-np.sqrt(3)/6])
+    polygons = np.expand_dims(polygon, 0) + np.expand_dims(offsets, 1)
+    ax = fig.gca()
+    collection = mcoll.PolyCollection(
+        polygons,
+        offsets=offsets,
+        facecolors=facecolors,
+        edgecolors=facecolors,
+        linewidths=1.0,
+        offset_position="data")
+    ax.add_collection(collection, autolim=False)
+    corners = ((-0.5, -0.5), (n_columns + 0.5, 2*n_rows + 0.5))
+    ax.update_datalim(corners)
+    ax.autoscale_view(tight=True)
+    return offsets
