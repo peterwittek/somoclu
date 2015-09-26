@@ -10,20 +10,18 @@ Dependencies
 The module requires `Numpy <http://www.numpy.org/>`_ and `matplotlib <http://www.matplotlib.org/>`_. The code is compatible with both Python 2 and 3. 
 
 Installation
-============
-Follow the standard procedure for installing Python modules:
+------------
+The code is available on PyPI, hence it can be installed by
 
 ::
 
-    $ pip install somoclu
+    $ sudo pip install somoclu
 
-If you use the development version, install it from the source code:
+If you want the latest git version, follow the standard procedure for installing Python modules:
 
 ::
 
-    $ git clone https://github.com/peterwittek/somoclu.git
-    $ cd somoclu
-    $ python setup.py install
+    $ sudo python setup.py install
 
 Build on Mac OS X
 --------------------
@@ -54,50 +52,26 @@ Then you can issue
     
 Build with CUDA support on Linux and OS X:
 ------------------------------------------
-You need to clone the GitHub repo or download the latest release tarball, and use the following script:
+If your CUDA is installed elsewhere than /usr/local/cuda, you cannot directly install the module from PyPI. Please download the `source distribution <https://pypi.python.org/packages/source/n/somoclu/somoclu-1.5.tar.gz>`_ from PyPI. Open the setup.py file in an editor and modify the path to your CUDA installation directory:
 
 ::
    
-    $ cd src/Python
-    $ bash makepy.sh
-
-Then if your CUDA installation is located at /opt/cuda and 64bit, you can do the following to install:
-
-::
-   
-    $ sudo python2 setup_with_CUDA.py install
-
-Otherwise, you should modify the setup_with_CUDA.py ,
-change the path to CUDA installation accordingly:
-
-::
-   
-   call(["./configure", "--without-mpi","--with-cuda=/opt/cuda/"])
-
-and
-
-::
-   
-   library_dirs=['/opt/cuda/lib64']
+   cuda_dir = /path/to/cuda
 
 Then run the install command
 
 ::
    
-    $ sudo python2 setup_with_CUDA.py install
-
-Then you can use the python interface like before, with CUDA support.
+    $ sudo python setup.py install
 
 Build with CUDA support on Windows:
 --------------------------------------
-You should first follow the instructions to build the windows binary at https://github.com/peterwittek/somoclu with MPI disabled with the same version Visual Studio as your Python is built.(Since currently Python is built by VS2008 by default and CUDA v6.5 removed VS2008 support, you may use CUDA 6.0 with VS2008 or find a Python prebuilt with VS2010. And remember to install VS2010 or Windows SDK7.1 to get the option in Platform Toolset if you use VS2013.) Then you should copy the .obj files generated in the release build path to the Python/src/src folder. 
+You should first follow the instructions to `build the Windows binary <https://github.com/peterwittek/somoclu>`_ with MPI disabled with the same version Visual Studio as your Python is built with.(Since currently Python is built by VS2008 by default and CUDA v6.5 removed VS2008 support, you may use CUDA 6.0 with VS2008 or find a Python prebuilt with VS2010. And remember to install VS2010 or Windows SDK7.1 to get the option in Platform Toolset if you use VS2013.) Then you should copy the .obj files generated in the release build path to the Python/src folder. 
 
-Then modify the library_dirs in setup_with_CUDA_Win.py  to your CUDA path.
-
-Then run the install command
+Then modify the win_cuda_dir in setup.py to your CUDA path and run the install command
 
 ::
    
-    $ sudo python2 setup_with_CUDA_Win.py install
+    $ sudo python setup.py install
 	
-Then it should be able to build and install the extension.
+Then it should be able to build and install the module.
