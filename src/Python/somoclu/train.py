@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+The module contains the Somoclu class that trains and visualizes
+self-organizing maps and emergent self-organizing maps.
+
+Created on Sun July 26 15:07:47 2015
+
+@author: Peter Wittek
+"""
 from __future__ import division, print_function
 import numpy as np
 import matplotlib.cm as cm
@@ -8,90 +17,193 @@ from .somoclu_wrap import train as wrap_train
 
 
 class Somoclu(object):
+    """Class for training and visualizing a self-organizing map.
+
+    :param n_columns: The number of columns in the map.
+    :type n_columns: int.
+    :param n_rows: The number of rows in the map.
+    :type n_rows: int.
+    :param data: Optional parameter to provide training data. It is not
+                 necessary if the map is otherwise trained outside Python,
+                 e.g., on a GPU cluster.
+    :type data: 2D numpy.array of float32.
+    :param initialcodebook: Optional parameter to start the training with a
+                            given codebook.
+    :type initialcodebook: 2D numpy.array of float32.
+    :param kerneltype: Optional parameter to specify which kernel to use:
+
+                           * 0: dense CPU kernel (default)
+                           * 1: dense GPU kernel (if compiled with it)
+    :type kerneltype: int.
+    :param maptype: Optional parameter to specify the map topology:
+                           * "planar": Planar map (default)
+                           * "toroid": Toroid map
+    :type maptype: str.
+    :param gridtype: Optional parameter to specify the grid form of the nodes:
+                           * "square": square neurons (default)
+                           * "hexagonal": hexagonal neurons
+    :type gridtype: str.
+    :param compactsupport: Optional parameter to cut off map updates beyond the
+                           training radius. Default: False.
+    :type compactsupport: bool.
+    """
 
     def __init__(self, n_columns, n_rows, data=None, initialcodebook=None,
                  kerneltype=0, maptype="planar", gridtype="square",
                  compactsupport=False):
+        """Constructor for the class.
+        """
+        self._n_columns, self._n_rows = n_columns, n_rows
         self._kernel_type = kerneltype
         self._map_type = maptype
         self._grid_type = gridtype
         self._compact_support = compactsupport
         self._check_parameters()
-        self.nVectors = 0
-        self.nDimensions = 0
-        self.data = None
         self.bmus = None
-        if data is not None:
-            self.update_data(data)
-        self._n_columns, self._n_rows = n_columns, n_rows
         self.umatrix = np.zeros(n_columns * n_rows, dtype=np.float32)
         self.codebook = initialcodebook
+        self.n_vectors = 0
+        self.n_dim = 0
+        self._data = None
+        if data is not None:
+            self.update_data(data)
 
     def load_bmus(self, filename):
+        """Load the best matching units from a file to the Somoclu object.
+
+        :param filename: The name of the file.
+        :type filename: str.
+        """
         self.bmus = np.loadtxt(filename, comments='%')
-        if self.nVectors != 0 and len(self.bmus) != self.nVectors:
+        if self.n_vectors != 0 and len(self.bmus) != self.n_vectors:
             raise Exception("The number of best matching units does not match"
                             "the number of data instances")
         else:
-            self.nVectors = len(self.bmus)
+            self.n_vectors = len(self.bmus)
         if max(self.bmus[:, 1]) > self._n_columns - 1 or \
                 max(self.bmus[:, 2]) > self._n_rows - 1:
             raise Exception("The dimensions of the best matching units do not"
                             "match that of the map")
 
     def load_umatrix(self, filename):
+        """Load the umatrix from a file to the Somoclu object.
+
+        :param filename: The name of the file.
+        :type filename: str.
+        """
+
         self.umatrix = np.loadtxt(filename, comments='%')
         if self.umatrix.shape != (self._n_columns, self._n_rows):
             raise Exception("The dimensions of the U-matrix do not "
                             "match that of the map")
 
     def load_codebook(self, filename):
+        """Load the codebook from a file to the Somoclu object.
+
+        :param filename: The name of the file.
+        :type filename: str.
+        """
         self.codebook = np.loadtxt(filename, comments='%')
-        if self.nDimensions == 0:
-            self.nDimensions = self.codebook.shape[1]
+        if self.n_dim == 0:
+            self.n_dim = self.codebook.shape[1]
         if self.codebook.shape != (self._n_rows*self._n_columns,
-                                   self.nDimensions):
+                                   self.n_dim):
             raise Exception("The dimensions of the codebook do not "
                             "match that of the map")
-        self.codebook.shape = (self._n_rows, self._n_columns, self.nDimensions)
+        self.codebook.shape = (self._n_rows, self._n_columns, self.n_dim)
 
-    def train(self, nEpoch=10, radius0=0, radiusN=1, radiusCooling="linear",
-              scale0=0.1, scaleN=0.01, scaleCooling="linear"):
-        self._check_cooling_parameters(radiusCooling, scaleCooling)
-        if self.data is None:
+    def train(self, epochs=10, radius0=0, radiusN=1, radiuscooling="linear",
+              scale0=0.1, scaleN=0.01, scalecooling="linear"):
+        """Train the map on the current data in the Somoclu object.
+
+        :param epochs: The number of epochs to train the map for.
+        :type epochs: int.
+        :param radius0: The initial radius on the map where the update happens
+                        around a best matching unit. Default value of 0 will
+                        trigger a value of min(n_columns, n_rows)/2.
+        :type radius0: int.
+        :param radiusN: The radius on the map where the update happens around a
+                        best matching unit in the final epoch. Default: 1.
+        :type radiusN: int.
+        :param radiuscooling: The cooling strategy between radius0 and radiusN:
+                                   * "linear": Linear interpolation (default)
+                                   * "exponential": Exponential decay
+        :param scale0: The initial learning scale. Default value: 0.1.
+        :type scale0: int.
+        :param scaleN: The learning scale in the final epoch. Default: 0.01.
+        :type scaleN: int.
+        :param scalecooling: The cooling strategy between scale0 and scaleN:
+                                   * "linear": Linear interpolation (default)
+                                   * "exponential": Exponential decay
+        :type scalecooling: str.
+        """
+        _check_cooling_parameters(radiuscooling, scalecooling)
+        if self._data is None:
             raise Exception("No data was provided!")
         self._init_codebook()
         self.umatrix.shape = (self._n_rows*self._n_columns, )
-        wrap_train(np.ravel(self.data), nEpoch, self._n_columns, self._n_rows,
-                   self.nDimensions, self.nVectors, radius0, radiusN,
-                   radiusCooling, scale0, scaleN, scaleCooling,
+        wrap_train(np.ravel(self._data), epochs, self._n_columns, self._n_rows,
+                   self.n_dim, self.n_vectors, radius0, radiusN,
+                   radiuscooling, scale0, scaleN, scalecooling,
                    self._kernel_type, self._map_type, self._grid_type,
                    self._compact_support, self.codebook, self.bmus,
                    self.umatrix)
         self.umatrix.shape = (self._n_rows, self._n_columns)
-        self.bmus.shape = (self.nVectors, 2)
-        self.codebook.shape = (self._n_rows, self._n_columns, self.nDimensions)
+        self.bmus.shape = (self.n_vectors, 2)
+        self.codebook.shape = (self._n_rows, self._n_columns, self.n_dim)
 
     def update_data(self, data):
-        oldNDimensions = self.nDimensions
+        """Change the data set in the Somoclu object. It is useful when the
+        data is updated and the training should continue on the new data.
+
+        :param data: The training data.
+        :type data: 2D numpy.array of float32.
+        """
+        oldn_dim = self.n_dim
         if data.dtype != np.float32:
             print("Warning: data was not float32. A 32-bit copy was made")
-            self.data = np.float32(data)
+            self._data = np.float32(data)
         else:
-            self.data = data
-        self.nVectors, self.nDimensions = data.shape
-        if self.nDimensions != oldNDimensions and oldNDimensions != 0:
+            self._data = data
+        self.n_vectors, self.n_dim = data.shape
+        if self.n_dim != oldn_dim and oldn_dim != 0:
             raise Exception("The dimension of the new data does not match!")
-        self.bmus = np.zeros(self.nVectors*2, dtype=np.intc)
+        self.bmus = np.zeros(self.n_vectors*2, dtype=np.intc)
 
     def view_component_planes(self, dimensions=None, figsize=None,
                               colormap=cm.Spectral_r, colorbar=False,
                               bestmatches=False, bestmatchcolors=None,
                               labels=None, filename=None):
-        if figsize is None:
-            figsize = (5*float(self._n_columns/self._n_rows), 5)
+        """Observe the component planes in the codebook of the SOM.
+
+        :param dimensions: Optional parameter to specify along which dimension
+                           or dimensions should the plotting happen. By
+                           default, each dimension is plotted in a sequence of
+                           plots.
+        :type dimension: int or list of int.
+        :param figsize: Optional parameter to specify the size of the figure.
+        :type figsize: (int, int)
+        :param colormap: Optional parameter to specify the color map to be
+                         used.
+        :type colormap: matplotlib.colors.Colormap
+        :param colorbar: Optional parameter to include a colormap as legend.
+        :type colorbar: bool.
+        :param bestmatches: Optional parameter to plot best matching units.
+        :type bestmatches: bool.
+        :param bestmatchcolors: Optional parameter to specify the color of each
+                                best matching unit.
+        :type bestmatchcolors: list of int.
+        :param labels: Optional parameter to specify the label of each point.
+        :type labels: list of str.
+        :param filename: If specified, the plot will not be shown but saved to
+                         this file.
+        :type filename: str.
+        """
+        if self.codebook is None:
+            raise Exception("The codebook is not available. Either train a map"
+                            " or load a codebook from a file")
         if dimensions is None:
-            dimensions = range(self.nDimensions)
+            dimensions = range(self.n_dim)
         for i in dimensions:
             self._view_matrix(self.codebook[:, :, i], figsize, colormap,
                               colorbar, bestmatches, bestmatchcolors, labels,
@@ -100,28 +212,53 @@ class Somoclu(object):
     def view_umatrix(self, figsize=None, colormap=cm.Spectral_r,
                      colorbar=False, bestmatches=False, bestmatchcolors=None,
                      labels=None, filename=None):
-        if figsize is None:
-            figsize = (6*float(self._n_columns/self._n_rows), 6)
+        """Plot the U-matrix of the trained map.
+
+        :param figsize: Optional parameter to specify the size of the figure.
+        :type figsize: (int, int)
+        :param colormap: Optional parameter to specify the color map to be
+                         used.
+        :type colormap: matplotlib.colors.Colormap
+        :param colorbar: Optional parameter to include a colormap as legend.
+        :type colorbar: bool.
+        :param bestmatches: Optional parameter to plot best matching units.
+        :type bestmatches: bool.
+        :param bestmatchcolors: Optional parameter to specify the color of each
+                                best matching unit.
+        :type bestmatchcolors: list of int.
+        :param labels: Optional parameter to specify the label of each point.
+        :type labels: list of str.
+        :param filename: If specified, the plot will not be shown but saved to
+                         this file.
+        :type filename: str.
+        """
+        if self.umatrix is None:
+            raise Exception("The U-matrix is not available. Either train a map"
+                            " or load a U-matrix from a file")
         self._view_matrix(self.umatrix, figsize, colormap, colorbar,
                           bestmatches, bestmatchcolors, labels, filename)
 
     def _view_matrix(self, matrix, figsize, colormap, colorbar, bestmatches,
                      bestmatchcolors, labels, filename):
+        """Internal function to plot a map with best matching units and labels.
+        """
+        if figsize is None:
+            figsize = (6*float(self._n_columns/self._n_rows), 6)
         fig = plt.figure(figsize=figsize)
         if self._grid_type == "hexagonal":
             offsets = self._hexplot(matrix, fig, colormap)
             bmu_coords = np.zeros(self.bmus.shape)
-            for i, (x, y) in enumerate(self.bmus):
-                bmu_coords[i] = offsets[y*self._n_columns + x]
+            for i, (row, col) in enumerate(self.bmus):
+                bmu_coords[i] = offsets[col*self._n_columns + row]
         else:
             plt.imshow(matrix, aspect='auto')
             plt.set_cmap(colormap)
             bmu_coords = self.bmus
 
         if colorbar:
-            m = cm.ScalarMappable(cmap=colormap)
-            m.set_array(matrix)
-            plt.colorbar(m, orientation='horizontal', shrink=0.5)
+            cmap = cm.ScalarMappable(cmap=colormap)
+            cmap.set_array(matrix)
+            plt.colorbar(cmap, orientation='horizontal', shrink=0.5)
 
         if bestmatches:
             if bestmatchcolors is None:
@@ -131,9 +268,10 @@ class Somoclu(object):
             plt.scatter(bmu_coords[:, 0], bmu_coords[:, 1], c=colors)
 
         if labels is not None:
-            for label, x, y in zip(labels, bmu_coords[:, 0], bmu_coords[:, 1]):
+            for label, row, col in zip(labels, bmu_coords[:, 0],
+                                       bmu_coords[:, 1]):
                 if label is not None:
-                    plt.annotate(label, xy=(x, y), xytext=(10, -5),
+                    plt.annotate(label, xy=(row, col), xytext=(10, -5),
                                  textcoords='offset points', ha='left',
                                  va='bottom',
                                  bbox=dict(boxstyle='round,pad=0.3',
@@ -146,28 +284,29 @@ class Somoclu(object):
         return plt
 
     def _hexplot(self, matrix, fig, colormap):
+        """Internal function to plot a hexagonal map.
+        """
         umatrix_min = matrix.min()
         umatrix_max = matrix.max()
         cmap = plt.get_cmap(colormap)
-        s = 1.1
         offsets = np.zeros((self._n_columns*self._n_rows, 2))
         facecolors = []
-        for y in range(self._n_rows):
-            for x in range(self._n_columns):
-                if y % 2 == 0:
-                    offsets[y*self._n_columns + x] = [x+0.5, 2*y]
-                    facecolors.append(cmap((matrix[y, x]-umatrix_min) /
+        for row in range(self._n_rows):
+            for col in range(self._n_columns):
+                if row % 2 == 0:
+                    offsets[row*self._n_columns + col] = [col+0.5, 2*row]
+                    facecolors.append(cmap((matrix[row, col]-umatrix_min) /
                                            (umatrix_max)*255))
                 else:
-                    offsets[y*self._n_columns + x] = [x, 2*y]
-                    facecolors.append(cmap((matrix[y, x]-umatrix_min) /
+                    offsets[row*self._n_columns + col] = [col, 2*row]
+                    facecolors.append(cmap((matrix[row, col]-umatrix_min) /
                                            (umatrix_max)*255))
         polygon = np.zeros((6, 2), float)
-        polygon[:, 0] = s * np.array([0.5, 0.5, 0.0, -0.5, -0.5, 0.0])
-        polygon[:, 1] = s * np.array([-np.sqrt(3)/6, np.sqrt(3)/6,
-                                      np.sqrt(3)/2+np.sqrt(3)/6,
-                                      np.sqrt(3)/6, -np.sqrt(3)/6,
-                                      -np.sqrt(3)/2-np.sqrt(3)/6])
+        polygon[:, 0] = 1.1 * np.array([0.5, 0.5, 0.0, -0.5, -0.5, 0.0])
+        polygon[:, 1] = 1.1 * np.array([-np.sqrt(3)/6, np.sqrt(3)/6,
+                                        np.sqrt(3)/2+np.sqrt(3)/6,
+                                        np.sqrt(3)/6, -np.sqrt(3)/6,
+                                        -np.sqrt(3)/2-np.sqrt(3)/6])
         polygons = np.expand_dims(polygon, 0) + np.expand_dims(offsets, 1)
         ax = fig.gca()
         collection = mcoll.PolyCollection(
@@ -183,15 +322,9 @@ class Somoclu(object):
         ax.autoscale_view(tight=True)
         return offsets
 
-    def _check_cooling_parameters(self, radiusCooling, scaleCooling):
-        if radiusCooling != "linear" and radiusCooling != "exponential":
-            raise Exception("Invalid parameter for radiusCooling: " +
-                            radiusCooling)
-        if scaleCooling != "linear" and scaleCooling != "exponential":
-            raise Exception("Invalid parameter for scaleCooling: " +
-                            scaleCooling)
-
     def _check_parameters(self):
+        """Internal function to verify the basic parameters of the SOM.
+        """
         if self._map_type != "planar" and self._map_type != "toroid":
             raise Exception("Invalid parameter for _map_type: " +
                             self._map_type)
@@ -203,7 +336,10 @@ class Somoclu(object):
                             self._kernel_type)
 
     def _init_codebook(self):
-        codebook_size = self._n_columns * self._n_rows * self.nDimensions
+        """Internal function to set the codebook or to indicate it to the C++
+        code that it should be randomly initialized.
+        """
+        codebook_size = self._n_columns * self._n_rows * self.n_dim
         if self.codebook is None:
             self.codebook = np.zeros(codebook_size, dtype=np.float32)
             self.codebook[0:2] = [1000, 2000]
@@ -211,7 +347,18 @@ class Somoclu(object):
             raise Exception("Invalid size for initial codebook")
         else:
             if self.codebook.dtype != np.float32:
-                print("Warning: initialCodebook was not float32. A 32-bit "
+                print("Warning: initialcodebook was not float32. A 32-bit "
                       "copy was made")
                 self.codebook = np.float32(self.codebook)
         self.codebook.shape = (codebook_size, )
+
+
+def _check_cooling_parameters(radiuscooling, scalecooling):
+    """Helper function to verify the cooling parameters of the training.
+    """
+    if radiuscooling != "linear" and radiuscooling != "exponential":
+        raise Exception("Invalid parameter for radiuscooling: " +
+                        radiuscooling)
+    if scalecooling != "linear" and scalecooling != "exponential":
+        raise Exception("Invalid parameter for scalecooling: " +
+                        scalecooling)
