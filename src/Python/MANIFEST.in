@@ -1,6 +1,11 @@
+include *.py
+include LICENSE
+include README.rst
+include doc/Makefile
+include doc/manual.pdf
+recursive-include doc/html *
+recursive-include doc/source *
 include somoclu/*.py
 include somoclu/src/*.h
 include somoclu/src/*.cpp
 include somoclu/src/*.cu
-include tests/rgbs.txt
-include tests/somoclu_test.py

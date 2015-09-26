@@ -1,38 +1,19 @@
 Somoclu - Python Interface
 ================================
 
-Somoclu is a massively parallel implementation of self-organizing maps. It relies on OpenMP for multicore execution, MPI for distributing the workload, and it can be accelerated by CUDA on a GPU cluster. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes. The topology of the grid is rectangular. Currently a subset of the command line version is supported with this package.
+Somoclu is a massively parallel implementation of self-organizing maps. It relies on OpenMP for multicore execution, MPI for distributing the workload, and it can be accelerated by CUDA. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes. The topology of map is either planar or toroid, the grid is square or hexagonal. Currently a subset of the command line version is supported with this Python module.
 
 Key features of the Python interface:
 
 * Fast execution by parallelization: OpenMP and CUDA are supported.
 * Multi-platform: Linux, OS X, and Windows are supported.
 * Planar and toroid maps.
-* Both dense and sparse input data are supported.
-* Large maps of several hundred thousand neurons are feasible.
+* Square and hexagonal grids.
+* Visualization of maps, including those that were trained outside of Python.
 
+The documentation is available online. Further details are found in the following paper:
 
-Usage
-------
-The following file uses rgbs.txt, which can be found at https://github.com/peterwittek/somoclu/tree/master/data
-
-.. code-block:: python
-		
-    #!/usr/bin/env python2
-    # -*- coding: utf-8 -*-
-    import somoclu
-    import numpy as np
-
-    data = np.loadtxt('rgbs.txt', dtype=np.float32)
-    nSomX, nSomY = 50, 50
-
-    som = somoclu.Somoclu(data, nSomX, nSomY)
-    som.train()
-    print som.codebook
-    print som.globalBmus
-    print som.uMatrix
-
-
+Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. `arXiv:1305.1422 <http://arxiv.org/abs/1305.1422>`_.
 
 
 Installation
