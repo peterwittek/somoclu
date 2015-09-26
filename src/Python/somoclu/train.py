@@ -12,38 +12,24 @@ from .somoclu_wrap import train as wrap_train
 
 class Somoclu(object):
 
-    def __init__(self, nSomX, nSomY, data=None, initialCodebook=None):
+    def __init__(self, nSomX, nSomY, data=None, initialCodebook=None,
+                 kernelType=0, mapType="planar", gridType="square",
+                 compact_support=False):
+        self.kernelType = kernelType
+        self.mapType = mapType
+        self.gridType = gridType
+        self.compact_support = compact_support
+        self._check_parameters()
+        self.nVectors = 0
+        self.nDimensions = 0
+        self.data = None
+        self.bmus = None
         if data is not None:
-            if data.dtype != np.float32:
-                print("Warning: data was not float32. A 32-bit copy was made")
-                self.data = np.float32(data)
-            else:
-                self.data = data
-            self.nVectors, self.nDimensions = data.shape
-        else:
-            self.nVectors = 0
-            self.nDimensions = 0
+            self.update_data(data)
         self.nSomX, self.nSomY = nSomX, nSomY
         self.gridType = "square"
-        self.bmus = np.zeros(self.nVectors*2, dtype=np.intc)
         self.umatrix = np.zeros(nSomX * nSomY, dtype=np.float32)
-        self.kernelType = 0
-        self.radiusCooling = "linear"
-        self.mapType = "planar"
-        self.scaleCooling = "linear"
-        if initialCodebook is None:
-            self.codebook = np.zeros(self.nSomY*self.nSomX*self.nDimensions,
-                                     dtype=np.float32)
-            self.codebook[0:2] = [1000, 2000]
-        elif initialCodebook.size != self.nSomX*self.nSomY*self.nDimensions:
-            raise Exception("Invalid size for initial codebook")
-        else:
-            if initialCodebook.dtype != np.float32:
-                print("Warning: initialCodebook was not float32. A 32-bit "
-                      "copy was made")
-                self.codebook = np.float32(initialCodebook)
-            else:
-                self.codebook = initialCodebook
+        self.codebook = initialCodebook
 
     def load_bmus(self, filename):
         self.bmus = np.loadtxt(filename, comments='%')
@@ -73,20 +59,33 @@ class Somoclu(object):
         self.codebook.shape = (self.nSomY, self.nSomX, self.nDimensions)
 
     def train(self, nEpoch=10, radius0=0, radiusN=1, radiusCooling="linear",
-              scale0=0.1, scaleN=0.01, scaleCooling="linear",
-              kernelType=0, mapType="planar", gridType="square",
-              compact_support=False):
-        self._check_parameters(radiusCooling, scaleCooling, kernelType,
-                               mapType, gridType)
+              scale0=0.1, scaleN=0.01, scaleCooling="linear"):
+        self._check_cooling_parameters(radiusCooling, scaleCooling)
+        if self.data is None:
+            raise Exception("No data was provided!")
+        self._init_codebook()
+        self.umatrix.shape = (self.nSomY*self.nSomX, )
         wrap_train(np.ravel(self.data), nEpoch, self.nSomX, self.nSomY,
                    self.nDimensions, self.nVectors, radius0, radiusN,
                    radiusCooling, scale0, scaleN, scaleCooling,
-                   kernelType, mapType, gridType, compact_support,
-                   self.codebook, self.bmus,
+                   self.kernelType, self.mapType, self.gridType,
+                   self.compact_support, self.codebook, self.bmus,
                    self.umatrix)
         self.umatrix.shape = (self.nSomY, self.nSomX)
         self.bmus.shape = (self.nVectors, 2)
         self.codebook.shape = (self.nSomY, self.nSomX, self.nDimensions)
+
+    def update_data(self, data):
+        oldNDimensions = self.nDimensions
+        if data.dtype != np.float32:
+            print("Warning: data was not float32. A 32-bit copy was made")
+            self.data = np.float32(data)
+        else:
+            self.data = data
+        self.nVectors, self.nDimensions = data.shape
+        if self.nDimensions != oldNDimensions and oldNDimensions != 0:
+            raise Exception("The dimension of the new data does not match!")
+        self.bmus = np.zeros(self.nVectors*2, dtype=np.intc)
 
     def view_component_planes(self, dimensions=None):
         if dimensions is None:
@@ -183,28 +182,33 @@ class Somoclu(object):
         plt.show()
         plt.clf()
 
-    def _check_parameters(self, radiusCooling, scaleCooling, kernelType,
-                          mapType, gridType):
+    def _check_cooling_parameters(self, radiusCooling, scaleCooling):
         if radiusCooling != "linear" and radiusCooling != "exponential":
             raise Exception("Invalid parameter for radiusCooling: " +
                             radiusCooling)
-        else:
-            self.radiusCooling = radiusCooling
         if scaleCooling != "linear" and scaleCooling != "exponential":
             raise Exception("Invalid parameter for scaleCooling: " +
                             scaleCooling)
-        else:
-            self.scaleCooling = scaleCooling
-        if mapType != "planar" and mapType != "toroid":
-            raise Exception("Invalid parameter for mapType: " + mapType)
-        else:
-            self.mapType = mapType
-        if gridType != "square" and gridType != "hexagonal":
-            raise Exception("Invalid parameter for gridType: " + gridType)
-        else:
-            self.gridType = gridType
-        if kernelType != 0 and kernelType != 1:
+
+    def _check_parameters(self):
+        if self.mapType != "planar" and self.mapType != "toroid":
+            raise Exception("Invalid parameter for mapType: " + self.mapType)
+        if self.gridType != "square" and self.gridType != "hexagonal":
+            raise Exception("Invalid parameter for gridType: " + self.gridType)
+        if self.kernelType != 0 and self.kernelType != 1:
             raise Exception("Invalid parameter for kernelTye: " +
-                            kernelType)
+                            self.kernelType)
+
+    def _init_codebook(self):
+        if self.codebook is None:
+            self.codebook = np.zeros(self.nSomY*self.nSomX*self.nDimensions,
+                                     dtype=np.float32)
+            self.codebook[0:2] = [1000, 2000]
+        elif self.codebook.size != self.nSomX*self.nSomY*self.nDimensions:
+            raise Exception("Invalid size for initial codebook")
         else:
-            self.kernelType = kernelType
+            if self.codebook.dtype != np.float32:
+                print("Warning: initialCodebook was not float32. A 32-bit "
+                      "copy was made")
+                self.codebook = np.float32(self.codebook)
+        self.codebook.shape = (self.nSomY*self.nSomX*self.nDimensions, )
