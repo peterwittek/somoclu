@@ -15,14 +15,14 @@ the U-matrix.
     c2 = (0.2, 0.5) + np.random.rand(50, 2)/5
     c3 = (0.4, 0.1) + np.random.rand(50, 2)/5
     data = np.float32(np.concatenate((c1, c2, c3)))
-    colors = [ "red" ] * 50
+    colors = ["red"] * 50
     colors.extend(["green"] * 50)
     colors.extend(["blue"] * 50)
-    plt.scatter(data[:,0], data[:,1], c=colors)
+    plt.scatter(data[:, 0], data[:, 1], c=colors)
     labels = range(150)
     n_columns, n_rows = 50, 30
     som = somoclu.Somoclu(n_columns, n_rows, data=data, maptype="planar", 
                           gridtype="rectangular")
-    som.train(epochs=10)    
+    som.train(epochs=10)
     som.view_component_planes()
     som.view_umatrix(bestmatches=True, bestmatchcolors=colors, labels=labels)
