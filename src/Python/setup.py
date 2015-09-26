@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-rom setuptools import setup, Extension
+from setuptools import setup, Extension
 from setuptools.command.install import install
 from subprocess import call
 import numpy
