@@ -13,7 +13,7 @@ scaleN = 0.01;
 scaleCooling = 'linear';
 kernelType = 0;
 mapType = 'planar';
-gridType = 'square';
+gridType = 'rectangular';
 compactSupport = false;
 [codebook, globalBmus, uMatrix] = MexSomoclu(data, nEpoch, nSomX, nSomY, ...
 radius0, radiusN, ...

@@ -7,7 +7,7 @@ Key features:
 * Fast execution by parallelization: OpenMP, MPI, and CUDA are supported.
 * Multi-platform: Linux, OS X, and Windows are supported.
 * Planar and toroid maps.
-* Square and hexagonal grids.
+* Rectangular and hexagonal grids.
 * Both dense and sparse input data are supported.
 * Large maps of several hundred thousand neurons are feasible.
 * Integration with [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/).

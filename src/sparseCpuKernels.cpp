@@ -144,7 +144,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                 for (unsigned int n = 0; n < nVectorsPerRank; n++) {
                     if (itask * nVectorsPerRank + n < nVectors) {
                         float dist = 0.0f;
-                        if (gridType == "square") {
+                        if (gridType == "rectangular") {
                             if (mapType == "planar") {
                                 dist = euclideanDistanceOnPlanarMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1]);
                             }

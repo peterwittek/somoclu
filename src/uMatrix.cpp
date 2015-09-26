@@ -62,7 +62,7 @@ float *calculateUMatrix(float *uMatrix, float *codebook, unsigned int nSomX,
 
                     if (som_x1 == som_x2 && som_y1 == som_y2) continue;
                     float tmp = 0.0f;
-                    if (gridType == "square") {
+                    if (gridType == "rectangular") {
                         if (mapType == "planar") {
                             tmp = euclideanDistanceOnPlanarMap(som_x1, som_y1, som_x2, som_y2);
                         }

@@ -40,7 +40,7 @@ class Somoclu(object):
                            * "toroid": Toroid map
     :type maptype: str.
     :param gridtype: Optional parameter to specify the grid form of the nodes:
-                           * "square": square neurons (default)
+                           * "rectangular": rectangular neurons (default)
                            * "hexagonal": hexagonal neurons
     :type gridtype: str.
     :param compactsupport: Optional parameter to cut off map updates beyond the
@@ -49,7 +49,7 @@ class Somoclu(object):
     """
 
     def __init__(self, n_columns, n_rows, data=None, initialcodebook=None,
-                 kerneltype=0, maptype="planar", gridtype="square",
+                 kerneltype=0, maptype="planar", gridtype="rectangular",
                  compactsupport=False):
         """Constructor for the class.
         """
@@ -328,7 +328,7 @@ class Somoclu(object):
         if self._map_type != "planar" and self._map_type != "toroid":
             raise Exception("Invalid parameter for _map_type: " +
                             self._map_type)
-        if self._grid_type != "square" and self._grid_type != "hexagonal":
+        if self._grid_type != "rectangular" and self._grid_type != "hexagonal":
             raise Exception("Invalid parameter for _grid_type: " +
                             self._grid_type)
         if self._kernel_type != 0 and self._kernel_type != 1:

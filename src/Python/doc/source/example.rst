@@ -22,7 +22,7 @@ the U-matrix.
     labels = range(150)
     n_columns, n_rows = 50, 30
     som = somoclu.Somoclu(n_columns, n_rows, data=data, maptype="planar", 
-                          gridtype="square")
+                          gridtype="rectangular")
     som.train(epochs=10)    
     som.view_component_planes()
     som.view_umatrix(bestmatches=True, bestmatchcolors=colors, labels=labels)

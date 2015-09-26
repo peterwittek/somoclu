@@ -300,7 +300,7 @@ void printUsage() {
          "Arguments:\n" \
          "     -c FILENAME           Specify an initial codebook for the map.\n" \
          "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
-         "     -g TYPE               Grid type: square or hexagonal (default: square)\n"\
+         "     -g TYPE               Grid type: rectangular or hexagonal (default: rectangular)\n"\
          "     -k NUMBER             Kernel type (default: " << KERNEL_TYPE << "): \n" \
          "                              0: Dense CPU\n" \
          "                              1: Dense GPU\n" \
@@ -349,7 +349,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     *scale0 = 0.0;
     *scaleN = 0.01;
     *scaleCooling = "linear";
-    *gridType = "square";
+    *gridType = "rectangular";
     *compactSupport = 0;
     static struct option long_options[] = {
         {"rows",  required_argument, 0, 'y'},
@@ -399,8 +399,8 @@ void processCommandLine(int argc, char** argv, string *inFilename,
             break;
         case 'g':
             *gridType = optarg;
-            if (*gridType != "square" && *gridType != "hexagonal") {
-                cerr << "The argument of option -h should be either square or hexagonal.\n";
+            if (*gridType != "rectangular" && *gridType != "hexagonal") {
+                cerr << "The argument of option -h should be either rectangular or hexagonal.\n";
                 my_abort(1);
             }
             break;

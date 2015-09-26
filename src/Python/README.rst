@@ -1,14 +1,14 @@
 Somoclu - Python Interface
 ================================
 
-Somoclu is a massively parallel implementation of self-organizing maps. It relies on OpenMP for multicore execution, MPI for distributing the workload, and it can be accelerated by CUDA. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes. The topology of map is either planar or toroid, the grid is square or hexagonal. Currently a subset of the command line version is supported with this Python module.
+Somoclu is a massively parallel implementation of self-organizing maps. It relies on OpenMP for multicore execution, MPI for distributing the workload, and it can be accelerated by CUDA. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes. The topology of map is either planar or toroid, the grid is rectangular or hexagonal. Currently a subset of the command line version is supported with this Python module.
 
 Key features of the Python interface:
 
 * Fast execution by parallelization: OpenMP and CUDA are supported.
 * Multi-platform: Linux, OS X, and Windows are supported.
 * Planar and toroid maps.
-* Square and hexagonal grids.
+* Rectangular and hexagonal grids.
 * Visualization of maps, including those that were trained outside of Python.
 
 The documentation is available online. Further details are found in the following paper:

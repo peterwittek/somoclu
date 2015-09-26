@@ -8,7 +8,7 @@ Rsomoclu.train <-
            radius0, radiusN,
            radiusCooling, scale0, scaleN,
            scaleCooling,
-           kernelType=0, mapType="planar", gridType="square", 
+           kernelType=0, mapType="planar", gridType="rectangular", 
            compactSupport=FALSE, codebook=NULL) {
     if (is.null(codebook)) {
       codebook <- numeric(nSomX*nSomY*dim(input_data)[2])

@@ -69,7 +69,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         gridType = gridType_c;
     }
     else {
-        gridType = "square";
+        gridType = "rectangular";
     }
     mxFree(gridType_c);
     bool compactSupport = (bool) mxGetPr(prhs[13])[0];
