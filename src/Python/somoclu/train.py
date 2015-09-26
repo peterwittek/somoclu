@@ -95,7 +95,8 @@ class Somoclu(object):
         plt.clf()
 
     def view_umatrix(self, colormap='spectral', colorbar=False,
-                     bestmatches=False, bestmatchcolors=None, labels=None):
+                     bestmatches=False, bestmatchcolors=None, labels=None,
+                     filename=None):
         if self.gridType == "hexagonal":
             return self._view_umatrixhex(colormap, colorbar, bestmatches,
                                          bestmatchcolors, labels)
@@ -121,7 +122,10 @@ class Somoclu(object):
                                  bbox=dict(boxstyle='round,pad=0.3',
                                            fc='white', alpha=0.8))
         plt.axis('off')
-        plt.show()
+        if filename is not None:
+            plt.savefig(filename)
+        else:
+            plt.show()
         plt.clf()
 
     def _view_umatrixhex(self, colormap='spectral', colorbar=False,
