@@ -1,4 +1,5 @@
-Since 1.4.1:
+Version 1.5: 2015-09-30
+  - New: Python interface has visual capabilities.
   - New: Option for hexagonal grid.
   - New: Option for requesting compact support in updating the map.
   - New: Python and R interfaces now allow passing an initial codebook.

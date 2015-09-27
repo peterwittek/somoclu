@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.61])
-AC_INIT([Somoclu], [1.4.1])
+AC_INIT([Somoclu], [1.5])
 m4_include([m4/ax_mpi_options.m4])
 m4_include([m4/ax_mpi_tests.m4])
 AC_CONFIG_SRCDIR([src/somoclu.cpp])
