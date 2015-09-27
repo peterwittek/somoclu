@@ -56,8 +56,29 @@ somoclu: $(OBJS)
 %.cu.co: %.cu
 		$(NVCC) $(DEFS) $(CUDA_CFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
+python_clean:
+	-rm -fr ./Python/somoclu/m4 ./Python/somoclu/src ./Python/somoclu/autogen.sh ./Python/somoclu/Makefile* ./Python/somoclu/config* ./Python/somoclu/*so ./Python/somoclu/*c ./Python/somoclu/*cxx ./Python/somoclu/LICENSE ./Python/dist ./Python/build $(OBJS) 1>/dev/null
+
+python: python_clean
+	mkdir ./Python/somoclu/src
+	mkdir ./Python/somoclu/src/Windows
+	cp -R ../m4 ./Python/somoclu/
+	cp ../autogen.sh ./Python/somoclu/
+	cp ../LICENSE ./Python/somoclu/
+	cp ../Makefile.in ./Python/somoclu/
+	cp ../configure.ac ./Python/somoclu/
+	cp ./Makefile.in ./Python/somoclu/src/
+	cp ./*.h ./Python/somoclu/src/
+	cp ./*.cpp ./Python/somoclu/src/
+	cp ./*.cu ./Python/somoclu/src/
+	swig -c++ -python ./Python/somoclu/somoclu.i
+	cd Python; python setup.py build
+
+python_install: python
+	cd Python; python setup.py install
+
 clean:
-	-rm -f somoclu libsomoclu.so $(OBJS) 1>/dev/null
+	-rm -fr somoclu libsomoclu.so 1>/dev/null
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
