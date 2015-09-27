@@ -33,7 +33,6 @@ $(distdir):
 	cp $(srcdir)/Makefile.in $(distdir)
 	cp $(srcdir)/README.md $(distdir)
 	cp $(srcdir)/LICENSE $(distdir)  
-	cp $(srcdir)/TODO $(distdir)
 	cp $(srcdir)/CHANGES $(distdir)
 	cp $(srcdir)/src/Makefile.in $(distdir)/src
 	cp $(srcdir)/src/*.c* $(srcdir)/src/*.h $(distdir)/src
