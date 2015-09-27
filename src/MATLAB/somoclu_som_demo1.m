@@ -1,10 +1,7 @@
-%SOM_DEMO1 Basic properties and behaviour of the Self-Organizing Map.
+%SOMOCLU_SOM_DEMO1 Basic properties and behaviour of the Self-Organizing Map.
 
-% Adapted from SOM Toolbox 2.0, February 11th, 2000 by Juha Vesanto
+% Adapted from SOM Toolbox 2.0
 % http://www.cis.hut.fi/projects/somtoolbox/
-
-% Version 1.0beta juuso 071197
-% Version 2.0beta juuso 030200 
 
 clf reset;
 figure(gcf)
@@ -14,16 +11,12 @@ echo on
 
 clc
 %    ==========================================================
-%    SOM_DEMO1 - BEHAVIOUR AND PROPERTIES OF SOM
+%    SOMOCLU_SOM_DEMO1 - BEHAVIOUR AND PROPERTIES OF SOM
 %    ==========================================================
 
-%    som_make        - Create, initialize and train a SOM.
 %     som_randinit   - Create and initialize a SOM.
 %     som_lininit    - Create and initialize a SOM.
-%     som_seqtrain   - Train a SOM.
-%     som_batchtrain - Train a SOM.
-%    som_bmus        - Find best-matching units (BMUs).
-%    som_quality     - Measure quality of SOM.
+%     somoclu_train   - Train a SOM.
 
 %    SELF-ORGANIZING MAP (SOM):
 
@@ -109,5 +102,90 @@ subplot(1,3,3)
 som_grid(sMap,'Coord',sMap.codebook)
 hold on, plot(D(:,1),D(:,2),'+r')
 title('Trained map')
+
+
+pause % Strike any key to continue with 3D data...
+
+clf
+
+clc
+%    TRAINING DATA: THE UNIT CUBE
+%    ============================
+
+%    Above, the map dimension was equal to input space dimension: both
+%    were 2-dimensional. Typically, the input space dimension is much
+%    higher than the 2-dimensional map. In this case the map cannot
+%    follow perfectly the data set any more but must find a balance
+%    between two goals:
+
+%      - data representation accuracy
+%      - data set topology representation accuracy    
+
+%    Here are 500 data points sampled from the unit cube:
+
+D = rand(500,3);
+
+subplot(1,3,1), plot3(D(:,1),D(:,2),D(:,3),'+r')
+view(3), axis on, rotate3d on
+title('Data')
+
+%    The ROTATE3D command enables you to rotate the picture by
+%    dragging the pointer above the picture with the leftmost mouse
+%    button pressed down.
+
+pause % Strike any key to train the SOM...
+
+
+
+sMap  = som_randinit(D);
+[sMap, sTrain, globalBmus, uMatrix] = somoclu_train(sMap, D, 'nEpoch', 100);
+U=som_umat(sMap)
+%    Here, the linear initialization is done again, so that 
+%    the results can be compared.
+
+sMap0 = som_lininit(D); 
+
+subplot(1,3,2)
+som_grid(sMap0,'Coord',sMap0.codebook,...
+	 'Markersize',2,'Linecolor','k','Surf',sMap0.codebook(:,3)) 
+axis([0 1 0 1 0 1]), view(-120,-25), title('After initialization')
+
+subplot(1,3,3)
+som_grid(sMap,'Coord',sMap.codebook,...
+	 'Markersize',2,'Linecolor','k','Surf',sMap.codebook(:,3)) 
+axis([0 1 0 1 0 1]), view(3), title('After training'), hold on
+
+%    Here you can see that the 2-dimensional map has folded into the
+%    3-dimensional space in order to be able to capture the whole data
+%    space. 
+
+pause % Strike any key to evaluate the quality of maps...
+
+
+clc
+%    BEST-MATCHING UNITS (BMU)
+%    =========================
+
+%    Before going to the quality, an important concept needs to be
+%    introduced: the Best-Matching Unit (BMU). The BMU of a data
+%    vector is the unit on the map whose model vector best resembles
+%    the data vector. In practise the similarity is measured as the
+%    minimum distance between data vector and each model vector on the
+%    map. The BMUs can be calculated using function SOM_BMUS. This
+%    function gives the index of the unit.
+
+%    Here the BMU is searched for the origin point (from the
+%    trained map):
+
+bmu = som_bmus(sMap,[0 0 0]);
+%    Here the corresponding unit is shown in the figure. You can
+%    rotate the figure to see better where the BMU is.
+
+co = sMap.codebook(bmu,:);
+text(co(1),co(2),co(3),'BMU','Fontsize',20)
+plot3([0 co(1)],[0 co(2)],[0 co(3)],'ro-')
+% Please see demos that installed with som-toolbox for more 
+% visualization examples...
+pause 
 
 
