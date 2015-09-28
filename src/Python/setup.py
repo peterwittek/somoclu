@@ -24,7 +24,6 @@ if sys.platform.startswith('win') and os.path.exists(win_cuda_dir):
                                sources=['somoclu/somoclu_wrap.cxx'],
                                extra_objects=[
                                         'somoclu/src/denseCpuKernels.obj',
-                                        'somoclu/src/io.obj',
                                         'somoclu/src/sparseCpuKernels.obj',
                                         'somoclu/src/training.obj',
                                         'somoclu/src/mapDistanceFunctions.obj',
@@ -38,11 +37,9 @@ elif os.path.exists(cuda_dir):
     class MyInstall(install):
 
         def run(self):
-            call(["pwd"])
             os.chdir('somoclu')
-            call(["bash", "autogen.sh"])
             call(["./configure", "--without-mpi", "--with-cuda=" + cuda_dir])
-            call(["make"])
+            call(["make", "lib"])
             os.chdir('../')
             install.run(self)
     
@@ -53,9 +50,7 @@ elif os.path.exists(cuda_dir):
     somoclu_module = Extension('_somoclu_wrap',
                                sources=['somoclu/somoclu_wrap.cxx'],
                                extra_objects=[
-                                          'somoclu/src/somoclu.o',
                                           'somoclu/src/denseCpuKernels.o',
-                                          'somoclu/src/io.o',
                                           'somoclu/src/sparseCpuKernels.o',
                                           'somoclu/src/training.o',
                                           'somoclu/src/mapDistanceFunctions.o',

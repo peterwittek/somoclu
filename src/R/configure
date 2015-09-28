@@ -1,27 +1,27 @@
 #!/bin/bash
-cd src
-bash autogen.sh
-HAS_CUDA=FALSE
-if test -z "${CUDA_HOME}"; then
-  echo "could not determine CUDA_HOME. Please see the README file for installation requirements"
-  exit 1
-else
-  HAS_CUDA=TRUE
+if [ "$#" -ne 1 ]; then
+    exit 0
 fi
 ARCH=$(uname -m)
-# replace these five lines with
-# CUDA_LIB := <path to your cuda shared libraries>
 if [ ${ARCH} = 'i386' ] ; then
-    CUDA_LIB=${CUDA_HOME}/lib
+    CUDA_LIB=$1/lib
 else
-    CUDA_LIB=${CUDA_HOME}/lib64
+    CUDA_LIB=$1/lib64
 fi
-
-./configure --with-cuda=${CUDA_HOME} --without-mpi
-make
+mkdir -p src/src
+mv src/*cpp src/*cu src/Makefile.in src/src/
+cp src/somoclu.h src/src/
+mv src/src/Rsomoclu.cpp src/
+mv src/Makefile.root.in src/Makefile.in
+rm src/Makevars*
+cd src
+./configure --with-cuda=$1 --without-mpi
+make lib
+#rm Makefile*
+mv src/*.o ./
+rm -fr src
 export PKG_LIBS=`${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()"`
 export PKG_CXXFLAGS=`${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()"`" -DHAVE_R -DCUDA"
-cd src
 ${R_HOME}/bin/R CMD SHLIB $PKG_CXXFLAGS Rsomoclu.cpp denseCpuKernels.o sparseCpuKernels.o mapDistanceFunctions.o trainOneEpoch.o uMatrix.o denseGpuKernels.cu.co io.o -lgomp -L${CUDA_LIB} -lcudart -lcublas
-rm somoclu
 cp Rsomoclu.so ../
+cd ..

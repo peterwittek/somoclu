@@ -33,18 +33,18 @@ MPI_LIBS       = @MPI_LIBS@
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
-LIBOBJS=sparseCpuKernels.o io.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o
+LIBOBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o
 
 ifdef CUDA_LIBS
 	LIBOBJS+=denseGpuKernels.cu.co
 endif
 
-OBJS=$(LIBOBJS) somoclu.o
+OBJS=$(LIBOBJS) io.o somoclu.o
 
 all: somoclu
 
 lib: $(LIBOBJS)
-	$(CXX) $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o libsomoclu.so $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
+	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o libsomoclu.so $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 	
 somoclu: CXXFLAGS+= -DCLI
 somoclu: $(OBJS)
@@ -57,16 +57,22 @@ somoclu: $(OBJS)
 		$(NVCC) $(DEFS) $(CUDA_CFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
 python_clean:
-	-rm -fr ./Python/somoclu/m4 ./Python/somoclu/src ./Python/somoclu/autogen.sh ./Python/somoclu/Makefile* ./Python/somoclu/config* ./Python/somoclu/*so ./Python/somoclu/*c ./Python/somoclu/*cxx ./Python/somoclu/LICENSE ./Python/dist ./Python/build $(OBJS) 1>/dev/null
+	-rm -fr ./Python/somoclu/src ./Python/somoclu.egg* \
+	  ./Python/somoclu/install-sh ./Python/somoclu/Makefile* \
+	  ./Python/somoclu/config* ./Python/somoclu/*so \
+	  ./Python/somoclu/somoclu_wrap* ./Python/somoclu/*pyc \
+	  ./Python/LICENSE ./Python/dist \
+	  ./Python/doc/doctrees ./Python/doc/manual.pdf ./Python/doc/html \
+	  ./Python/doc/latex ./Python/build $(OBJS) 1>/dev/null
 
 python:
 	mkdir -p ./Python/somoclu/src
 	mkdir -p ./Python/somoclu/src/Windows
-	cp -R ../m4 ./Python/somoclu/
-	cp ../autogen.sh ./Python/somoclu/
-	cp ../LICENSE ./Python/somoclu/
+	cp ../LICENSE ./Python
 	cp ../Makefile.in ./Python/somoclu/
-	cp ../configure.ac ./Python/somoclu/
+	cp ../configure ./Python/somoclu/
+	cp ../config.h.in ./Python/somoclu/
+	cp ../install-sh ./Python/somoclu/
 	cp ./Makefile.in ./Python/somoclu/src/
 	cp ./*.h ./Python/somoclu/src/
 	cp ./*.cpp ./Python/somoclu/src/
@@ -74,26 +80,39 @@ python:
 	swig -c++ -python ./Python/somoclu/somoclu.i
 	cd Python; python setup.py build
 
-python_install: python
+python_doc: python
+	export PYTHONPATH=`ls -d --color=never $$PWD/Python/build/lib.*| head -c -1`:$$PYTHONPATH; $(MAKE) -C Python/doc html latexpdf
+
+python_install: python python_doc
 	cd Python; python setup.py install
 
 r_clean:
-	-rm -fr ./R/src/*h ./R/src/mapDistanceFunctions.cpp ./R/src/training.cpp ./R/src/uMatrix.cpp ./R/src/denseCpuKernels.cpp ./R/src/sparseCpuKernels.cpp R/data ./Rsomoclu*gz
+	-rm -fr ./R/src/configure ./R/src/config.h.in ./R/src/Makefile.root.in \
+	  ./R/src/Makefile.in ./R/src/denseGpuKernels.cu ./R/src/*h \
+	  ./R/src/mapDistanceFunctions.cpp ./R/src/training.cpp \
+	  ./R/src/uMatrix.cpp ./R/src/denseCpuKernels.cpp \
+	  ./R/src/sparseCpuKernels.cpp R/data ./Rsomoclu*gz
 
 r:
 	mkdir -p R/data
+	cp ../configure ./R/src/
+	cp ../config.h.in ./R/src/
+	cp ../install-sh ./R/src/
+	cp ../Makefile.in ./R/src/Makefile.root.in
+	cp ./Makefile.in ./R/src/
 	cp ./*.h ./R/src/
 	cp ./mapDistanceFunctions.cpp ./R/src/
 	cp ./training.cpp ./R/src/
 	cp ./uMatrix.cpp ./R/src/
 	cp ./denseCpuKernels.cpp ./R/src/
+	cp ./denseGpuKernels.cu ./R/src/
 	cp ./sparseCpuKernels.cpp ./R/src/
 	cp ../data/rgbs.txt ./R/data/
-	gzip ./R/data/rgbs.txt 
+	gzip -f ./R/data/rgbs.txt 
 	R CMD build R
 
 clean:
-	-rm -fr somoclu libsomoclu.so 1>/dev/null
+	-rm -fr $(OBJS) somoclu libsomoclu.so 1>/dev/null
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)

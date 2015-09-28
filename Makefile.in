@@ -15,7 +15,7 @@ bindir	 = @bindir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@
 
-all clean install uninstall lib somoclu python python_clean python_install r r_clean:
+all clean install uninstall lib somoclu python python_doc python_clean python_install r r_clean:
 	$(MAKE) -C src $@
 
 dist: $(distdir).tar.gz
