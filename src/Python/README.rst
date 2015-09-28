@@ -11,10 +11,37 @@ Key features of the Python interface:
 * Rectangular and hexagonal grids.
 * Visualization of maps, including those that were trained outside of Python.
 
-The documentation is available online. Further details are found in the following paper:
+The documentation is available on [Read the Docs](http://somoclu.readthedocs.org/). Further details are found in the following paper:
 
 Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. `arXiv:1305.1422 <http://arxiv.org/abs/1305.1422>`_.
 
+Usage
+-----
+A simple example is below. For more example, please refer to the [documentation](http://somoclu.readthedocs.org/).
+
+::
+
+    import somoclu
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    c1 = np.random.rand(50, 2)/5
+    c2 = (0.2, 0.5) + np.random.rand(50, 2)/5
+    c3 = (0.4, 0.1) + np.random.rand(50, 2)/5
+    data = np.float32(np.concatenate((c1, c2, c3)))
+    colors = ["red"] * 50
+    colors.extend(["green"] * 50)
+    colors.extend(["blue"] * 50)
+
+    labels = list(range(150))
+    #labels[2] = None
+    #labels[41] = None
+    #labels[40] = None
+    n_rows, n_columns = 30, 50
+    som = somoclu.Somoclu(n_columns, n_rows, data=data, maptype="planar",
+                          gridtype="rectangular")
+    som.train(epochs=10)
+    som.view_umatrix(bestmatches=True, bestmatchcolors=colors, labels=labels)
 
 Installation
 ------------
