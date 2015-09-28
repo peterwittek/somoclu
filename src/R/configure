@@ -17,7 +17,7 @@ rm src/Makevars*
 cd src
 ./configure --with-cuda=$1 --without-mpi
 make lib
-#rm Makefile*
+rm Makefile*
 mv src/*.o ./
 rm -fr src
 export PKG_LIBS=`${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()"`
