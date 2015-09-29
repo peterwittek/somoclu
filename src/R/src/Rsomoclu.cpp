@@ -6,6 +6,15 @@ using namespace Rcpp;
 
 #include"somoclu.h"
 
+void my_abort(int err) {
+    cerr << "Aborted\n";
+#ifdef HAVE_MPI
+    MPI_Abort(MPI_COMM_WORLD, err);
+#else
+    exit(err);
+#endif
+}
+
 RcppExport SEXP Rtrain(SEXP data_p,
                        SEXP nEpoch_p,
                        SEXP nSomX_p, SEXP nSomY_p,
