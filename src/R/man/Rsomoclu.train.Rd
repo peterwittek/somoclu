@@ -5,13 +5,11 @@
   A function call to Somoclu to train the Self Organizing Map.
 }
 \usage{
-Rsomoclu.train(input_data, nEpoch, 
-           nSomX, nSomY,
-           radius0, radiusN,
-           radiusCooling, scale0, scaleN,
-           scaleCooling, snapshots,
-           kernelType, mapType
-           )
+Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
+                     radius0, radiusN,
+                     radiusCooling, scale0, scaleN,
+                     scaleCooling,
+                     kernelType, mapType, gridType, compactSupport, codebook)
 }
 \arguments{
   \item{input_data}{input data, matrix format}
@@ -26,15 +24,15 @@ Rsomoclu.train(input_data, nEpoch,
   \item{scaleN}{Finishing learning rate (default: 0.01)}
   \item{scaleCooling}{Learning rate cooling strategy: linear or
     exponential (default: linear)}
-  \item{snapshots}{Save interim files (default: 0): 
-                            0: Do not save interim files
-                            1: Save U-matrix only
-                            2: Also save codebook and best matching}
   \item{kernelType}{Kernel type
                             0: Dense CPU
                             1: Dense GPU
-                            2: Sparse CPU}
-  \item{mapType}{Map type: planar or toroid (default: planar)}
+                            2: Sparse CPU
+                            (default: 0)}
+  \item{mapType}{Map type: planar or toroid (default: "planar")}
+  \item{gridType}{Grid type: square or hexagonal (default: "rectangular")}
+  \item{compactSupport}{Compact support for map update, (default:FALSE)}
+  \item{codebook}{initial codebook, (default:NULL)}
   %% \item{initialCodebookFilename}{Specify an initial codebook for the map}
 }
 \references{Peter Wittek (2013). Somoclu: An Efficient Distributed
@@ -43,7 +41,7 @@ Rsomoclu.train(input_data, nEpoch,
 \examples{
 library('Rsomoclu')
 data_file <- system.file("data", "rgbs.txt.gz", package = 'Rsomoclu')
-input_data <- read.table(data_file) 
+input_data <- read.table(data_file)
 input_data <- data.matrix(input_data)
 nSomX <- 50
 nSomY <- 50
@@ -54,14 +52,16 @@ radiusCooling <- "linear"
 scale0 <- 0
 scaleN <- 0.01
 scaleCooling <- "linear"
-kernelType <- 0
+kernelType <- 1
 mapType <- "planar"
-snapshots <- 0
+gridType <- "rectangular"
+compactSupport <- FALSE
+codebook <- NULL
 res <- Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
-               radius0, radiusN,
-               radiusCooling, scale0, scaleN,
-               scaleCooling, snapshots,
-               kernelType, mapType)
+                      radius0, radiusN,
+                      radiusCooling, scale0, scaleN,
+                      scaleCooling,
+                      kernelType, mapType, gridType, compactSupport)
 res$codebook
 res$globalBmus
 res$uMatrix
