@@ -37,6 +37,9 @@ $(distdir):
 	cp $(srcdir)/src/Makefile.in $(distdir)/src
 	cp $(srcdir)/src/*.c* $(srcdir)/src/*.h $(distdir)/src
 	cp $(srcdir)/data/rgbs.* $(distdir)/data
+	cp -r $(srcdir)/src/MATLAB $(distdir)/src/
+	cp -r $(srcdir)/src/Python $(distdir)/src/
+	cp -r $(srcdir)/src/R $(distdir)/src/
 
 distcheck: $(distdir).tar.gz
 	gzip -cd $+ | tar xvf -
