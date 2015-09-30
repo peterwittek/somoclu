@@ -2,8 +2,9 @@ Version 1.5: 2015-09-30
   - New: Python interface has visual capabilities.
   - New: Option for hexagonal grid.
   - New: Option for requesting compact support in updating the map.
-  - New: Python and R interfaces now allow passing an initial codebook.
+  - New: Python, R, and MATLAB interfaces now allow passing an initial codebook.
   - Changed: Reduced memory use in calculating U-matrices.
+  - Changed: Build system rebuilt and simplified.
 
 Version 1.4.1: 2015-01-28
   - Better support for ICC.
