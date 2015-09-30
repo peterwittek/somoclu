@@ -98,6 +98,6 @@ setup(name='somoclu',
       ext_modules=[somoclu_module],
       py_modules=["somoclu"],
       packages=["somoclu"],
-      install_requires=['numpy'],
+      install_requires=['numpy', 'matplotlib'],
       cmdclass=cmdclass
       )
