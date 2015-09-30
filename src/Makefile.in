@@ -28,15 +28,24 @@ NVCC       	   = @NVCC@
 MPI_INC        = @MPI_INC@
 MPI_LIBDIR     = @MPI_LIBDIR@
 MPI_LIBS       = @MPI_LIBS@
+MATLAB_ROOT    = @MATLAB_ROOT@
+MEX_BIN        = @MEX_BIN@
 
 # VPATH-related substitution variables
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
-LIBOBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o
+LIBOBJS=sparseCpuKernels.o denseCpuKernels.o io.o mapDistanceFunctions.o training.o uMatrix.o
+
+MEX_FLAGS=-I./
+MEX_LIBS=-lgomp
+MEX_OBJS=sparseCpuKernels.o denseCpuKernels.o io.o mapDistanceFunctions.o training.o uMatrix.o
 
 ifdef CUDA_LIBS
 	LIBOBJS+=denseGpuKernels.cu.co
+	MEX_FLAGS+=-I"$(MATLAB_ROOT)/toolbox/distcomp/gpu/extern/include/" -DCUDA 
+	MEX_LIBS+=$(CUDA_LDFLAGS) $(CUDA_LIBS) -lnvblas -lmwgpu
+	MEX_OBJS+=denseGpuKernels.cu.o
 endif
 
 OBJS=$(LIBOBJS) io.o somoclu.o
@@ -56,15 +65,13 @@ somoclu: $(OBJS)
 %.cu.co: %.cu
 		$(NVCC) $(DEFS) $(CUDA_CFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
-python_clean:
-	-rm -fr ./Python/somoclu/src ./Python/somoclu.egg* \
-	  ./Python/somoclu/install-sh ./Python/somoclu/Makefile* \
-	  ./Python/somoclu/config* ./Python/somoclu/*so \
-	  ./Python/somoclu/somoclu_wrap* ./Python/somoclu/*pyc \
-	  ./Python/LICENSE ./Python/dist \
-	  ./Python/doc/doctrees ./Python/doc/manual.pdf ./Python/doc/html \
-	  ./Python/doc/latex ./Python/build $(OBJS) 1>/dev/null
+matlab: lib
+	if [ -e denseGpuKernels.cu.co ]; then cp denseGpuKernels.cu.co denseGpuKernels.cu.o; fi
+	$(MEX_BIN) $(MEX_FLAGS) MATLAB/MexSomoclu.cpp $(MEX_OBJS) $(MEX_LIBS)
 
+matlab_clean: clean
+	-rm -f MexSomoclu* denseGpuKernels.cu.o
+	
 python:
 	mkdir -p ./Python/somoclu/src
 	mkdir -p ./Python/somoclu/src/Windows
@@ -86,11 +93,20 @@ python_doc: python
 python_install: python python_doc
 	cd Python; python setup.py install
 
+python_clean:
+	-rm -fr ./Python/somoclu/src ./Python/somoclu.egg* \
+	  ./Python/somoclu/install-sh ./Python/somoclu/Makefile* \
+	  ./Python/somoclu/config* ./Python/somoclu/*so \
+	  ./Python/somoclu/somoclu_wrap* ./Python/somoclu/*pyc \
+	  ./Python/LICENSE ./Python/dist \
+	  ./Python/doc/doctrees ./Python/doc/manual.pdf ./Python/doc/html \
+	  ./Python/doc/latex ./Python/build $(OBJS) 1>/dev/null
+
 r_clean:
 	-rm -fr ./R/src/configure ./R/src/config.h.in ./R/src/Makefile.root.in \
 	  ./R/src/Makefile.in ./R/src/denseGpuKernels.cu ./R/src/*h \
 	  ./R/src/mapDistanceFunctions.cpp ./R/src/training.cpp \
-	  ./R/src/uMatrix.cpp ./R/src/denseCpuKernels.cpp \
+	  ./R/src/io.cpp ./R/src/uMatrix.cpp ./R/src/denseCpuKernels.cpp \
 	  ./R/src/sparseCpuKernels.cpp R/data ./Rsomoclu*gz
 
 r:
@@ -104,6 +120,7 @@ r:
 	cp ./mapDistanceFunctions.cpp ./R/src/
 	cp ./training.cpp ./R/src/
 	cp ./uMatrix.cpp ./R/src/
+	cp ./io.cpp ./R/src/
 	cp ./denseCpuKernels.cpp ./R/src/
 	cp ./denseGpuKernels.cu ./R/src/
 	cp ./sparseCpuKernels.cpp ./R/src/

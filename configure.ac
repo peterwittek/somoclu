@@ -100,6 +100,24 @@ if test x"$with_mpi" != x"no" ; then
       mpi_enabled=yes
     fi
 fi
+#Setup MEX compiler
+# ------------------------------------------------------------------------------
+MATLAB_ROOT="/usr/local/MATLAB/R2013a"
+AC_ARG_WITH([matlab],
+   [  --with-matlab=PATH    prefix where MATLAB is installed [default=/usr/local/MATLAB/R2013a]])
+if test x"$with_matlab" != x"no" ; then
+
+  if test -n "$with_matlab"
+  then
+     MATLAB_ROOT=$with_matlab
+  fi
+
+fi
+
+
+MEX_BIN=$MATLAB_ROOT/bin/mex
+AC_SUBST(MATLAB_ROOT)
+AC_SUBST(MEX_BIN)
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
