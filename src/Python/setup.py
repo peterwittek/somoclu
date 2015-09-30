@@ -42,7 +42,7 @@ elif os.path.exists(cuda_dir):
             call(["make", "lib"])
             os.chdir('../')
             install.run(self)
-    
+
     if arch == 32:
         cuda_lib_dir = cuda_dir + "/lib"
     else:
@@ -86,10 +86,10 @@ else:
                                )
 
 setup(name='somoclu',
-      version='1.5',
+      version='1.5.0.1',
       license='GPL3',
       author="peterwittek",
-      author_email="",
+      author_email="xgdgsc@gmail.com",
       maintainer="shichaogao",
       maintainer_email="xgdgsc@gmail.com",
       url="http://peterwittek.github.io/somoclu/",
