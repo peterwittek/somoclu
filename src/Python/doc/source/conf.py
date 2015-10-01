@@ -14,6 +14,18 @@
 
 import sys
 import os
+import mock
+
+import numpy as np
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import matplotlib.collections as mcoll
+
+
+MOCK_MODULES = ['numpy', 'matplotlib.cm', 'matplotlib.pyplot', 'matplotlib.collections']
+                
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
