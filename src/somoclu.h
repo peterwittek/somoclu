@@ -30,6 +30,9 @@ using namespace std;
 #include <mpi.h>
 #endif
 
+#ifdef _WIN32
+#include<algorithm>
+#endif
 
 #define DENSE_CPU 0
 #define DENSE_GPU 1

@@ -326,7 +326,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                            float scale, string mapType, string gridType,
                            bool compact_support, int *globalBmus) {
 #ifdef _WIN32
-    int* bmus = (int *)alloca(sizeof(int) * nVectorsPerRank * 2);
+	unsigned int* bmus = (unsigned int *)alloca(sizeof(unsigned int)* nVectorsPerRank * 2);
 #else
     unsigned int *bmus = new unsigned int[nVectorsPerRank * 2];
 #endif

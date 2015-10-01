@@ -18,9 +18,6 @@
     <ClInclude Include="..\..\somoclu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\somocluWrap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\unistd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -41,16 +38,10 @@
     <ClCompile Include="..\..\somoclu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\somocluWrap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\sparseCpuKernels.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\training.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\trainOneEpoch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\uMatrix.cpp">
