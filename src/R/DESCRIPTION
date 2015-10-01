@@ -1,9 +1,9 @@
 Package: Rsomoclu
 Version: 1.5
 Date: 2015-09-30
-Title: R package for somoclu
+Title: Somoclu
 Depends: Rcpp
-Imports: 
+Imports:
 Suggests:
 Authors@R: c(person(given = "Peter", family = "Wittek", role = c("aut"), email = ""),
              person(given = "Shichao", family = "Gao", role = c("cre"), email = "xgdgsc@gmail.com"))
@@ -11,7 +11,7 @@ Description: Somoclu is a massively parallel implementation of self-organizing m
 URL: http://peterwittek.github.io/somoclu/
 BugReports: https://github.com/peterwittek/somoclu/issues
 License: GPL-3
-Packaged: 2014-03-16 16:55:16 UTC; 
+Packaged: 2014-03-16 16:55:16 UTC;
 Author: Peter Wittek [aut], Shichao Gao [cre]
 Maintainer: Shichao Gao <xgdgsc@gmail.com>
 NeedsCompilation: yes
