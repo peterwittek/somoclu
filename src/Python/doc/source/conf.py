@@ -16,12 +16,6 @@ import sys
 import os
 import mock
 
-import numpy as np
-import matplotlib.cm as cm
-import matplotlib.pyplot as plt
-import matplotlib.collections as mcoll
-
-
 MOCK_MODULES = ['numpy', 'matplotlib.cm', 'matplotlib.pyplot', 'matplotlib.collections']
                 
 for mod_name in MOCK_MODULES:
