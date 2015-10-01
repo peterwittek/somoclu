@@ -13,7 +13,11 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.collections as mcoll
 
-from .somoclu_wrap import train as wrap_train
+try:
+    from .somoclu_wrap import train as wrap_train
+except ImportError:
+    print("Warning: training function cannot be imported. Only pre-trained "
+          "maps can be analyzed.")
 
 
 class Somoclu(object):
