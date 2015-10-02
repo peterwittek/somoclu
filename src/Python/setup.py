@@ -68,9 +68,14 @@ else:
         extra_link_args = []
     else:
         extra_compile_args = ['-fopenmp']
-        extra_link_args = [
-            '-lgomp'
-        ]
+        if 'clang-omp' in os.environ['CC']:
+            extra_link_args = [
+                '-liomp5'
+            ]
+        else:
+            extra_link_args = [
+                '-lgomp'
+            ]
     sources_files = ['somoclu/src/denseCpuKernels.cpp',
                      'somoclu/src/io.cpp',
                      'somoclu/src/sparseCpuKernels.cpp',

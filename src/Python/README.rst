@@ -51,6 +51,15 @@ The code is available on PyPI, hence it can be installed by
 
     $ sudo pip install somoclu
 
+Some pre-built binaries in the wheel format or windows installer are provided at `PyPI Dowloads <https://pypi.python.org/pypi/somoclu#downloads>`_, they are tested with `Anaconda <https://www.continuum.io/downloads>`_ distributions. If you encounter errors like `ImportError: DLL load failed: The specified module could not be found` when `import somoclu`, you may need to use `Dependency Walker <http://www.dependencywalker.com/>`_ as shown `here <http://stackoverflow.com/a/24704384/1136027>`_ on ``_somoclu_wrap.pyd`` to find out missing DLLs and place them at the write place. Usually right version (32/64bit) of ``vcomp90.dll, msvcp90.dll, msvcr90.dll`` should be put to ``C:\Windows\System32`` or ``C:\Windows\SysWOW64``.
+
+The wheel binaries for OSX are compiled with `clang-omp <http://clang-omp.github.io/>`_ , and depend on libiomp5, which you can install by:
+
+::
+
+    $ brew install libiomp
+
+
 If you want the latest git version, follow the standard procedure for installing Python modules:
 
 ::
@@ -59,33 +68,56 @@ If you want the latest git version, follow the standard procedure for installing
 
 Build on Mac OS X
 --------------------
-Before installing using pip, gcc should be installed first. As of OS X 10.9, gcc is just symlink to clang. To build somoclu and this extension correctly, it is recommended to install gcc using something like:
+Using GCC
+---------------
+Since OS X 10.9, gcc is just symlink to clang. To build somoclu and this extension correctly, it is recommended to install gcc using something like:
 
 ::
 
-    $ brew install gcc48
+    $ brew install gcc --without-multilib
 
 and set environment using:
 
 ::
 
-    export CC=/usr/local/bin/gcc
-    export CXX=/usr/local/bin/g++
-    export CPP=/usr/local/bin/cpp
-    export LD=/usr/local/bin/gcc
-    alias c++=/usr/local/bin/c++
-    alias g++=/usr/local/bin/g++
-    alias gcc=/usr/local/bin/gcc
-    alias cpp=/usr/local/bin/cpp
-    alias ld=/usr/local/bin/gcc
-    alias cc=/usr/local/bin/gcc
+    export CC=/usr/local/bin/gcc-5
+    export CXX=/usr/local/bin/g++-5
+    export CPP=/usr/local/bin/cpp-5
+    export LD=/usr/local/bin/gcc-5
+    alias c++=/usr/local/bin/c++-5
+    alias g++=/usr/local/bin/g++-5
+    alias gcc=/usr/local/bin/gcc-5
+    alias cpp=/usr/local/bin/cpp-5
+    alias ld=/usr/local/bin/gcc-5
+    alias cc=/usr/local/bin/gcc-5
 
-Then you can issue
+Using clang-omp
+---------------
+To install clang-omp, follow instructions at http://clang-omp.github.io/. And set environment using:
 
 ::
 
-    $ sudo pip install somoclu
+    export CC=/usr/local/bin/clang-omp
+    export CXX=/usr/local/bin/clang-omp++
+    export CPP=/usr/local/bin/clang-omp++
+    export LD=/usr/local/bin/clang-omp
+    alias c++=/usr/local/bin/clang-omp++
+    alias g++=/usr/local/bin/clang-omp++
+    alias gcc=/usr/local/bin/clang-omp
+    alias cpp=/usr/local/bin/clang-omp++
+    alias ld=/usr/local/bin/clang-omp
+    alias cc=/usr/local/bin/clang-omp
+    export PATH=/usr/local/bin/:$PATH
+    export C_INCLUDE_PATH=/usr/local/include/:$C_INCLUDE_PATH
+    export CPLUS_INCLUDE_PATH=/usr/local/include/:$CPLUS_INCLUDE_PATH
+    export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH
+    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
+Before building the module manually with:
+
+::
+
+    $ python setup.py build
 
 Build with CUDA support on Linux and OS X:
 ------------------------------------------
