@@ -85,19 +85,36 @@ else:
                                extra_link_args=extra_link_args
                                )
 
-setup(name='somoclu',
-      version='1.5.0.1',
-      license='GPL3',
-      author="peterwittek",
-      author_email="xgdgsc@gmail.com",
-      maintainer="shichaogao",
-      maintainer_email="xgdgsc@gmail.com",
-      url="http://peterwittek.github.io/somoclu/",
-      platforms=["unix", "windows"],
-      description="Massively parallel implementation of self-organizing maps",
-      ext_modules=[somoclu_module],
-      py_modules=["somoclu"],
-      packages=["somoclu"],
-      install_requires=['numpy', 'matplotlib'],
-      cmdclass=cmdclass
-      )
+try:
+    setup(name='somoclu',
+          version='1.5.0.1',
+          license='GPL3',
+          author="peterwittek",
+          author_email="xgdgsc@gmail.com",
+          maintainer="shichaogao",
+          maintainer_email="xgdgsc@gmail.com",
+          url="http://peterwittek.github.io/somoclu/",
+          platforms=["unix", "windows"],
+          description="Massively parallel implementation of self-organizing maps",
+          ext_modules=[somoclu_module],
+          py_modules=["somoclu"],
+          packages=["somoclu"],
+          install_requires=['numpy', 'matplotlib'],
+          cmdclass=cmdclass
+          )
+except:
+    setup(name='somoclu',
+          version='1.5.0.1',
+          license='GPL3',
+          author="peterwittek",
+          author_email="xgdgsc@gmail.com",
+          maintainer="shichaogao",
+          maintainer_email="xgdgsc@gmail.com",
+          url="http://peterwittek.github.io/somoclu/",
+          platforms=["unix", "windows"],
+          description="Massively parallel implementation of self-organizing maps",
+          py_modules=["somoclu"],
+          packages=["somoclu"],
+          install_requires=['numpy', 'matplotlib'],
+          cmdclass=cmdclass
+          )  
