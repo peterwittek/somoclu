@@ -68,7 +68,7 @@ else:
         extra_link_args = []
     else:
         extra_compile_args = ['-fopenmp']
-        if 'clang-omp' in os.environ['CC']:
+        if 'CC' in os.environ and 'clang-omp' in os.environ['CC']:
             extra_link_args = [
                 '-liomp5'
             ]
