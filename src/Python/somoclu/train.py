@@ -216,9 +216,10 @@ class Somoclu(object):
         if dimensions is None:
             dimensions = range(self.n_dim)
         for i in dimensions:
-            self._view_matrix(self.codebook[:, :, i], figsize, colormap,
-                              colorbar, bestmatches, bestmatchcolors, labels,
-                              zoom, filename)
+            plt = self._view_matrix(self.codebook[:, :, i], figsize, colormap,
+                                    colorbar, bestmatches, bestmatchcolors,
+                                    labels, zoom, filename)
+        return plt
 
     def view_umatrix(self, figsize=None, colormap=cm.Spectral_r,
                      colorbar=False, bestmatches=False, bestmatchcolors=None,
@@ -250,8 +251,9 @@ class Somoclu(object):
         if self.umatrix is None:
             raise Exception("The U-matrix is not available. Either train a map"
                             " or load a U-matrix from a file")
-        self._view_matrix(self.umatrix, figsize, colormap, colorbar,
-                          bestmatches, bestmatchcolors, labels, zoom, filename)
+        return self._view_matrix(self.umatrix, figsize, colormap, colorbar,
+                                 bestmatches, bestmatchcolors, labels, zoom,
+                                 filename)
 
     def _view_matrix(self, matrix, figsize, colormap, colorbar, bestmatches,
                      bestmatchcolors, labels, zoom, filename):
