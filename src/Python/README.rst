@@ -17,7 +17,7 @@ Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Pa
 
 Usage
 -----
-A simple example is below. For more example, please refer to the `documentation <http://somoclu.readthedocs.org>`_.
+A simple example is below. For more example, please refer to the `documentation <http://somoclu.readthedocs.org>`_ and a more thorough ipython notebook example at `Somoclu in Python.ipynb <http://nbviewer.ipython.org/github/peterwittek/ipython-notebooks/blob/master/Somoclu%20in%20Python.ipynb>`_.
 
 ::
 
@@ -60,7 +60,18 @@ The wheel binaries for OSX are compiled with `clang-omp <http://clang-omp.github
     $ brew install libiomp
 
 
-If you want the latest git version, follow the standard procedure for installing Python modules:
+If you want the latest git version, first git clone the repo, install `swig <http://www.swig.org/>`_ and run:
+
+::
+
+    $ ./autogen.sh
+    $ ./configure [options]
+    $ make
+    $ make python
+
+to generate python interface files.
+
+Then follow the standard procedure for installing Python modules:
 
 ::
 
