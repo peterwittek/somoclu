@@ -26,13 +26,6 @@ If you want CUDA support, specify the CUDA directory as well.
    ::
       make matlab
 
-If you see errors like:
-::
-  nvcc fatal: Unsupported gpu architecture 'compute_13'
-  mex: compile of ' "MexSomoclu.cpp"' failed.
-
-when using **CUDA 7**, which removed support for ``compute_13``, you may need to remove all ``-gencode=arch=compute_13,code=sm_13`` from ``mexopts.sh`` which is located usually at ``MATLAB_ROOT/toolbox/distcomp/gpu/extern/src/mex/glnxa64/``. Then run the previous build script ``makeMex.sh``.
-
 3. Then ``MexSomoclu.mexa64`` or ``MexSomoclu.mexa32`` is generated for use, you can test by installing som-toolbox from https://github.com/ilarinieminen/SOM-Toolbox, and running the ``mex_interface_test.m`` or ``mex_interface_test_gpu.m``.
 
 If you encounter errors like:
