@@ -29,6 +29,7 @@ function [sMap, sTrain, globalBmus, uMatrix] = somoclu_train(sMap, D, varargin)
 %   'scaleCooling' 'alpha_type' (string)  Learning rate cooling strategy: linear or exponential (default: linear)
 %   'gridType' 'lattice'  (string)  Grid type: square or hexagonal (default: square)
 %   'compactSupport'  Compact support for map update (0: false, 1: true, default: 0)
+%   'neighborhood'  Neighborhood function (bubble or gaussian, default: gaussian)
 %   'nEpoch' 'trainlen' (scalar)  Maximum number of epochs
 %   'sTrain','som_train '  = 'train'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -81,6 +82,7 @@ sTrain.radius_cooling = 'linear';
 sTrain.alpha_type = 'linear';
 sTrain.kernel_type = 0;
 sTrain.compact_support = false;
+sTrain.neighborhood = 'gaussian';
 sTrain.scale0 = 0.1
 sTrain.scaleN = 0.01
 
@@ -108,6 +110,7 @@ while i<=length(varargin),
 %         if l>2, radius = varargin{i}; tlen_type = 'samples'; end
       end 
      case {'scaleCooling', 'alpha_type'}, i=i+1; sTrain.alpha_type = varargin{i};
+     case 'neighborhood', i=i+1; sTrain.neighborhood = varargin{i};
      case {'scale0', 'alpha_ini'}, i=i+1; sTrain.scale0 = varargin{i};
      case 'scaleN', i=i+1; sTrain.scaleN = varargin{i};
      case {'sTrain','train','som_train'}, i=i+1; sTrain = varargin{i};
@@ -137,13 +140,18 @@ while i<=length(varargin),
   end
   i = i+1; 
 end
+if strcmp(sTrain.neighborhood, 'gaussian')
+    sTrain.gaussian = 1;
+else
+    sTrain.gaussian = 0;
+end
 [sMap.codebook, globalBmus, uMatrix] = MexSomoclu(D, sTrain.trainlen, ...
 sTopol.msize(1), sTopol.msize(2), ...
 sTrain.radius_ini, sTrain.radius_fin, ...
 sTrain.radius_cooling,  sTrain.scale0, sTrain.scaleN, ...
 sTrain.alpha_type, ...
 sTrain.kernel_type, sTopol.shape, sTopol.lattice, ...
-sTrain.compact_support, sMap.codebook);
+sTrain.compact_support, sTrain.gaussian, sMap.codebook);
 rowNums=colon(1,size(globalBmus,1))'
 globalBmus = [rowNums globalBmus]
 sTrain = som_set(sTrain,'time',datestr(now,0));
