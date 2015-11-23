@@ -8,7 +8,7 @@ Key features:
 * Multi-platform: Linux, OS X, and Windows are supported.
 * Planar and toroid maps.
 * Rectangular and hexagonal grids.
-* Gaussian and bubble neighborhood function.
+* Gaussian and bubble neighborhood functions.
 * Both dense and sparse input data are supported.
 * Large maps of several hundred thousand neurons are feasible.
 * Integration with [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/).
