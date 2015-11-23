@@ -9,7 +9,8 @@ Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                      radius0, radiusN,
                      radiusCooling, scale0, scaleN,
                      scaleCooling,
-                     kernelType, mapType, gridType, compactSupport, codebook)
+                     kernelType, mapType, gridType, compactSupport, 
+                     neighborhood, codebook)
 }
 \arguments{
   \item{input_data}{input data, matrix format}
@@ -32,11 +33,11 @@ Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
   \item{mapType}{Map type: planar or toroid (default: "planar")}
   \item{gridType}{Grid type: square or hexagonal (default: "rectangular")}
   \item{compactSupport}{Compact support for map update, (default:FALSE)}
+  \item{neighborhood}{Neighborhood function: gaussian or bubble (default: "gaussian")}
   \item{codebook}{initial codebook, (default:NULL)}
   %% \item{initialCodebookFilename}{Specify an initial codebook for the map}
 }
-\references{Peter Wittek (2013). Somoclu: An Efficient Distributed
-  Library for Self-Organizing Maps. arXiv:1305.1422.}
+\references{Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. arXiv:1305.1422.}
 \author{Peter Wittek, Shichao Gao}
 \examples{
 library('Rsomoclu')

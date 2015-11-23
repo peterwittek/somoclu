@@ -9,7 +9,7 @@ Rsomoclu.train <-
            radiusCooling, scale0, scaleN,
            scaleCooling,
            kernelType=0, mapType="planar", gridType="rectangular", 
-           compactSupport=FALSE, codebook=NULL) {
+           compactSupport=FALSE, neighborhood="gaussian", codebook=NULL) {
     if (is.null(codebook)) {
       codebook <- numeric(nSomX*nSomY*dim(input_data)[2])
       codebook[1] <- 1000
@@ -19,7 +19,7 @@ Rsomoclu.train <-
                  nSomX, nSomY, radius0, radiusN,
                  radiusCooling, scale0, scaleN,
                  scaleCooling, kernelType, mapType,
-                 gridType, compactSupport,
+                 gridType, compactSupport, neighborhood,
                  codebook)
     res
 }

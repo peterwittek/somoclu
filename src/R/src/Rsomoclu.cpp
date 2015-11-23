@@ -26,6 +26,7 @@ RcppExport SEXP Rtrain(SEXP data_p,
                        SEXP scaleCooling_p,
                        SEXP kernelType_p, SEXP mapType_p,
                        SEXP gridType_p, SEXP compactSupport_p,
+                       SEXP neighbordhood_p,
                        SEXP codebook_p) {
     Rcpp::NumericMatrix dataMatrix(data_p);
     Rcpp::NumericVector codebook_vec(codebook_p);
@@ -44,6 +45,7 @@ RcppExport SEXP Rtrain(SEXP data_p,
     bool compactSupport = as<bool>(compactSupport_p);
     string mapType = as<string>(mapType_p);
     string gridType = as<string>(gridType_p);
+    string neighborhood = as<string>(neighborhood_p);
     int data_length = nVectors * nDimensions;
     float* data = new float[data_length];
     // convert matrix to data c float array
@@ -70,7 +72,7 @@ RcppExport SEXP Rtrain(SEXP data_p,
           nDimensions, nVectors, radius0, radiusN,
           radiusCooling, scale0, scaleN, scaleCooling,
           kernelType, mapType,
-          gridType, compactSupport,
+          gridType, compactSupport, neighborhood == "gaussian",
           codebook, codebook_size, globalBmus, globalBmus_size,
           uMatrix, uMatrix_size);
     Rcpp::NumericVector globalBmus_vec(globalBmus_size);
