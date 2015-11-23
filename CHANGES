@@ -1,3 +1,6 @@
+Since 1.5:
+  - New: Neighborhood function can be chosen between Gaussian and bubble.
+
 Version 1.5: 2015-09-30
   - New: Python interface has visual capabilities.
   - New: Option for hexagonal grid.

@@ -23,7 +23,7 @@ void train(float *data, int data_length,
            float scale0, float scaleN,
            string scaleCooling,
            unsigned int kernelType, string mapType,
-           string gridType, bool compact_support,
+           string gridType, bool compact_support, bool gaussian,
            float* codebook, int codebook_size,
            int* globalBmus, int globalBmus_size,
            float* uMatrix, int uMatrix_size);

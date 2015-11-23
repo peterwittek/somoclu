@@ -54,7 +54,7 @@ class Somoclu(object):
 
     def __init__(self, n_columns, n_rows, data=None, initialcodebook=None,
                  kerneltype=0, maptype="planar", gridtype="rectangular",
-                 compactsupport=False):
+                 compactsupport=False, neighborhood="gaussian"):
         """Constructor for the class.
         """
         self._n_columns, self._n_rows = n_columns, n_rows
@@ -62,6 +62,7 @@ class Somoclu(object):
         self._map_type = maptype
         self._grid_type = gridtype
         self._compact_support = compactsupport
+        self._neighborhood = neighborhood
         self._check_parameters()
         self.bmus = None
         self.umatrix = np.zeros(n_columns * n_rows, dtype=np.float32)
@@ -153,8 +154,8 @@ class Somoclu(object):
                    self.n_dim, self.n_vectors, radius0, radiusN,
                    radiuscooling, scale0, scaleN, scalecooling,
                    self._kernel_type, self._map_type, self._grid_type,
-                   self._compact_support, self.codebook, self.bmus,
-                   self.umatrix)
+                   self._compact_support, self._neighborhood == "gaussian", 
+                   self.codebook, self.bmus, self.umatrix)
         self.umatrix.shape = (self._n_rows, self._n_columns)
         self.bmus.shape = (self.n_vectors, 2)
         self.codebook.shape = (self._n_rows, self._n_columns, self.n_dim)
@@ -325,9 +326,13 @@ class Somoclu(object):
         if self._grid_type != "rectangular" and self._grid_type != "hexagonal":
             raise Exception("Invalid parameter for _grid_type: " +
                             self._grid_type)
+        if self._neighborhood != "gaussian" and self._neighborhood != "bubble":
+            raise Exception("Invalid parameter for neighborhood: " +
+                            self._neighborhood)
         if self._kernel_type != 0 and self._kernel_type != 1:
             raise Exception("Invalid parameter for kernelTye: " +
                             self._kernel_type)
+
 
     def _init_codebook(self):
         """Internal function to set the codebook or to indicate it to the C++

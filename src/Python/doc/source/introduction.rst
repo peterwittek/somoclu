@@ -9,6 +9,7 @@ Key features of the Python interface:
 * Multi-platform: Linux, OS X, and Windows are supported.
 * Planar and toroid maps.
 * Rectangular and hexagonal grids.
+* Gaussian or bubble neighborhood function.
 * Visualization of maps, including those that were trained outside of Python.
 
 The documentation is available online. Further details are found in the following paper:
