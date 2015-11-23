@@ -324,7 +324,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius,
                            float scale, string mapType, string gridType,
-                           bool compact_support, int *globalBmus) {
+                           bool compact_support, bool gaussian, int *globalBmus) {
 #ifdef _WIN32
 	unsigned int* bmus = (unsigned int *)alloca(sizeof(unsigned int)* nVectorsPerRank * 2);
 #else
@@ -367,7 +367,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                                 dist = euclideanDistanceOnHexagonalToroidMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1], nSomX, nSomY);
                             }
                         }
-                        float neighbor_fuct = getWeight(dist, radius, scale, compact_support);
+                        float neighbor_fuct = getWeight(dist, radius, scale, compact_support, gaussian);
 
                         for (unsigned int d = 0; d < nDimensions; d++) {
                             localNumerator[som_y * nSomX * nDimensions + som_x * nDimensions + d] +=

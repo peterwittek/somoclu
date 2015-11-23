@@ -35,6 +35,7 @@ Arguments:
                                 1: Dense GPU
                                 2: Sparse CPU
     -m TYPE                  Map type: planar or toroid (default: planar)
+    -n NUMBER                Neighborhood function (bubble or gaussian, default: gaussian)
     -p NUMBER                Compact support for map update
                              (0: false, 1: true, default: 0)
     -t STRATEGY              Radius cooling strategy: linear or exponential (default: linear)

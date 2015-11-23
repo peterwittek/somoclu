@@ -72,16 +72,22 @@ float gaussianNeighborhood(float distance, float radius, float stddevs) {
     return exp((-(float) distance * distance) / norm);
 }
 
-float getWeight(float distance, float radius, float scaling, bool compact_support = false) {
+float getWeight(float distance, float radius, float scaling, bool compact_support = false,
+                bool gaussian = true) {
+    float result = 0.0;
     if (!compact_support) {
-        return scaling * gaussianNeighborhood(distance, radius, 2);
-    }
-    else {
-        if (distance <= radius) {
-            return scaling * gaussianNeighborhood(distance, radius, 2);
-        }
-        else {
-            return 0.0;
+        if (gaussian) {
+            result = gaussianNeighborhood(distance, radius, 2);
+        } else {
+            result = 1.0;
         }
     }
+    else if (distance <= radius) {
+        if (gaussian) {
+            result = gaussianNeighborhood(distance, radius, 2);
+        } else {
+            result = 1.0;
+        }
+    }
+    return scaling * result;
 }

@@ -76,7 +76,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius,
                            float scale, string mapType, string gridType,
-                           bool compact_support, int *globalBmus) {
+                           bool compact_support, bool gaussian, int *globalBmus) {
     unsigned int p1[2] = {0, 0};
     unsigned int *bmus = new unsigned int[nVectorsPerRank * 2];
 #ifdef _OPENMP
@@ -150,7 +150,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                                 dist = euclideanDistanceOnHexagonalToroidMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1], nSomX, nSomY);
                             }
                         }
-                        float neighbor_fuct = getWeight(dist, radius, scale, compact_support);
+                        float neighbor_fuct = getWeight(dist, radius, scale, compact_support, gaussian);
 
                         for (unsigned int d = 0; d < nDimensions; d++) {
                             localNumerator[som_y * nSomX * nDimensions + som_x * nDimensions + d] +=

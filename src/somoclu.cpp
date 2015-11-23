@@ -54,6 +54,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                         unsigned int *kernelType, string *mapType,
                         unsigned int *snapshots,
                         string *gridType, unsigned int *compactSupport,
+                        unsigned int *gaussian,
                         string *initialCodebookFilename);
 
 /* -------------------------------------------------------------------------- */
@@ -80,6 +81,7 @@ int main(int argc, char** argv)
     string mapType;
     string gridType;
     unsigned int compactSupport;
+    unsigned int gaussian;
     unsigned int radius0 = 0;
     unsigned int radiusN = 0;
     string radiusCooling;
@@ -97,7 +99,7 @@ int main(int argc, char** argv)
                            &scale0, &scaleN, &scaleCooling,
                            &nSomX, &nSomY,
                            &kernelType, &mapType, &snapshots,
-                           &gridType, &compactSupport,
+                           &gridType, &compactSupport, &gaussian,
                            &initialCodebookFilename);
 #ifndef CUDA
         if (kernelType == DENSE_GPU) {
@@ -238,7 +240,7 @@ int main(int argc, char** argv)
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
-          gridType, compactSupport == 1,
+          gridType, compactSupport == 1, gaussian == 1,
           outPrefix, snapshots);
 
 #ifdef HAVE_MPI
@@ -306,6 +308,7 @@ void printUsage() {
          "                              1: Dense GPU\n" \
          "                              2: Sparse CPU\n" \
          "     -m TYPE               Map type: planar or toroid (default: planar) \n" \
+         "     -n NUMBER             Neighborhood function (bubble or gaussian, default: gaussian)\n"\
          "     -p NUMBER             Compact support for map update (0: false, 1: true, default: 0)\n"\
          "     -t STRATEGY           Radius cooling strategy: linear or exponential (default: linear)\n" \
          "     -r NUMBER             Start radius (default: half of the map in direction min(x,y))\n" \
@@ -334,6 +337,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                         unsigned int *kernelType, string *mapType,
                         unsigned int *snapshots,
                         string *gridType, unsigned int *compactSupport,
+                        unsigned int *gaussian,
                         string *initialCodebookFilename) {
 
     // Setting default values
@@ -351,6 +355,8 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     *scaleCooling = "linear";
     *gridType = "rectangular";
     *compactSupport = 0;
+    *gaussian = 1;
+    string neighborhood_function = "gaussian";
     static struct option long_options[] = {
         {"rows",  required_argument, 0, 'y'},
         {"columns",    required_argument, 0, 'x'},
@@ -359,7 +365,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     int c;
     extern int optind, optopt;
     int option_index = 0;
-    while ((c = getopt_long (argc, argv, "hx:y:e:g:k:l:m:p:r:s:t:c:L:R:T:",
+    while ((c = getopt_long (argc, argv, "hx:y:e:g:k:l:m:n:p:r:s:t:c:L:R:T:",
                              long_options, &option_index)) != -1) {
         switch (c) {
         case 'c':
@@ -380,6 +386,17 @@ void processCommandLine(int argc, char** argv, string *inFilename,
             *kernelType = atoi(optarg);
             if (*kernelType > SPARSE_CPU) {
                 cerr << "The argument of option -k should be a valid kernel.\n";
+                my_abort(1);
+            }
+            break;
+        case 'n':
+            neighborhood_function = optarg;
+            if (neighborhood_function == "bubble") {
+                *gaussian = 0;
+            } else if (neighborhood_function == "gaussian") {
+                *gaussian = 1;
+            } else {
+                cerr << "The argument of option -n should be either bubble or Gaussian.\n";
                 my_abort(1);
             }
             break;

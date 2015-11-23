@@ -84,7 +84,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                             unsigned int nDimensions, unsigned int nVectors,
                             unsigned int nVectorsPerRank, float radius,
                             float scale, string mapType, string gridType,
-                            bool compact_support, int *globalBmus) {
+                            bool compact_support, bool gaussian, int *globalBmus) {
     int p1[2] = {0, 0};
     int *bmus = new int[nVectorsPerRank * 2];
 #ifdef _OPENMP
@@ -160,7 +160,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                                 dist = euclideanDistanceOnHexagonalToroidMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1], nSomX, nSomY);
                             }
                         }
-                        float neighbor_fuct = getWeight(dist, radius, scale, compact_support);
+                        float neighbor_fuct = getWeight(dist, radius, scale, compact_support, gaussian);
                         unsigned int j = 0;
                         while ( sparseData[n][j].index != -1 ) {
                             localNumerator[som_y * nSomX * nDimensions +

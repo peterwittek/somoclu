@@ -53,7 +53,7 @@ float euclideanDistanceOnToroidMap(const unsigned int som_x, const unsigned int 
 float euclideanDistanceOnPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y);
 float euclideanDistanceOnHexagonalToroidMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y, const unsigned int nSomX, const unsigned int nSomY);
 float euclideanDistanceOnHexagonalPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y);
-float getWeight(float distance, float radius, float scaling, bool compact_support);
+float getWeight(float distance, float radius, float scaling, bool compact_support, bool gaussian);
 int saveCodebook(string cbFileName, float *codebook,
                  unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions);
 float *calculateUMatrix(float* uMatrix, float *codebook, unsigned int nSomX,
@@ -81,7 +81,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                    float scale0, float scaleN,
                    string scaleCooling,
                    unsigned int kernelType, string mapType,
-                   string gridType, bool compact_support);
+                   string gridType, bool compact_support, bool gaussian);
 void train(float *data, int data_length,
            unsigned int nEpoch,
            unsigned int nSomX, unsigned int nSomY,
@@ -91,7 +91,7 @@ void train(float *data, int data_length,
            float scale0, float scaleN,
            string scaleCooling,
            unsigned int kernelType, string mapType,
-           string gridType, bool compact_support,
+           string gridType, bool compact_support, bool gaussian,
            float* codebook, int codebook_size,
            int* globalBmus, int globalBmus_size,
            float* uMatrix, int uMatrix_size);
@@ -105,7 +105,7 @@ void train(int itask, float *data, svm_node **sparseData,
            float scale0, float scaleN,
            string scaleCooling,
            unsigned int kernelType, string mapType,
-           string gridType, bool compact_support
+           string gridType, bool compact_support, bool gaussian
 #ifdef CLI
            , string outPrefix, unsigned int snapshots);
 #else
@@ -118,7 +118,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nDimensions, unsigned int nVectors,
                            unsigned int nVectorsPerRank, float radius,
                            float scale, string mapType,
-                           string gridType, bool compact_support,
+                           string gridType, bool compact_support, bool gaussian,
                            int *globalBmus);
 void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                             float *denominator, float *codebook,
@@ -126,7 +126,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                             unsigned int nDimensions, unsigned int nVectors,
                             unsigned int nVectorsPerRank, float radius,
                             float scale, string mapType,
-                            string gridType, bool compact_support,
+                            string gridType, bool compact_support, bool gaussian,
                             int *globalBmus);
 void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
                         unsigned int nSomY, unsigned int nDimensions);
@@ -143,7 +143,7 @@ extern "C" {
                                unsigned int nDimensions, unsigned int nVectors,
                                unsigned int nVectorsPerRank, float radius,
                                float scale, string mapType,
-                               string gridType, bool compact_support,
+                               string gridType, bool compact_support, bool gaussian,
                                int *globalBmus);
 #endif
     void my_abort(int err);
