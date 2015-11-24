@@ -19,6 +19,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 
 #ifdef _WIN32
 #include "Windows/unistd.h"
@@ -44,6 +45,37 @@ using namespace std;
 #define KERNEL_TYPE 0
 #define SNAPSHOTS 0
 
+void printUsage() {
+    cout << "Usage:\n" \
+         "     [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX\n" \
+         "Arguments:\n" \
+         "     -c FILENAME           Specify an initial codebook for the map.\n" \
+         "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
+         "     -g TYPE               Grid type: rectangular or hexagonal (default: rectangular)\n"\
+         "     -k NUMBER             Kernel type (default: " << KERNEL_TYPE << "): \n" \
+         "                              0: Dense CPU\n" \
+         "                              1: Dense GPU\n" \
+         "                              2: Sparse CPU\n" \
+         "     -m TYPE               Map type: planar or toroid (default: planar) \n" \
+         "     -n NUMBER             Neighborhood function (bubble or gaussian, default: gaussian)\n"\
+         "     -p NUMBER             Compact support for map update (0: false, 1: true, default: 0)\n"\
+         "     -t STRATEGY           Radius cooling strategy: linear or exponential (default: linear)\n" \
+         "     -r NUMBER             Start radius (default: half of the map in direction min(x,y))\n" \
+         "     -R NUMBER             End radius (default: 1)\n" \
+         "     -T STRATEGY           Learning rate cooling strategy: linear or exponential (default: linear)\n" \
+         "     -l NUMBER             Starting learning rate (default: 0.1)\n" \
+         "     -L NUMBER             Finishing learning rate (default: 0.01)\n" \
+         "     -s NUMBER             Save interim files (default: 0):\n" \
+         "                              0: Do not save interim files\n" \
+         "                              1: Save U-matrix only\n" \
+         "                              2: Also save codebook and best matching neurons\n" \
+         "     -x, --columns NUMBER  Number of columns in map (size of SOM in direction x) (default: " << N_SOM_X << ")\n" \
+         "     -y, --rows NUMBER     Number of rows in map (size of SOM in direction y) (default: " << N_SOM_Y << ")\n" \
+         "Examples:\n" \
+         "     somoclu data/rgbs.txt data/rgbs\n"
+         "     mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs\n";
+}
+
 void processCommandLine(int argc, char** argv, string *inFilename,
                         string* outPrefix, unsigned int *nEpoch,
                         unsigned int *radius0, unsigned int *radiusN,
@@ -55,7 +87,165 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                         unsigned int *snapshots,
                         string *gridType, unsigned int *compactSupport,
                         unsigned int *gaussian,
-                        string *initialCodebookFilename);
+                        string *initialCodebookFilename) {
+
+    // Setting default values
+    *nEpoch = N_EPOCH;
+    *nSomX = N_SOM_X;
+    *nSomY = N_SOM_Y;
+    *kernelType = KERNEL_TYPE;
+    *snapshots = SNAPSHOTS;
+    *mapType = "planar";
+    *radius0 = 0;
+    *radiusN = 0;
+    *radiusCooling = "linear";
+    *scale0 = 0.0;
+    *scaleN = 0.01;
+    *scaleCooling = "linear";
+    *gridType = "rectangular";
+    *compactSupport = 0;
+    *gaussian = 1;
+    string neighborhood_function = "gaussian";
+    static struct option long_options[] = {
+        {"rows",  required_argument, 0, 'y'},
+        {"columns",    required_argument, 0, 'x'},
+        {0, 0, 0, 0}
+    };
+    int c;
+    extern int optind, optopt;
+    int option_index = 0;
+    while ((c = getopt_long (argc, argv, "hx:y:e:g:k:l:m:n:p:r:s:t:c:L:R:T:",
+                             long_options, &option_index)) != -1) {
+        switch (c) {
+        case 'c':
+            *initialCodebookFilename = optarg;
+            break;
+        case 'e':
+            *nEpoch = atoi(optarg);
+            if (*nEpoch <= 0) {
+                my_abort("The argument of option -e should be a positive integer.");
+            }
+            break;
+        case 'h':
+            printUsage();
+            exit(0);
+            break;
+        case 'k':
+            *kernelType = atoi(optarg);
+            if (*kernelType > SPARSE_CPU) {
+                my_abort("The argument of option -k should be a valid kernel.");
+            }
+            break;
+        case 'n':
+            neighborhood_function = optarg;
+            if (neighborhood_function == "bubble") {
+                *gaussian = 0;
+            } else if (neighborhood_function == "gaussian") {
+                *gaussian = 1;
+            } else {
+                my_abort("The argument of option -n should be either bubble or Gaussian.");
+            }
+            break;
+        case 'p':
+            *compactSupport = atoi(optarg);
+            if (*compactSupport != 0 && *compactSupport != 1) {
+                my_abort("The argument of option -g should be either 0 (false) or 1 (true).");
+            }
+            break;
+        case 'm':
+            *mapType = optarg;
+            if (*mapType != "planar" && *mapType != "toroid") {
+                my_abort("The argument of option -m should be either planar or toroid.");
+            }
+            break;
+        case 'g':
+            *gridType = optarg;
+            if (*gridType != "rectangular" && *gridType != "hexagonal") {
+                my_abort("The argument of option -h should be either rectangular or hexagonal.");
+            }
+            break;
+        case 'r':
+            *radius0 = atoi(optarg);
+            if (*radius0 <= 0) {
+                my_abort("The argument of option -r should be a positive integer.");
+            }
+            break;
+        case 'R':
+            *radiusN = atoi(optarg);
+            if (*radiusN <= 0) {
+                my_abort("The argument of option -R should be a positive integer.");
+            }
+            break;
+        case 't':
+            *radiusCooling = optarg;
+            if (*radiusCooling != "linear" && *radiusCooling != "exponential") {
+                my_abort("The argument of option -t should be linear or exponential.");
+            }
+            break;
+        case 'l':
+            *scale0 = atof(optarg);
+            if (*scale0 <= 0) {
+                my_abort("The argument of option -l should be a positive float.");
+            }
+            break;
+        case 'L':
+            *scaleN = atof(optarg);
+            if (*scaleN <= 0) {
+                my_abort("The argument of option -L should be a positive float.");
+            }
+            break;
+        case 'T':
+            *scaleCooling = optarg;
+            if (*scaleCooling != "linear" && *scaleCooling != "exponential") {
+                my_abort("The argument of option -T should be linear or exponential.");
+            }
+            break;
+        case 's':
+            *snapshots = atoi(optarg);
+            if (*snapshots > 2) {
+                my_abort("The argument of option -s should be 0, 1, or 2.");
+            }
+
+            break;
+        case 'x':
+            *nSomX = atoi(optarg);
+            if (*nSomX <= 0) {
+                my_abort("The argument of option -x should be a positive integer.");
+            }
+            break;
+        case 'y':
+            *nSomY = atoi(optarg);
+            if (*nSomY <= 0) {
+                my_abort("The argument of option -y should be a positive integer.");
+            }
+            break;
+        case '?':
+            if (optopt == 'e' || optopt == 'k' || optopt == 's' ||
+                    optopt == 'x'    || optopt == 'y') {
+                stringstream sstm;
+                sstm << "Option -" <<  optopt << " requires an argument.";
+                my_abort(sstm.str());
+            }
+            else if (isprint (optopt)) {
+                stringstream sstm;
+                sstm << "Unknown option -" << optopt;
+                my_abort(sstm.str());
+            }
+            else {
+                stringstream sstm;
+                sstm << "Unknown option character `\\x" << optopt << "'";
+                my_abort(sstm.str());
+            }
+        default:
+            abort ();
+        }
+    }
+    if (argc - optind != 2) {
+        my_abort("Incorrect number of mandatory parameters");
+    }
+    *inFilename = argv[optind++];
+    *outPrefix = argv[optind++];
+}
 
 /* -------------------------------------------------------------------------- */
 int main(int argc, char** argv)
@@ -103,8 +293,7 @@ int main(int argc, char** argv)
                            &initialCodebookFilename);
 #ifndef CUDA
         if (kernelType == DENSE_GPU) {
-            cerr << "Somoclu was compile without GPU support!\n";
-            my_abort(1);
+            my_abort("Somoclu was compile without GPU support!");
         }
 #endif
     }
@@ -220,12 +409,10 @@ int main(int argc, char** argv)
             delete [] codebook;
             codebook = readMatrix(initialCodebookFilename, nSomXY, tmpNDimensions);
             if (tmpNDimensions != nDimensions) {
-                cerr << "Dimension of initial codebook does not match data!\n";
-                my_abort(5);
+                my_abort("Dimension of initial codebook does not match data!");
             }
             else if (nSomXY / nSomY != nSomX) {
-                cerr << "Dimension of initial codebook does not match specified SOM grid!\n";
-                my_abort(6);
+                my_abort("Dimension of initial codebook does not match specified SOM grid!");
             }
             cout << "Read initial codebook: " << initialCodebookFilename << "\n";
         }
@@ -294,225 +481,6 @@ int main(int argc, char** argv)
     MPI_Finalize();
 #endif
     return 0;
-}
-
-void printUsage() {
-    cout << "Usage:\n" \
-         "     [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX\n" \
-         "Arguments:\n" \
-         "     -c FILENAME           Specify an initial codebook for the map.\n" \
-         "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
-         "     -g TYPE               Grid type: rectangular or hexagonal (default: rectangular)\n"\
-         "     -k NUMBER             Kernel type (default: " << KERNEL_TYPE << "): \n" \
-         "                              0: Dense CPU\n" \
-         "                              1: Dense GPU\n" \
-         "                              2: Sparse CPU\n" \
-         "     -m TYPE               Map type: planar or toroid (default: planar) \n" \
-         "     -n NUMBER             Neighborhood function (bubble or gaussian, default: gaussian)\n"\
-         "     -p NUMBER             Compact support for map update (0: false, 1: true, default: 0)\n"\
-         "     -t STRATEGY           Radius cooling strategy: linear or exponential (default: linear)\n" \
-         "     -r NUMBER             Start radius (default: half of the map in direction min(x,y))\n" \
-         "     -R NUMBER             End radius (default: 1)\n" \
-         "     -T STRATEGY           Learning rate cooling strategy: linear or exponential (default: linear)\n" \
-         "     -l NUMBER             Starting learning rate (default: 0.1)\n" \
-         "     -L NUMBER             Finishing learning rate (default: 0.01)\n" \
-         "     -s NUMBER             Save interim files (default: 0):\n" \
-         "                              0: Do not save interim files\n" \
-         "                              1: Save U-matrix only\n" \
-         "                              2: Also save codebook and best matching neurons\n" \
-         "     -x, --columns NUMBER  Number of columns in map (size of SOM in direction x) (default: " << N_SOM_X << ")\n" \
-         "     -y, --rows NUMBER     Number of rows in map (size of SOM in direction y) (default: " << N_SOM_Y << ")\n" \
-         "Examples:\n" \
-         "     somoclu data/rgbs.txt data/rgbs\n"
-         "     mpirun -np 4 somoclu -k 0 -x 20 -y 20 data/rgbs.txt data/rgbs\n";
-}
-
-void processCommandLine(int argc, char** argv, string *inFilename,
-                        string* outPrefix, unsigned int *nEpoch,
-                        unsigned int *radius0, unsigned int *radiusN,
-                        string *radiusCooling,
-                        float *scale0, float *scaleN,
-                        string *scaleCooling,
-                        unsigned int *nSomX, unsigned int *nSomY,
-                        unsigned int *kernelType, string *mapType,
-                        unsigned int *snapshots,
-                        string *gridType, unsigned int *compactSupport,
-                        unsigned int *gaussian,
-                        string *initialCodebookFilename) {
-
-    // Setting default values
-    *nEpoch = N_EPOCH;
-    *nSomX = N_SOM_X;
-    *nSomY = N_SOM_Y;
-    *kernelType = KERNEL_TYPE;
-    *snapshots = SNAPSHOTS;
-    *mapType = "planar";
-    *radius0 = 0;
-    *radiusN = 0;
-    *radiusCooling = "linear";
-    *scale0 = 0.0;
-    *scaleN = 0.01;
-    *scaleCooling = "linear";
-    *gridType = "rectangular";
-    *compactSupport = 0;
-    *gaussian = 1;
-    string neighborhood_function = "gaussian";
-    static struct option long_options[] = {
-        {"rows",  required_argument, 0, 'y'},
-        {"columns",    required_argument, 0, 'x'},
-        {0, 0, 0, 0}
-    };
-    int c;
-    extern int optind, optopt;
-    int option_index = 0;
-    while ((c = getopt_long (argc, argv, "hx:y:e:g:k:l:m:n:p:r:s:t:c:L:R:T:",
-                             long_options, &option_index)) != -1) {
-        switch (c) {
-        case 'c':
-            *initialCodebookFilename = optarg;
-            break;
-        case 'e':
-            *nEpoch = atoi(optarg);
-            if (*nEpoch <= 0) {
-                cerr << "The argument of option -e should be a positive integer.\n";
-                my_abort(1);
-            }
-            break;
-        case 'h':
-            printUsage();
-            my_abort(0);
-            break;
-        case 'k':
-            *kernelType = atoi(optarg);
-            if (*kernelType > SPARSE_CPU) {
-                cerr << "The argument of option -k should be a valid kernel.\n";
-                my_abort(1);
-            }
-            break;
-        case 'n':
-            neighborhood_function = optarg;
-            if (neighborhood_function == "bubble") {
-                *gaussian = 0;
-            } else if (neighborhood_function == "gaussian") {
-                *gaussian = 1;
-            } else {
-                cerr << "The argument of option -n should be either bubble or Gaussian.\n";
-                my_abort(1);
-            }
-            break;
-        case 'p':
-            *compactSupport = atoi(optarg);
-            if (*compactSupport != 0 && *compactSupport != 1) {
-                cerr << "The argument of option -g should be either 0 (false) or 1 (true).\n";
-                my_abort(1);
-            }
-            break;
-        case 'm':
-            *mapType = optarg;
-            if (*mapType != "planar" && *mapType != "toroid") {
-                cerr << "The argument of option -m should be either planar or toroid.\n";
-                my_abort(1);
-            }
-            break;
-        case 'g':
-            *gridType = optarg;
-            if (*gridType != "rectangular" && *gridType != "hexagonal") {
-                cerr << "The argument of option -h should be either rectangular or hexagonal.\n";
-                my_abort(1);
-            }
-            break;
-        case 'r':
-            *radius0 = atoi(optarg);
-            if (*radius0 <= 0) {
-                cerr << "The argument of option -r should be a positive integer.\n";
-                my_abort(1);
-            }
-            break;
-        case 'R':
-            *radiusN = atoi(optarg);
-            if (*radiusN <= 0) {
-                cerr << "The argument of option -R should be a positive integer.\n";
-                my_abort(1);
-            }
-            break;
-        case 't':
-            *radiusCooling = optarg;
-            if (*radiusCooling != "linear" && *radiusCooling != "exponential") {
-                cerr << "The argument of option -t should be linear or exponential.\n";
-                my_abort(1);
-            }
-            break;
-        case 'l':
-            *scale0 = atof(optarg);
-            if (*scale0 <= 0) {
-                cerr << "The argument of option -l should be a positive float.\n";
-                my_abort(1);
-            }
-            break;
-        case 'L':
-            *scaleN = atof(optarg);
-            if (*scaleN <= 0) {
-                cerr << "The argument of option -L should be a positive float.\n";
-                my_abort(1);
-            }
-            break;
-        case 'T':
-            *scaleCooling = optarg;
-            if (*scaleCooling != "linear" && *scaleCooling != "exponential") {
-                cerr << "The argument of option -T should be linear or exponential.\n";
-                my_abort(1);
-            }
-            break;
-        case 's':
-            *snapshots = atoi(optarg);
-            if (*snapshots > 2) {
-                cerr << "The argument of option -s should be 0, 1, or 2.\n";
-                my_abort(1);
-            }
-
-            break;
-        case 'x':
-            *nSomX = atoi(optarg);
-            if (*nSomX <= 0) {
-                cerr << "The argument of option -x should be a positive integer.\n";
-                my_abort(1);
-            }
-            break;
-        case 'y':
-            *nSomY = atoi(optarg);
-            if (*nSomY <= 0) {
-                cerr << "The argument of option -y should be a positive integer.\n";
-                my_abort(1);
-            }
-            break;
-        case '?':
-            if (optopt == 'e' || optopt == 'k' || optopt == 's' ||
-                    optopt == 'x'    || optopt == 'y') {
-                cerr << "Option -" <<  optopt << " requires an argument.\n";
-                printUsage();
-                my_abort(1);
-            }
-            else if (isprint (optopt)) {
-                cerr << "Unknown option `-" << optopt << "'.\n";
-                printUsage();
-                my_abort(1);
-            }
-            else {
-                cerr << "Unknown option character `\\x" << optopt << "'.\n";
-                printUsage();
-                my_abort(1);
-            }
-        default:
-            abort ();
-        }
-    }
-    if (argc - optind != 2) {
-        cerr << "Incorrect number of mandatory parameters\n";
-        printUsage();
-        my_abort(1);
-    }
-    *inFilename = argv[optind++];
-    *outPrefix = argv[optind++];
 }
 
 /// EOF

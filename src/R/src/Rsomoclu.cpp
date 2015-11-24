@@ -6,17 +6,6 @@ using namespace Rcpp;
 
 #include"somoclu.h"
 
-#ifdef CUDA
-void my_abort(int err) {
-    cerr << "Aborted\n";
-#ifdef HAVE_MPI
-    MPI_Abort(MPI_COMM_WORLD, err);
-#else
-    exit(err);
-#endif
-}
-#endif
-
 RcppExport SEXP Rtrain(SEXP data_p,
                        SEXP nEpoch_p,
                        SEXP nSomX_p, SEXP nSomY_p,

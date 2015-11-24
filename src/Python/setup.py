@@ -77,7 +77,6 @@ else:
                 '-lgomp'
             ]
     sources_files = ['somoclu/src/denseCpuKernels.cpp',
-                     'somoclu/src/io.cpp',
                      'somoclu/src/sparseCpuKernels.cpp',
                      'somoclu/src/mapDistanceFunctions.cpp',
                      'somoclu/src/training.cpp',

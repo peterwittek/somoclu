@@ -1,5 +1,6 @@
 Since 1.5:
   - New: Neighborhood function can be chosen between Gaussian and bubble.
+  - Fixed: `io.cpp` is no longer required in the wrappers. An exception is thrown when needed.
 
 Version 1.5: 2015-09-30
   - New: Python interface has visual capabilities.

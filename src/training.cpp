@@ -23,13 +23,33 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#endif
+#else
+#include <stdexcept>
+#endif  // CLI
 #ifdef HAVE_R
 #include <R.h>
-#endif
+#endif  // HAVE_R
 #include "somoclu.h"
 
 using namespace std;
+
+void my_abort(string err) {
+#ifdef CLI
+#ifdef HAVE_MPI
+    int rank = 0;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if (rank == 0) {
+        cerr << "Error: " << err << endl;
+    }
+    MPI_Abort(MPI_COMM_WORLD, 1);
+#else
+    cerr << "Error: " << err << endl;
+    exit(1);
+#endif  // HAVE_MPI
+#else
+    throw std::runtime_error(err);
+#endif  // CLI
+}
 
 void train(float *data, int data_length, unsigned int nEpoch,
            unsigned int nSomX, unsigned int nSomY,

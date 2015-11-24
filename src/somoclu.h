@@ -146,6 +146,6 @@ extern "C" {
                                string gridType, bool compact_support, bool gaussian,
                                int *globalBmus);
 #endif
-    void my_abort(int err);
+    void my_abort(string err);
 }
-#endif
+#endif  // SOMOCLU_H

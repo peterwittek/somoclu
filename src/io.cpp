@@ -133,8 +133,7 @@ void getMatrixDimensions(string inFilename, unsigned int &nRows, unsigned int &n
         file.close();
     }
     else {
-        std::cerr << "Input file could not be opened!\n";
-        my_abort(-1);
+        my_abort("Input file could not be opened!");
     }
 }
 
@@ -287,8 +286,7 @@ void readSparseMatrixDimensions(string filename, unsigned int &nRows,
         file.close();
     }
     else {
-        std::cerr << "Input file could not be opened!\n";
-        my_abort(-1);
+        my_abort("Input file could not be opened!");
     }
 }
 
@@ -333,16 +331,4 @@ svm_node** readSparseMatrixChunk(string filename, unsigned int nRows,
     }
     file.close();
     return x_matrix;
-}
-
-/** Shut down MPI cleanly if something goes wrong
- * @param err - error code to print
- */
-void my_abort(int err) {
-    cerr << "Aborted\n";
-#ifdef HAVE_MPI
-    MPI_Abort(MPI_COMM_WORLD, err);
-#else
-    exit(err);
-#endif
 }

@@ -35,11 +35,11 @@ MEX_BIN        = @MEX_BIN@
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
-LIBOBJS=sparseCpuKernels.o denseCpuKernels.o io.o mapDistanceFunctions.o training.o uMatrix.o
+LIBOBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o
 
 MEX_FLAGS=-I./
 MEX_LIBS=-lgomp
-MEX_OBJS=sparseCpuKernels.o denseCpuKernels.o io.o mapDistanceFunctions.o training.o uMatrix.o
+MEX_OBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o
 
 ifdef CUDA_LIBS
 	LIBOBJS+=denseGpuKernels.cu.co
@@ -65,7 +65,7 @@ somoclu: $(OBJS)
 %.cu.co: %.cu
 		$(NVCC) $(DEFS) $(CUDA_CFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
-matlab: lib
+matlab: $(MEX_OBJS)
 	if [ -e denseGpuKernels.cu.co ]; then cp denseGpuKernels.cu.co denseGpuKernels.cu.o; fi
 	$(MEX_BIN) $(MEX_FLAGS) MATLAB/MexSomoclu.cpp $(MEX_OBJS) $(MEX_LIBS)
 
@@ -82,7 +82,12 @@ python:
 	cp ../install-sh ./Python/somoclu/
 	cp ./Makefile.in ./Python/somoclu/src/
 	cp ./*.h ./Python/somoclu/src/
-	cp ./*.cpp ./Python/somoclu/src/
+	cp ./mapDistanceFunctions.cpp ./Python/somoclu/src/
+	cp ./training.cpp ./Python/somoclu/src/
+	cp ./uMatrix.cpp ./Python/somoclu/src/
+	cp ./denseCpuKernels.cpp ./Python/somoclu/src/
+	cp ./denseGpuKernels.cu ./Python/somoclu/src/
+	cp ./sparseCpuKernels.cpp ./Python/somoclu/src/
 	cp ./*.cu ./Python/somoclu/src/
 	swig -c++ -python ./Python/somoclu/somoclu.i
 	cd Python; python setup.py build
@@ -120,7 +125,6 @@ r:
 	cp ./mapDistanceFunctions.cpp ./R/src/
 	cp ./training.cpp ./R/src/
 	cp ./uMatrix.cpp ./R/src/
-	cp ./io.cpp ./R/src/
 	cp ./denseCpuKernels.cpp ./R/src/
 	cp ./denseGpuKernels.cu ./R/src/
 	cp ./sparseCpuKernels.cpp ./R/src/
