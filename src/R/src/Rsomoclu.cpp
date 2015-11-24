@@ -26,7 +26,7 @@ RcppExport SEXP Rtrain(SEXP data_p,
                        SEXP scaleCooling_p,
                        SEXP kernelType_p, SEXP mapType_p,
                        SEXP gridType_p, SEXP compactSupport_p,
-                       SEXP neighbordhood_p,
+                       SEXP neighborhood_p,
                        SEXP codebook_p) {
     Rcpp::NumericMatrix dataMatrix(data_p);
     Rcpp::NumericVector codebook_vec(codebook_p);
