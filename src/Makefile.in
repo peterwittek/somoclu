@@ -39,11 +39,11 @@ LIBOBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o u
 
 MEX_FLAGS=-I./
 MEX_LIBS=-lgomp
-MEX_OBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o
+MEX_OBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o uMatrix.o
 
 ifdef CUDA_LIBS
 	LIBOBJS+=denseGpuKernels.cu.co
-	MEX_FLAGS+=-I"$(MATLAB_ROOT)/toolbox/distcomp/gpu/extern/include/" -DCUDA 
+	MEX_FLAGS+=-I"$(MATLAB_ROOT)/toolbox/distcomp/gpu/extern/include/" -DCUDA
 	MEX_LIBS+=$(CUDA_LDFLAGS) $(CUDA_LIBS) -lnvblas -lmwgpu
 	MEX_OBJS+=denseGpuKernels.cu.o
 endif
@@ -54,7 +54,7 @@ all: somoclu
 
 lib: $(LIBOBJS)
 	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o libsomoclu.so $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
-	
+
 somoclu: CXXFLAGS+= -DCLI
 somoclu: $(OBJS)
 	$(CXX) $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -o $@ $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
@@ -67,11 +67,11 @@ somoclu: $(OBJS)
 
 matlab: lib
 	if [ -e denseGpuKernels.cu.co ]; then cp denseGpuKernels.cu.co denseGpuKernels.cu.o; fi
-	$(MEX_BIN) $(MEX_FLAGS) MATLAB/MexSomoclu.cpp $(MEX_OBJS) $(MEX_LIBS)
+	$(MEX_BIN) $(MEX_FLAGS) MATLAB/MexSomoclu.cpp training.cpp $(MEX_OBJS) $(MEX_LIBS)
 
 matlab_clean: clean
 	-rm -f MexSomoclu* denseGpuKernels.cu.o
-	
+
 python:
 	mkdir -p ./Python/somoclu/src
 	mkdir -p ./Python/somoclu/src/Windows
@@ -129,7 +129,7 @@ r:
 	cp ./denseGpuKernels.cu ./R/src/
 	cp ./sparseCpuKernels.cpp ./R/src/
 	cp ../data/rgbs.txt ./R/data/
-	gzip -f ./R/data/rgbs.txt 
+	gzip -f ./R/data/rgbs.txt
 	R CMD build R
 
 clean:
@@ -139,7 +139,7 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL_PROGRAM) -m 0755 somoclu \
 	 $(DESTDIR)$(bindir)
-	 
+
 uninstall:
 	-rm $(DESTDIR)$(bindir)/somoclu &>/dev/null
 
