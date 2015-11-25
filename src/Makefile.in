@@ -68,9 +68,10 @@ somoclu: $(OBJS)
 matlab: lib
 	if [ -e denseGpuKernels.cu.co ]; then cp denseGpuKernels.cu.co denseGpuKernels.cu.o; fi
 	$(MEX_BIN) $(MEX_FLAGS) MATLAB/MexSomoclu.cpp training.cpp $(MEX_OBJS) $(MEX_LIBS)
+	mv MexSomoclu* MATLAB
 
 matlab_clean: clean
-	-rm -f MexSomoclu* denseGpuKernels.cu.o
+	-rm -f MATLAB/MexSomoclu* denseGpuKernels.cu.o
 
 python:
 	mkdir -p ./Python/somoclu/src
@@ -133,7 +134,7 @@ r:
 	R CMD build R
 
 clean:
-	-rm -fr $(OBJS) somoclu libsomoclu.so 1>/dev/null
+	-rm -fr $(OBJS) somoclu libsomoclu.so *.cu.o 1>/dev/null
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
