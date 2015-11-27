@@ -31,13 +31,14 @@ Arguments:
     -c FILENAME              Specify an initial codebook for the map.
     -e NUMBER                Maximum number of epochs
     -g TYPE                  Grid type: square or hexagonal (default: square)
+    -h, --help               This help text
     -k NUMBER                Kernel type
                                 0: Dense CPU
                                 1: Dense GPU
                                 2: Sparse CPU
     -m TYPE                  Map type: planar or toroid (default: planar)
-    -n NUMBER                Neighborhood function (bubble or gaussian, default: gaussian)
-    -p NUMBER                Compact support for map update
+    -n FUNCTION              Neighborhood function (bubble or gaussian, default: gaussian)
+    -p NUMBER                Compact support for Gaussian neighborhood
                              (0: false, 1: true, default: 0)
     -t STRATEGY              Radius cooling strategy: linear or exponential (default: linear)
     -r NUMBER                Start radius (default: half of the map in direction min(x,y))

@@ -75,17 +75,12 @@ float gaussianNeighborhood(float distance, float radius, float stddevs) {
 float getWeight(float distance, float radius, float scaling, bool compact_support = false,
                 bool gaussian = true) {
     float result = 0.0;
-    if (!compact_support) {
-        if (gaussian) {
+    if (gaussian) {
+        if (!compact_support || distance <= radius) {
             result = gaussianNeighborhood(distance, radius, 2);
-        } else {
-            result = 1.0;
         }
-    }
-    else if (distance <= radius) {
-        if (gaussian) {
-            result = gaussianNeighborhood(distance, radius, 2);
-        } else {
+    } else {
+        if (distance <= radius) {
             result = 1.0;
         }
     }

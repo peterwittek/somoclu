@@ -32,7 +32,7 @@ Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                             (default: 0)}
   \item{mapType}{Map type: planar or toroid (default: "planar")}
   \item{gridType}{Grid type: square or hexagonal (default: "rectangular")}
-  \item{compactSupport}{Compact support for map update, (default:FALSE)}
+  \item{compactSupport}{Compact support for Gaussian neighborhood, (default:FALSE)}
   \item{neighborhood}{Neighborhood function: gaussian or bubble (default: "gaussian")}
   \item{codebook}{initial codebook, (default:NULL)}
   %% \item{initialCodebookFilename}{Specify an initial codebook for the map}

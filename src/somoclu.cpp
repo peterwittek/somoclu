@@ -52,13 +52,14 @@ void printUsage() {
          "     -c FILENAME           Specify an initial codebook for the map.\n" \
          "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
          "     -g TYPE               Grid type: rectangular or hexagonal (default: rectangular)\n"\
+         "     -h, --help            This help text\n" \
          "     -k NUMBER             Kernel type (default: " << KERNEL_TYPE << "): \n" \
          "                              0: Dense CPU\n" \
          "                              1: Dense GPU\n" \
          "                              2: Sparse CPU\n" \
          "     -m TYPE               Map type: planar or toroid (default: planar) \n" \
-         "     -n NUMBER             Neighborhood function (bubble or gaussian, default: gaussian)\n"\
-         "     -p NUMBER             Compact support for map update (0: false, 1: true, default: 0)\n"\
+         "     -n FUNCTION           Neighborhood function (bubble or gaussian, default: gaussian)\n"\
+         "     -p NUMBER             Compact support for Gaussian neighborhood (0: false, 1: true, default: 0)\n"\
          "     -t STRATEGY           Radius cooling strategy: linear or exponential (default: linear)\n" \
          "     -r NUMBER             Start radius (default: half of the map in direction min(x,y))\n" \
          "     -R NUMBER             End radius (default: 1)\n" \
@@ -107,6 +108,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     *gaussian = 1;
     string neighborhood_function = "gaussian";
     static struct option long_options[] = {
+        {"help",  no_argument,       0,  'h'},
         {"rows",  required_argument, 0, 'y'},
         {"columns",    required_argument, 0, 'x'},
         {0, 0, 0, 0}

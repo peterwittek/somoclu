@@ -48,7 +48,8 @@ class Somoclu(object):
                            * "hexagonal": hexagonal neurons
     :type gridtype: str.
     :param compactsupport: Optional parameter to cut off map updates beyond the
-                           training radius. Default: False.
+                           training radius with the Gaussian neighborhood. 
+                           Default: False.
     :type compactsupport: bool.
     """
 
