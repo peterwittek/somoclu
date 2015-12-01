@@ -9,7 +9,7 @@ Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                      radius0, radiusN,
                      radiusCooling, scale0, scaleN,
                      scaleCooling,
-                     kernelType, mapType, gridType, compactSupport, 
+                     kernelType, mapType, gridType, compactSupport,
                      neighborhood, codebook)
 }
 \arguments{
@@ -58,11 +58,12 @@ mapType <- "planar"
 gridType <- "rectangular"
 compactSupport <- FALSE
 codebook <- NULL
+neighborhood <- "gaussian"
 res <- Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                       radius0, radiusN,
                       radiusCooling, scale0, scaleN,
                       scaleCooling,
-                      kernelType, mapType, gridType, compactSupport)
+                      kernelType, mapType, gridType, compactSupport, neighborhood, codebook)
 res$codebook
 res$globalBmus
 res$uMatrix
