@@ -51,6 +51,10 @@ class Somoclu(object):
                            training radius with the Gaussian neighborhood. 
                            Default: False.
     :type compactsupport: bool.
+    :param neighborhood: Optional parameter to specify the neighborhood:
+                           * "gaussian": Gaussian neighborhood (default)
+                           * "bubble": bubble neighborhood function
+    :type neighborhood: str.
     """
 
     def __init__(self, n_columns, n_rows, data=None, initialcodebook=None,
