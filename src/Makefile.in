@@ -70,7 +70,7 @@ matlab: lib
 	$(MEX_BIN) $(MEX_FLAGS) MATLAB/MexSomoclu.cpp training.cpp $(MEX_OBJS) $(MEX_LIBS)
 	mv MexSomoclu* MATLAB
 
-matlab_clean: clean
+matlab_clean:
 	-rm -f MATLAB/MexSomoclu* denseGpuKernels.cu.o
 
 python:
@@ -133,7 +133,7 @@ r:
 	gzip -f ./R/data/rgbs.txt
 	R CMD build R
 
-clean:
+clean: python_clean r_clean matlab_clean
 	-rm -fr $(OBJS) somoclu libsomoclu.so *.cu.o 1>/dev/null
 
 install:
