@@ -1,9 +1,7 @@
 *************************
 Download and Installation
 *************************
-The entire package for is available as a `gzipped tar <https://pypi.python.org/packages/source/n/somoclu/somoclu-1.5.tar.gz>`_ file from the `Python Package Index <https://pypi.python.org/pypi/somoclu/>`_, containing the source, documentation, and examples.
-
-The latest development version is available on `GitHub <https://github.com/peterwittek/somoclu>`_.
+The package is available in the `Python Package Index <https://pypi.python.org/pypi/somoclu/>`_, containing the source, documentation, and examples. The latest development version is available on `GitHub <https://github.com/peterwittek/somoclu>`_.
 
 Dependencies
 ============
@@ -52,7 +50,7 @@ Then you can issue
     
 Build with CUDA support on Linux and OS X:
 ------------------------------------------
-If your CUDA is installed elsewhere than /usr/local/cuda, you cannot directly install the module from PyPI. Please download the `source distribution <https://pypi.python.org/packages/source/n/somoclu/somoclu-1.5.tar.gz>`_ from PyPI. Open the setup.py file in an editor and modify the path to your CUDA installation directory:
+If your CUDA is installed elsewhere than /usr/local/cuda, you cannot directly install the module from PyPI. Please download the source distribution from `PyPI <https://pypi.python.org/pypi/somoclu>`_. Open the setup.py file in an editor and modify the path to your CUDA installation directory:
 
 ::
    

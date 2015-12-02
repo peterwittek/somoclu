@@ -132,7 +132,7 @@ Before building the module manually with:
 
 Build with CUDA support on Linux and OS X:
 ------------------------------------------
-If your CUDA is installed elsewhere than /usr/local/cuda, you cannot directly install the module from PyPI. Please download the `source distribution <https://pypi.python.org/packages/source/n/somoclu/somoclu-1.5.tar.gz>`_ from PyPI. Open the setup.py file in an editor and modify the path to your CUDA installation directory:
+If your CUDA is installed elsewhere than /usr/local/cuda, you cannot directly install the module from PyPI. Please download the `source distribution <https://pypi.python.org/pypi/somoclu>`_ from PyPI. Open the setup.py file in an editor and modify the path to your CUDA installation directory:
 
 ::
 
