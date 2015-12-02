@@ -1,37 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta charset="UTF-8">
     <title>Somoclu by peterwittek</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
-
   <body>
-    <div id="container">
-      <div class="inner">
+    <section class="page-header">
+      <h1 class="project-name">Somoclu</h1>
+      <h2 class="project-tagline">Massively parallel self-organizing maps</h2>
+      <a href="https://github.com/peterwittek/somoclu" class="btn">View on GitHub</a>
+      <a href="https://github.com/peterwittek/somoclu/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/peterwittek/somoclu/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-        <header>
-          <h1>Somoclu</h1>
-          <h2>Massively parallel self-organizing maps</h2>
-        </header>
-
-        <section id="downloads" class="clearfix">
-          <a href="https://github.com/peterwittek/somoclu/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
-          <a href="https://github.com/peterwittek/somoclu/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
-          <a href="https://github.com/peterwittek/somoclu" id="view-on-github" class="button"><span>View on GitHub</span></a>
-        </section>
-
-        <hr>
-
-        <section id="main_content">
-          <h1>
+    <section class="main-content">
+      <h1>
 <a id="somoclu" class="anchor" href="#somoclu" aria-hidden="true"><span class="octicon octicon-link"></span></a>Somoclu</h1>
 
 <p>Somoclu is a massively parallel implementation of self-organizing maps. It exploits multicore CPUs, it is able to rely on MPI for distributing the workload in a cluster, and it can be accelerated by CUDA. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes.</p>
@@ -43,6 +31,7 @@
 <li>Multi-platform: Linux, OS X, and Windows are supported.</li>
 <li>Planar and toroid maps.</li>
 <li>Rectangular and hexagonal grids.</li>
+<li>Gaussian and bubble neighborhood functions.</li>
 <li>Both dense and sparse input data are supported.</li>
 <li>Large maps of several hundred thousand neurons are feasible.</li>
 <li>Integration with <a href="http://databionic-esom.sourceforge.net/">Databionic ESOM Tools</a>.</li>
@@ -70,12 +59,14 @@
 <pre><code>-c FILENAME              Specify an initial codebook for the map.
 -e NUMBER                Maximum number of epochs
 -g TYPE                  Grid type: square or hexagonal (default: square)
+-h, --help               This help text
 -k NUMBER                Kernel type
                             0: Dense CPU
                             1: Dense GPU
                             2: Sparse CPU
 -m TYPE                  Map type: planar or toroid (default: planar)
--p NUMBER                Compact support for map update 
+-n FUNCTION              Neighborhood function (bubble or gaussian, default: gaussian)
+-p NUMBER                Compact support for Gaussian neighborhood
                          (0: false, 1: true, default: 0)
 -t STRATEGY              Radius cooling strategy: linear or exponential (default: linear)
 -r NUMBER                Start radius (default: half of the map in direction min(x,y))
@@ -97,14 +88,16 @@
 $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 </code></pre>
 
-<p>With random initialization, the initial codebook will be filled with random numbers ranging from 0 to 1. Either supply your own initial codebook or normalize your data to fall in this range.</p>
+<p>With random initialization, the initial codebook will be filled with random numbers ranging from 0 to 1. Either supply your own initial codebook or normalize your data to fall in this range. </p>
+
+<p>If the range of the values of the features includes negative numbers, the codebook will eventually adjust. It is, however, not advised to have negative values, especially if the codebook is initialized from 0 to 1. This comes from the batch training nature of the parallel implementation. The batch update rule will change the codebook values with weighted averages of the data points, and with negative values, the updates can cancel out.</p>
 
 <p>The maps generated by the GPU and the CPU kernels are likely to be different. For computational efficiency, Somoclu uses single-precision floats. This occasionally results in identical distances between a data instance and the neurons. The CPU version will pick the best matching unit with the lowest coordinate values. Such sequentiality cannot be guaranteed in the reduction kernel of the GPU variant. This is not a bug, but it is better to be aware of it.</p>
 
 <h2>
 <a id="efficient-parallel-and-distributed-execution" class="anchor" href="#efficient-parallel-and-distributed-execution" aria-hidden="true"><span class="octicon octicon-link"></span></a>Efficient Parallel and Distributed Execution</h2>
 
-<p>The CPU kernels use OpenMP to load multicore processors. On a single node, this is more efficient than launching tasks with MPI to match the number of cores. The MPI tasks replicated the codebook, which is especially inefficient for large maps. </p>
+<p>The CPU kernels use OpenMP to load multicore processors. On a single node, this is more efficient than launching tasks with MPI to match the number of cores. The MPI tasks replicated the codebook, which is especially inefficient for large maps.</p>
 
 <p>For instance, given a single node with eight cores, the following execution will use 1/8th of the memory, and will run 10-20% faster:</p>
 
@@ -126,7 +119,7 @@ $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 <h2>
 <a id="visualisation" class="anchor" href="#visualisation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Visualisation</h2>
 
-<p>The primary purpose of generating a map is visualisation. Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures. </p>
+<p>The primary purpose of generating a map is visualisation. Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures.</p>
 
 <p>The output formats of the U-matrix and the codebook are compatible with <a href="http://databionic-esom.sourceforge.net/">Databionic ESOM Tools</a> for more advanced visualisation.</p>
 
@@ -138,7 +131,7 @@ $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 <p>The sparse format follows the <a href="http://www.csie.ntu.edu.tw/%7Ecjlin/libsvm/">libsvm</a> guidelines. The first feature is zero-indexed. For instance, the vector [ 1.2 0 0 3.4] is represented as the following line in the file:
 0:1.2 3:3.4. The file is parsed twice: once to get the number of instances and features, and the second time to read the data in the individual threads.</p>
 
-<p>The basic dense format includes the coordinates of the data vectors, separated by a white-space. Just like the sparse format, this file is parsed twice to get the basic dimensions right. </p>
+<p>The basic dense format includes the coordinates of the data vectors, separated by a white-space. Just like the sparse format, this file is parsed twice to get the basic dimensions right.</p>
 
 <p>The .lrn file of <a href="http://databionic-esom.sourceforge.net/">Databionic ESOM Tools</a> is also accepted and it is parsed only once. The format is described as follows:</p>
 
@@ -148,7 +141,7 @@ $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 
 <p>% s1        s2          ..      sm</p>
 
-<p>% var_name1 var_name2       ..      var_namem   </p>
+<p>% var_name1 var_name2       ..      var_namem</p>
 
 <p>x11     x12         ..      x1m</p>
 
@@ -174,7 +167,14 @@ $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 <pre><code>$ sudo pip install somoclu
 </code></pre>
 
-<p>To get it working with the GPU kernel, you might have to edit the setup.py file to specify your CUDA directory.</p>
+<p>Some pre-built binaries in the wheel format or windows installer are provided at <a href="https://pypi.python.org/pypi/somoclu#downloads">PyPI Dowloads</a>, they are tested with <a href="https://www.continuum.io/downloads">Anaconda </a> distributions. If you encounter errors like <code>ImportError: DLL load failed: The specified module could not be found</code> when <code>import somoclu</code>, you may need to use <a href="http://www.dependencywalker.com/">Dependency Walker</a> as shown <a href="http://stackoverflow.com/a/24704384/1136027">here</a> on <code>_somoclu_wrap.pyd</code> to find out missing DLLs and place them at the write place. Usually right version (32/64bit) of <code>vcomp90.dll, msvcp90.dll, msvcr90.dll</code> should be put to <code>C:\Windows\System32</code> or <code>C:\Windows\SysWOW64</code>.</p>
+
+<p>The wheel binaries for OSX are compiled with <a href="http://clang-omp.github.io/">clang-omp</a> , and depend on libiomp5, which you can install by:</p>
+
+<pre><code>$ brew install libiomp
+</code></pre>
+
+<p>To get it working with the GPU kernel, you might have to follow the instructions at <a href="https://github.com/peterwittek/somoclu/tree/master/src/Python">Somoclu - Python Interface</a>.</p>
 
 <p>The R version is available on CRAN. You can install it with</p>
 
@@ -255,34 +255,25 @@ directory.</p>
 <h2>
 <a id="windows" class="anchor" href="#windows" aria-hidden="true"><span class="octicon octicon-link"></span></a>Windows</h2>
 
-<p>Use the <code>somoclu.sln</code> under <code>src/Windows/somoclu</code> as an example Visual Studio 2013 solution. Modify the CUDA version or VC compiler version according to your needs. </p>
+<p>Use the <code>somoclu.sln</code> under <code>src/Windows/somoclu</code> as an example Visual Studio 2013 solution. Modify the CUDA version or VC compiler version according to your needs.</p>
 
 <p>The default solution enables all of OpenMP, MPI, and CUDA. The default MPI installation path is <code>C:\Program Files\Microsoft MPI</code>, modify the settings if yours is in a different path. The configuration default CUDA version is 6.5.  Disable MPI by removing <code>HAVE_MPI</code> macro in the project properties (<code>Properties -&gt; Configuration Properties -&gt; C/C++ -&gt; Preprocessor</code>). Disable CUDA by removing <code>CUDA</code> macro in the solution properties.</p>
 
-<p>The usage is identical to the Linux version through command line (see the relevant section). </p>
-
-<p>When using the Somoclu Python interface on Windows, if you encounter errors like: </p>
-
-<pre><code>ImportError: DLL load failed: The specified module could not be found
-</code></pre>
-
-<p>You may need to find the right version (32/64bit) of <code>vcomp90.dll, msvcp90.dll, msvcr90.dll</code> and put to <code>C:\Windows\System32</code> or <code>C:\Windows\SysWOW64</code>.</p>
-
-<p>Instructions on building Python extension with CUDA support on Windows is at <a href="https://github.com/peterwittek/somoclu/tree/master/src/Python">here</a>.</p>
+<p>The usage is identical to the Linux version through command line (see the relevant section).</p>
 
 <h1>
 <a id="acknowledgment" class="anchor" href="#acknowledgment" aria-hidden="true"><span class="octicon octicon-link"></span></a>Acknowledgment</h1>
 
 <p>This work was supported by the European Commission Seventh Framework Programme under Grant Agreement Number FP7-601138 PERICLES and by the AWS in Education Machine Learning Grant award.</p>
-        </section>
 
-        <footer>
-          Somoclu is maintained by <a href="https://github.com/peterwittek">peterwittek</a><br>
-          This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
-        </footer>
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/peterwittek/somoclu">Somoclu</a> is maintained by <a href="https://github.com/peterwittek">peterwittek</a>.</span>
 
-        
-      </div>
-    </div>
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
   </body>
 </html>
