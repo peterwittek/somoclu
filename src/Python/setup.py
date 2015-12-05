@@ -108,7 +108,7 @@ try:
           )
 except:
     setup(name='somoclu',
-          version='1.5.0.1',
+          version='1.5.1',
           license='GPL3',
           author="peterwittek",
           author_email="xgdgsc@gmail.com",
@@ -121,4 +121,4 @@ except:
           packages=["somoclu"],
           install_requires=['numpy', 'matplotlib'],
           cmdclass=cmdclass
-          )  
+          )
