@@ -14,6 +14,16 @@ import_array();
 %apply (float* INPLACE_ARRAY1, int DIM1) {(float* uMatrix, int uMatrix_size)}
 
 using namespace std;
+
+%exception train {
+   try {
+      $action
+   } catch (runtime_error &e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+   }
+}
+
 void train(float *data, int data_length,
            unsigned int nEpoch,
            unsigned int nSomX, unsigned int nSomY,
