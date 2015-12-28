@@ -90,26 +90,25 @@ sources_files = ['somoclu/src/denseCpuKernels.cpp',
                  'somoclu/src/mapDistanceFunctions.cpp',
                  'somoclu/src/training.cpp',
                  'somoclu/src/uMatrix.cpp',
-                 'somoclu/src/denseGpuKernels.cu',
                  'somoclu/somoclu_wrap.cxx']
 somoclu_module = Extension('_somoclu_wrap',
                            sources=sources_files,
                            include_dirs=[numpy_include, 'src'],
-                           extra_compile_args={'cc': extra_compile_args,
-                                               'nvcc': ['-use_fast_math',
-                                                        '--ptxas-options=-v',
-                                                        '-c',
-                                                        '--compiler-options',
-                                                        '-fPIC ' +
-                                                        extra_compile_args[0]]},
+                           extra_compile_args={'cc': extra_compile_args},
                            libraries=[openmp],
                            )
 if CUDA is not None:
+    somoclu_module.sources.append('somoclu/src/denseGpuKernels.cu')
     somoclu_module.define_macros = [('CUDA', None)]
     somoclu_module.include_dirs.append(CUDA['include'])
     somoclu_module.library_dirs = [CUDA['lib']]
     somoclu_module.libraries += ['cudart', 'cublas']
     somoclu_module.runtime_library_dirs = [CUDA['lib']]
+    somoclu_module.extra_compile_args['nvcc']=['-use_fast_math', 
+                                               '--ptxas-options=-v', '-c',
+                                               '--compiler-options','-fPIC ' +
+                                               extra_compile_args[0]]
+
 
 try:
     setup(name='somoclu',
