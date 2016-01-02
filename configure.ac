@@ -35,7 +35,7 @@ if [[[ $string == *"ICC"* ]]]
 then  
   CXXFLAGS="${CXXFLAGS} -fast"
 else
-  AS_IF([test "x$GXX" = "xyes"],[CXXFLAGS="${CXXFLAGS} -Ofast -march=native"])
+  AS_IF([test "x$GXX" = "xyes"],[CXXFLAGS="${CXXFLAGS} -O3 -ffast-math -march=native"])
 fi
 #find out what version we are running
 ARCH=`uname -m`
