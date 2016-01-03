@@ -67,4 +67,16 @@ res <- Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
 res$codebook
 res$globalBmus
 res$uMatrix
+
+## Convert to kohonen object for plotting
+library(kohonen)
+sommap = structure(list(grid = somgrid(nSomX, nSomY), codes = res$codebook, changes = NULL,
+               alpha = c(scale0, scaleN), radius = c(radius0, radiusN),
+               toroidal = FALSE, method="som"),
+          class = "kohonen")
+## Show 'codebook'
+plot(sommap, type="codes", main = c("Codes X", "Codes Y"))
+## Show 'component planes'
+plot(sommap, type = "property", property = sommap$codes[,1],
+     main = colnames(sommap$codes)[1])
 }
