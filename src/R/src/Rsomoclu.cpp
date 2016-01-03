@@ -18,7 +18,7 @@ RcppExport SEXP Rtrain(SEXP data_p,
                        SEXP neighborhood_p,
                        SEXP codebook_p) {
     Rcpp::NumericMatrix dataMatrix(data_p);
-    Rcpp::NumericVector codebook_vec(codebook_p);
+    Rcpp::NumericMatrix codebookMatrix(codebook_p);
     int nVectors = dataMatrix.rows();
     int nDimensions = dataMatrix.cols();
     int nEpoch = as<int>(nEpoch_p);
@@ -48,7 +48,7 @@ RcppExport SEXP Rtrain(SEXP data_p,
     float* codebook = new float[codebook_size];
 	for(int i = 0; i < uMatrix_size; i++) {
 		for(int j = 0; j < nDimensions; j++) {
-			codebook[i * nDimensions + j] = (float) codebook_vec(i ,j);
+			codebook[i * nDimensions + j] = (float) codebookMatrix(i ,j);
 		}
 	}
 
@@ -63,31 +63,35 @@ RcppExport SEXP Rtrain(SEXP data_p,
           gridType, compactSupport, neighborhood == "gaussian",
           codebook, codebook_size, globalBmus, globalBmus_size,
           uMatrix, uMatrix_size);
-    Rcpp::NumericVector globalBmus_vec(globalBmus_size);
-    Rcpp::NumericVector uMatrix_vec(uMatrix_size);
+    Rcpp::NumericMatrix globalBmusMatrix(nVectors, 2);
+    Rcpp::NumericMatrix uMatrixMatrix(nSomX, nSomY);
     if(codebook != NULL) {
     	for(int i = 0; i < uMatrix_size; i++) {
     			for(int j = 0; j < nDimensions; j++) {
-    				codebook_vec(i ,j) = (float) codebook[i * nDimensions + j];
+    				codebookMatrix(i ,j) = (float) codebook[i * nDimensions + j];
     			}
     		}
     }
     if(globalBmus != NULL) {
-        for(int i = 0; i < globalBmus_size; i++) {
-            globalBmus_vec(i) = globalBmus[i];
+        for(int i = 0; i < nVectors; i++) {
+        	for (int j = 0; j < 2; j++) {
+        		globalBmusMatrix(i, j) = globalBmus[i * 2 + j];
+        	}
         }
     }
     if(uMatrix != NULL) {
-        for(int i = 0; i < uMatrix_size; i++) {
-            uMatrix_vec(i) = uMatrix[i];
+        for(int i = 0; i < nSomX; i++) {
+        	for (int j = 0; j < nSomY; j++) {
+        		uMatrixMatrix(i, j) = uMatrix[i * nSomY + j];
+        	}
         }
     }
     delete[] codebook;
     delete[] globalBmus;
     delete[] uMatrix;
-    return Rcpp::List::create(Rcpp::Named("codebook") = codebook_vec,
-                              Rcpp::Named("globalBmus") = globalBmus_vec,
-                              Rcpp::Named("uMatrix") = uMatrix_vec);;
+    return Rcpp::List::create(Rcpp::Named("codebook") = codebookMatrix,
+                              Rcpp::Named("globalBmus") = globalBmusMatrix,
+                              Rcpp::Named("uMatrix") = uMatrixMatrix);;
 }
 
 RCPP_MODULE(Rsomoclu) {
