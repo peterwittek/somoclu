@@ -22,4 +22,26 @@ Rsomoclu.train <-
                  gridType, compactSupport, neighborhood,
                  codebook)
     res
-}
+  }
+
+Rsomoclu.kohonen <-
+  function(input_data, result, n.hood = NULL, toroidal = FALSE) {
+    mapping <- map(structure(list(codes = result$codebook), class = "kohonen"), newdata = input_data)
+    nSomX = nrow(result$uMatrix)
+    nSomY = ncol(result$uMatrix)
+    grid = somgrid(nSomX, nSomY)
+    if (missing(n.hood)) {
+      n.hood <- switch(grid$topo,
+                       hexagonal = "circular",
+                       rectangular = "square")
+    } else {
+      n.hood <- match.arg(n.hood, c("circular", "square"))
+    }
+    grid$n.hood <- n.hood
+    sommap = structure(list(data = input_data, grid = grid, codes = result$codebook, changes = NULL,
+                            unit.classif = mapping$unit.classif,
+                            distances = mapping$distances,
+                            toroidal = toroidal, method="som"),
+                       class = "kohonen")
+    sommap
+  }

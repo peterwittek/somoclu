@@ -1,3 +1,6 @@
 useDynLib(Rsomoclu)
 export(Rsomoclu.train)
+export(Rsomoclu.kohonen)
 import(Rcpp)
+import(kohonen)
+importFrom(class, somgrid)

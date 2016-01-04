@@ -37,6 +37,12 @@ Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
   \item{codebook}{initial codebook, (default:NULL)}
   %% \item{initialCodebookFilename}{Specify an initial codebook for the map}
 }
+\value{
+  a list including elements
+  \item{codebook}{the codebook}
+  \item{globalBmus}{global Best Matching Unit matrix}
+  \item{uMatrix}{uMatrix}
+}
 \references{Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. arXiv:1305.1422.}
 \author{Peter Wittek, Shichao Gao}
 \examples{
@@ -67,16 +73,6 @@ res <- Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
 res$codebook
 res$globalBmus
 res$uMatrix
-
-## Convert to kohonen object for plotting
-library(kohonen)
-sommap = structure(list(grid = somgrid(nSomX, nSomY), codes = res$codebook, changes = NULL,
-               alpha = c(scale0, scaleN), radius = c(radius0, radiusN),
-               toroidal = FALSE, method="som"),
-          class = "kohonen")
-## Show 'codebook'
-plot(sommap, type="codes", main = c("Codes X", "Codes Y"))
-## Show 'component planes'
-plot(sommap, type = "property", property = sommap$codes[,1],
-     main = colnames(sommap$codes)[1])
+library('kohonen')
+sommap = Rsomoclu.kohonen(input_data, res)
 }

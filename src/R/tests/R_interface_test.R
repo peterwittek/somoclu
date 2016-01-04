@@ -26,3 +26,12 @@ res <- Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
 res$codebook
 res$globalBmus
 res$uMatrix
+library('kohonen')
+sommap = Rsomoclu.kohonen(input_data, res)
+## Show 'codebook'
+plot(sommap, type="codes", main = c("Codes X", "Codes Y"))
+## Show 'component planes'
+plot(sommap, type = "property", property = sommap$codes[,1],
+     main = colnames(sommap$codes)[1])
+## Show 'U-Matrix'
+plot(sommap, type="dist.neighbours")
