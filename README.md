@@ -130,9 +130,9 @@ The Python version is also available in [PyPI](https://pypi.python.org/pypi/somo
 
     $ sudo pip install somoclu
 
-Some pre-built binaries in the wheel format or windows installer are provided at [PyPI Dowloads](https://pypi.python.org/pypi/somoclu#downloads), they are tested with [Anaconda ](https://www.continuum.io/downloads) distributions. If you encounter errors like `ImportError: DLL load failed: The specified module could not be found` when `import somoclu`, you may need to use [Dependency Walker](http://www.dependencywalker.com/) as shown [here](http://stackoverflow.com/a/24704384/1136027) on `_somoclu_wrap.pyd` to find out missing DLLs and place them at the write place. Usually right version (32/64bit) of `vcomp90.dll, msvcp90.dll, msvcr90.dll` should be put to `C:\Windows\System32` or `C:\Windows\SysWOW64`.
+Some pre-built binaries in the wheel format or Windows installer are provided at [PyPI Dowloads](https://pypi.python.org/pypi/somoclu#downloads), they are tested with [Anaconda](https://www.continuum.io/downloads) distributions. If you encounter errors like `ImportError: DLL load failed: The specified module could not be found` when `import somoclu`, you may need to use [Dependency Walker](http://www.dependencywalker.com/) as shown [here](http://stackoverflow.com/a/24704384/1136027) on `_somoclu_wrap.pyd` to find out missing DLLs and place them at the write place. Usually right version (32/64bit) of `vcomp90.dll, msvcp90.dll, msvcr90.dll` should be put to `C:\Windows\System32` or `C:\Windows\SysWOW64`.
 
-The wheel binaries for OSX are compiled with [clang-omp](http://clang-omp.github.io/) , and depend on libiomp5, which you can install by:
+The wheel binaries for OSX are compiled with [clang-omp](http://clang-omp.github.io/), and depend on libiomp5, which you can install by:
 
     $ brew install libiomp
 

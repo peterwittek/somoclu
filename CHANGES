@@ -1,3 +1,7 @@
+Since 1.5.1:
+  - New: R wrapper integrates with kohonen package.
+  - New: Better handling of CUDA compilation in the Python interface.
+
 Version 1.5.1: 2015-12-02
   - New: Neighborhood function can be chosen between Gaussian and bubble.
   - Fixed: R wrapper passes arrays with correct orientation.
