@@ -6,9 +6,6 @@
 clf reset;
 figure(gcf)
 echo on
-
-
-
 clc
 %    ==========================================================
 %    SOMOCLU_SOM_DEMO1 - BEHAVIOUR AND PROPERTIES OF SOM
@@ -184,8 +181,39 @@ bmu = som_bmus(sMap,[0 0 0]);
 co = sMap.codebook(bmu,:);
 text(co(1),co(2),co(3),'BMU','Fontsize',20)
 plot3([0 co(1)],[0 co(2)],[0 co(3)],'ro-')
-% Please see demos that installed with som-toolbox for more 
-% visualization examples...
+
 pause 
 
+%    VISUALIZATION OF CLUSTERS: DISTANCE MATRICES
+%    ===============================================
 
+%    Distance matrices are typically used to show the cluster
+%    structure of the SOM. They show distances between neighboring
+%    units, and are thus closely related to single linkage clustering
+%    techniques. The most widely used distance matrix technique is
+%    the U-matrix. 
+
+%    Here, the U-matrix of the map is shown (using all three
+%    components in the distance calculation):
+
+colormap(1-gray)
+som_show(sMap,'umat','all');
+pause % Strike any key to continue...
+%    VISUALIZATION OF COMPONENTS: COMPONENT PLANES
+%    ================================================
+
+%    The component planes visualizations shows what kind of values the
+%    prototype vectors of the map units have for different vector
+%    components.
+
+%    Here is the U-matrix and the three component planes of the map.
+
+som_show(sMap)
+% Please see demos that installed with som-toolbox for more 
+% visualization examples...
+
+% Or You can save the results with functions in Databionic ESOM Tools for further
+% analysis using Databionic ESOM Tools
+saveumx('demo', uMatrix);
+savebm('demo', globalBmus);
+savewts('demo', sMap.codebook, msize(1,1), msize(1,2));
