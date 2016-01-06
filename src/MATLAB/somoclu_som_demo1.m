@@ -46,13 +46,13 @@ clc
 %    INITIALIZE AND TRAIN THE SELF-ORGANIZING MAP
 %    ============================================
 
-%    Here are 300 data points sampled from the unit square:
+%    Here are 28 data points imported from file:
 
-D = rand(300,2);
+D = importdata('../../data/rgbs.txt');
 
-%    The map will be a 2-dimensional grid of size 10 x 10.
+%    The map will be a 2-dimensional grid of size 50 x 50.
 
-msize = [10 10];
+msize = [50 50];
 
 %    SOM_RANDINIT and SOM_LININIT can be used to initialize the
 %    prototype vectors in the map. The map size is actually an
@@ -71,7 +71,7 @@ sMap  = som_randinit(D, 'msize', msize);
 
 subplot(1,3,1) 
 som_grid(sMap)
-axis([0 11 0 11]), view(0,-90), title('Map in output space')
+axis([0 50 0 50]), view(0,-90), title('Map in output space')
 
 subplot(1,3,2) 
 plot(D(:,1),D(:,2),'+r'), hold on
@@ -89,8 +89,8 @@ pause % Strike any key to train the SOM...
 %    data. Here, the sequential training algorithm is used:
 
 % sMap  = som_seqtrain(sMap,D,'radius',[5 1],'trainlen',10);
-sMap  = somoclu_train(sMap, D, 'msize', msize, 'radius',[5 1], ...
-    'nEpoch', 100);
+sMap  = somoclu_train(sMap, D, 'msize', msize, ...
+    'nEpoch', 10, 'radius0',0, 'radiusN', 0, 'scale0', 0, 'scaleN', 0.01);
 % for GPU kernel:
 % sMap  = somoclu_train(sMap, D, 'msize', msize, 'radius',[5 1], ...
 %     'nEpoch', 100, 'kernelType', 1);
@@ -106,22 +106,7 @@ pause % Strike any key to continue with 3D data...
 clf
 
 clc
-%    TRAINING DATA: THE UNIT CUBE
-%    ============================
-
-%    Above, the map dimension was equal to input space dimension: both
-%    were 2-dimensional. Typically, the input space dimension is much
-%    higher than the 2-dimensional map. In this case the map cannot
-%    follow perfectly the data set any more but must find a balance
-%    between two goals:
-
-%      - data representation accuracy
-%      - data set topology representation accuracy    
-
-%    Here are 500 data points sampled from the unit cube:
-
-D = rand(500,3);
-
+%   3-dimention Plot
 subplot(1,3,1), plot3(D(:,1),D(:,2),D(:,3),'+r')
 view(3), axis on, rotate3d on
 title('Data')
@@ -130,13 +115,9 @@ title('Data')
 %    dragging the pointer above the picture with the leftmost mouse
 %    button pressed down.
 
-pause % Strike any key to train the SOM...
+pause % Strike any key to continue...
 
 
-
-sMap  = som_randinit(D);
-[sMap, sTrain, globalBmus, uMatrix] = somoclu_train(sMap, D, 'nEpoch', 100);
-U=som_umat(sMap)
 %    Here, the linear initialization is done again, so that 
 %    the results can be compared.
 
@@ -211,9 +192,18 @@ pause % Strike any key to continue...
 som_show(sMap)
 % Please see demos that installed with som-toolbox for more 
 % visualization examples...
-
+pause % Strike any key to continue...
 % Or You can save the results with functions in Databionic ESOM Tools for further
 % analysis using Databionic ESOM Tools
-saveumx('demo', uMatrix);
-savebm('demo', globalBmus);
-savewts('demo', sMap.codebook, msize(1,1), msize(1,2));
+MatrixFileNamePrefix = 'demo';
+saveumx(MatrixFileNamePrefix, uMatrix);
+savebm(MatrixFileNamePrefix, globalBmus);
+savewts(MatrixFileNamePrefix, sMap.codebook, msize(1,1), msize(1,2));
+  background = 'umx';  foreground = 'bm'; 
+OtherFileNames = []; gradient = 'gray';
+colors = 10; zoom = 3; bmsize = 3;
+[img, umx] = esom_picture(MatrixFileNamePrefix, background, foreground, OtherFileNames, gradient, colors, zoom, bmsize);
+figure;
+image(img);
+title(['U-Matrix of ' MatrixFileNamePrefix ' using grayscale with bestmatches'])
+xlabel('ESOM x coordinates'); ylabel('ESOM y coordinates');
