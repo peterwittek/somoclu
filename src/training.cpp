@@ -294,13 +294,15 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                               nVectors, nVectorsPerRank, radius, scale,
                               mapType, gridType, compact_support, gaussian, globalBmus);
         break;
-#ifdef CUDA
     case DENSE_GPU:
+#ifdef CUDA
         trainOneEpochDenseGPU(itask, data, numerator, denominator,
                               codebook, nSomX, nSomY, nDimensions,
                               nVectors, nVectorsPerRank, radius, scale,
                               mapType, gridType, compact_support, gaussian, globalBmus);
         break;
+#else
+        my_abort("Compiled without CUDA!");
 #endif
     case SPARSE_CPU:
         trainOneEpochSparseCPU(itask, sparseData, numerator, denominator,
