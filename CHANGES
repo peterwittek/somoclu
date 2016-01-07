@@ -1,6 +1,8 @@
 Since 1.5.1:
   - New: R wrapper integrates with kohonen package.
+  - New: MATLAB wrapper integrates with soomtoolbox.
   - New: Better handling of CUDA compilation in the Python interface.
+  - Changed: Throws an exception if GPU kernel is requested, but it was compiled without it. The earlier behaviour quietly defaulted to the CPU kernel.
 
 Version 1.5.1: 2015-12-02
   - New: Neighborhood function can be chosen between Gaussian and bubble.
