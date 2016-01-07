@@ -112,7 +112,7 @@ if CUDA is not None:
 
 try:
     setup(name='somoclu',
-          version='1.5.1',
+          version='1.6',
           license='GPL3',
           author="peterwittek",
           author_email="",
@@ -128,7 +128,7 @@ try:
           )
 except:
     setup(name='somoclu',
-          version='1.5.1',
+          version='1.6',
           license='GPL3',
           author="peterwittek",
           author_email="",

@@ -1,4 +1,4 @@
-Since 1.5.1:
+Version 1.6: 2016-01-08
   - New: R wrapper integrates with kohonen package.
   - New: MATLAB wrapper integrates with soomtoolbox.
   - New: Better handling of CUDA compilation in the Python interface.
