@@ -157,7 +157,7 @@ AS_HELP_STRING([--with-mpi-libdir=DIR],[MPI library directory @<:@default MPIROO
 ]
 )
 
-if test -z "${MPI_LIBDIR}"; then
+if test -z "${MPI_LIBDIR}" -a "X${MPI_CXX}" != "Xnone" ; then
   MPI_LIBDIR="-L${MPI_DIR}/lib"
 fi
 

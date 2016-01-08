@@ -150,4 +150,4 @@ Makefile: Makefile.in ../config.status
 ../config.status: ../configure
 	cd .. && ./config.status --recheck
 
-.PHONY: all clean install uninstall
+.PHONY: all clean install uninstall python
