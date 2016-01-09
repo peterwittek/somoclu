@@ -59,7 +59,7 @@ radiusCooling <- "linear"
 scale0 <- 0
 scaleN <- 0.01
 scaleCooling <- "linear"
-kernelType <- 1
+kernelType <- 0
 mapType <- "planar"
 gridType <- "rectangular"
 compactSupport <- FALSE
