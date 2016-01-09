@@ -133,13 +133,7 @@ Before building the module manually with:
 
 Build with CUDA support on Linux and OS X:
 ------------------------------------------
-If your CUDA is installed elsewhere than /usr/local/cuda, you cannot directly install the module from PyPI. Please download the `source distribution <https://pypi.python.org/pypi/somoclu>`_ from PyPI. Open the setup.py file in an editor and modify the path to your CUDA installation directory:
-
-::
-
-   cuda_dir = /path/to/cuda
-
-Then run the install command
+If the ``CUDAHOME`` variable is set, the usual install command will build and install the library:
 
 ::
 

@@ -5,7 +5,7 @@ import numpy
 import os
 import sys
 import platform
-
+win_cuda_dir = ""
 
 def find_cuda():
     if 'CUDAHOME' in os.environ:
@@ -22,20 +22,22 @@ def find_cuda():
                                    'your $PATH. Either add it to your path, or'
                                    'set $CUDAHOME')
         home = os.path.dirname(os.path.dirname(nvcc))
-    libdir = "lib"
-    arch = int(platform.architecture()[0][0:2])
-    if sys.platform.startswith('win'):
-        os.path.join(libdir, "x"+str(arch))
-    elif arch == 64:
-        libdir += "64"
     cudaconfig = {'home': home, 'nvcc': nvcc,
-                  'include': os.path.join(home, 'include'),
-                  'lib': os.path.join(home, libdir)}
+                  'include': os.path.join(home, 'include')}
     for k, v in cudaconfig.items():
         if not os.path.exists(v):
             raise EnvironmentError('The CUDA %s path could not be located in '
                                    '%s' % (k, v))
-
+    libdir = "lib"
+    arch = int(platform.architecture()[0][0:2])
+    if sys.platform.startswith('win'):
+        os.path.join(libdir, "x"+str(arch))
+    if os.path.exists(os.path.join(home, libdir)):
+        cudaconfig['lib'] = libdir
+    elif os.path.exists(os.path.join(home, libdir + "64")):
+        cudaconfig['lib'] = libdir + "64"
+    else:
+        raise EnvironmentError('The CUDA libraries could not be located')        
     return cudaconfig
 
 try:
@@ -75,39 +77,56 @@ class custom_build_ext(build_ext):
         customize_compiler_for_nvcc(self.compiler)
         build_ext.build_extensions(self)
 
-
-if sys.platform.startswith('win'):
-    extra_compile_args = ['-openmp']
-    openmp = ''
+cmdclass = {}
+if sys.platform.startswith('win') and os.path.exists(win_cuda_dir):
+    arch = int(platform.architecture()[0][0:2])
+    somoclu_module = Extension('_somoclu_wrap',
+                               sources=['somoclu/somoclu_wrap.cxx'],
+                               extra_objects=[
+                                        'somoclu/src/denseCpuKernels.obj',
+                                        'somoclu/src/sparseCpuKernels.obj',
+                                        'somoclu/src/training.obj',
+                                        'somoclu/src/mapDistanceFunctions.obj',
+                                        'somoclu/src/uMatrix.obj',
+                                        'somoclu/src/denseGpuKernels.cu.obj'],
+                               define_macros=[('CUDA', None)],
+                               library_dirs=[win_cuda_dir+"/lib/x"+str(arch)],
+                               libraries=['cudart', 'cublas'],
+                               include_dirs=[numpy_include])
 else:
-    extra_compile_args = ['-fopenmp']
-    if 'CC' in os.environ and 'clang-omp' in os.environ['CC']:
-        openmp = 'iomp5'
+    if sys.platform.startswith('win'):
+        extra_compile_args = ['-openmp']
+        openmp = ''
     else:
-        openmp = 'gomp'
-sources_files = ['somoclu/src/denseCpuKernels.cpp',
-                 'somoclu/src/sparseCpuKernels.cpp',
-                 'somoclu/src/mapDistanceFunctions.cpp',
-                 'somoclu/src/training.cpp',
-                 'somoclu/src/uMatrix.cpp',
-                 'somoclu/somoclu_wrap.cxx']
-somoclu_module = Extension('_somoclu_wrap',
-                           sources=sources_files,
-                           include_dirs=[numpy_include, 'src'],
-                           extra_compile_args={'cc': extra_compile_args},
-                           libraries=[openmp],
-                           )
-if CUDA is not None:
-    somoclu_module.sources.append('somoclu/src/denseGpuKernels.cu')
-    somoclu_module.define_macros = [('CUDA', None)]
-    somoclu_module.include_dirs.append(CUDA['include'])
-    somoclu_module.library_dirs = [CUDA['lib']]
-    somoclu_module.libraries += ['cudart', 'cublas']
-    somoclu_module.runtime_library_dirs = [CUDA['lib']]
-    somoclu_module.extra_compile_args['nvcc']=['-use_fast_math', 
-                                               '--ptxas-options=-v', '-c',
-                                               '--compiler-options','-fPIC ' +
-                                               extra_compile_args[0]]
+        extra_compile_args = ['-fopenmp']
+        if 'CC' in os.environ and 'clang-omp' in os.environ['CC']:
+            openmp = 'iomp5'
+        else:
+            openmp = 'gomp'
+    sources_files = ['somoclu/src/denseCpuKernels.cpp',
+                     'somoclu/src/sparseCpuKernels.cpp',
+                     'somoclu/src/mapDistanceFunctions.cpp',
+                     'somoclu/src/training.cpp',
+                     'somoclu/src/uMatrix.cpp',
+                     'somoclu/somoclu_wrap.cxx']
+    somoclu_module = Extension('_somoclu_wrap',
+                               sources=sources_files,
+                               include_dirs=[numpy_include, 'src'],
+                               extra_compile_args={'cc': extra_compile_args},
+                               libraries=[openmp],
+                               )
+    if CUDA is not None:
+        somoclu_module.sources.append('somoclu/src/denseGpuKernels.cu')
+        somoclu_module.define_macros = [('CUDA', None)]
+        somoclu_module.include_dirs.append(CUDA['include'])
+        somoclu_module.library_dirs = [CUDA['lib']]
+        somoclu_module.libraries += ['cudart', 'cublas']
+        somoclu_module.runtime_library_dirs = [CUDA['lib']]
+        somoclu_module.extra_compile_args['nvcc']=['-use_fast_math',
+                                                   '--ptxas-options=-v', '-c',
+                                                   '--compiler-options','-fPIC ' +
+                                                   extra_compile_args[0]]
+    cmdclass = {'build_ext': custom_build_ext}
 
 
 try:
@@ -124,7 +143,7 @@ try:
           ext_modules=[somoclu_module],
           packages=["somoclu"],
           install_requires=['numpy', 'matplotlib'],
-          cmdclass={'build_ext': custom_build_ext},
+          cmdclass=cmdclass,
           )
 except:
     setup(name='somoclu',

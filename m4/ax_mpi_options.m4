@@ -1,7 +1,7 @@
 AC_DEFUN([AX_MPI_OPTIONS],[
   dnl
   dnl Command-line options for setting up MPI
-  dnl 
+  dnl
 
 MPI_CXX=none
 
@@ -18,7 +18,7 @@ AS_HELP_STRING([--with-mpi-compilers=DIR or --with-mpi-compilers=yes],
     # add more paths to check as 4th argument if you wanted to.
     # Calls AC_SUBST for MPI_CXX, etc.
 
-    if test "X${MPI_CXX}" = "Xnone" ; then 
+    if test "X${MPI_CXX}" = "Xnone" ; then
       echo "Looking for an MPI C++ compiler in your path"
       AC_CHECK_PROGS([MY_CXX], [mpic++ mpicxx mpiCC mpiicpc], [none],)
       MPI_CXX=${MY_CXX}
@@ -51,7 +51,7 @@ AS_HELP_STRING([--with-mpi-compilers=DIR or --with-mpi-compilers=yes],
 ]
 )
 
-if test "X${MPI_CXX}" = "Xnone" ; then 
+if test "X${MPI_CXX}" = "Xnone" ; then
   AC_CHECK_PROGS([MY_CXX], [mpic++ mpicxx mpiCC mpiicpc], [none],)
   MPI_CXX=${MY_CXX}
 fi
@@ -74,9 +74,9 @@ AS_HELP_STRING([--with-mpi=MPIROOT],[use MPI root directory.]),
 if test -z "${MPI_DIR}";	then
 	# set MPI_DIR to the correct directory
 	# otherwise send error
-	
+
 	AC_MSG_CHECKING([for MPI directory])
-	
+
 	CANDIDATES=/usr
 	pathlibs="$(echo $LD_LIBRARY_PATH|sed -e 's/:/ /g')"
 	counter=1
@@ -84,7 +84,7 @@ if test -z "${MPI_DIR}";	then
   CANDIDATES="/usr"
 	until [test x"$end" = x"yes"]
 	do
-		pathlib="$(echo $pathlibs | awk -v awk_var=$counter '{print $awk_var}' )" 
+		pathlib="$(echo $pathlibs | awk -v awk_var=$counter '{print $awk_var}' )"
 		if test -n "$pathlib"; then
 		  match="$(echo ${pathlib:(-4)})"
 		  if test x"$match" = x"/lib"; then
@@ -105,7 +105,7 @@ if test -z "${MPI_DIR}";	then
 		fi
 		counter=$(($counter+1))
 	done
-	
+
 	#find what path has the openmpi directory
 	counter=1
 	DIR=no
@@ -122,8 +122,8 @@ if test -z "${MPI_DIR}";	then
 		fi
 		counter=$(($counter+1))
 	done
-	
-	if test -z "${MPI_DIR}";	then	
+
+	if test -z "${MPI_DIR}";	then
 			AC_MSG_RESULT([${MPI_DIR}])
 	fi
 fi
@@ -172,7 +172,7 @@ AS_HELP_STRING([--with-mpi-libs="LIBS"],[MPI libraries @<:@default "-lmpi"@:>@])
 ]
 )
 
-if test -n "${MPI_LIBDIR}"; then
+if test -n "${MPI_LIBDIR}" -a x"$MPI_CXX" != x"none"; then
   MPI_LIBS="-lmpi"
 fi
 

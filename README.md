@@ -58,7 +58,7 @@ Examples:
     $ somoclu data/rgbs.txt data/rgbs
     $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 
-With random initialization, the initial codebook will be filled with random numbers ranging from 0 to 1. Either supply your own initial codebook or normalize your data to fall in this range. 
+With random initialization, the initial codebook will be filled with random numbers ranging from 0 to 1. Either supply your own initial codebook or normalize your data to fall in this range.
 
 If the range of the values of the features includes negative numbers, the codebook will eventually adjust. It is, however, not advised to have negative values, especially if the codebook is initialized from 0 to 1. This comes from the batch training nature of the parallel implementation. The batch update rule will change the codebook values with weighted averages of the data points, and with negative values, the updates can cancel out.
 
@@ -84,9 +84,9 @@ The same caveats apply for the sparse CPU kernel.
 
 Visualisation
 -------------
-The primary purpose of generating a map is visualisation. Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures.
+The primary purpose of generating a map is visualisation. Apart from the Python interface, Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures. The R version integrates with [kohonen](https://cran.r-project.org/package=kohonen) and the MATLAB version with [somtoolbox](www.cis.hut.fi/somtoolbox/).
 
-The output formats of the U-matrix and the codebook are compatible with [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/) for more advanced visualisation.
+The output formats U-matrix and the codebook of the command-line version are compatible with [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/) for more advanced visualisation.
 
 
 Input File Formats
