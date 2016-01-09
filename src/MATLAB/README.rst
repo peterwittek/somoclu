@@ -11,14 +11,13 @@ License: GPL-3
 OS_type: unix, windows
 
 Somoclu MATLAB Extension Build Guide (Linux/Mac):
-=============================================
-
-1. Configure the library to compile without MPI support. Optionally, specify the root of your MATLAB installation. E.g.:
-
-    ::
-        ./configure --without-mpi --with-matlab=/usr/local/MATLAB/R2014a
+=================================================
 
    **(OS X users see the Note below first)**
+
+1. Configure the library to compile without MPI support. Optionally, specify the root of your MATLAB installation. E.g.::
+
+    $ ./configure --without-mpi --with-matlab=/usr/local/MATLAB/R2014a
 
 If you want CUDA support, specify the CUDA directory as well.
 
