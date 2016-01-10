@@ -1,4 +1,4 @@
-Version 1.6: 2016-01-08
+Version 1.6: 2016-01-10
   - New: R wrapper integrates with kohonen package.
   - New: MATLAB wrapper integrates with soomtoolbox.
   - New: Better handling of CUDA compilation in the Python interface.
@@ -33,14 +33,14 @@ Version 1.3.1: 2014-04-10
   - Better I/O separation for the Python, R, and MATLAB interfaces.
   - Initial Windows support through GCC on Windows.
   - Bug fixes: major MPI initialization bug fixed.
-  
+
 Version 1.3: 2014-03-31
 
   - Learning rate parameter included.
   - Linear and exponential cooling strategies added for radius and learning rate.
   - CLI interface made more user-friendly.
   - Default radius depends on both X and Y of the map.
-  - Bug fixes: CUDA build without MPI, best matching unit passing without MPI, 
+  - Bug fixes: CUDA build without MPI, best matching unit passing without MPI,
     coordinate order in best matching unit file.
   - Python, R, and MATLAB interfaces added.
 
@@ -55,13 +55,13 @@ Version 1.2: 2013-12-17
   - Long-named command line switches for specifying SOM dimensions.
   - Fine-grained control of which interim files to save across epochs
   - Option in Makefile for building shared library.
-  
+
 Version 1.1.2: 2013-11-28
 
-  - Toroid maps were added. 
-  - Initial radius is exposed as a parameter via the command line interface. 
+  - Toroid maps were added.
+  - Initial radius is exposed as a parameter via the command line interface.
   - Formats of codebook and U-matrix export are compatible with Databionic ESOM Tools for advanced visualisation.
-  - Bug fixes: codebook update with a compact support was removed, NaN entry no longer appears in U-matrices. 
+  - Bug fixes: codebook update with a compact support was removed, NaN entry no longer appears in U-matrices.
 
 Version 1.0: 2013-05-14
 
