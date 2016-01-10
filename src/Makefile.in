@@ -71,7 +71,7 @@ matlab: lib
 	mv MexSomoclu* MATLAB
 
 matlab_clean:
-	-rm -f MATLAB/MexSomoclu* denseGpuKernels.cu.o
+	-rm -f MATLAB/*o
 
 python:
 	mkdir -p ./Python/somoclu/src
