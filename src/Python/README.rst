@@ -141,9 +141,9 @@ If the ``CUDAHOME`` variable is set, the usual install command will build and in
 
 Build with CUDA support on Windows:
 --------------------------------------
-You should first follow the instructions to `build the Windows binary <https://github.com/peterwittek/somoclu>`_ with MPI disabled with the same version Visual Studio as your Python is built with.(Since currently Python is built by VS2008 by default and CUDA v6.5 removed VS2008 support, you may use CUDA 6.0 with VS2008 or find a Python prebuilt with VS2010. And remember to install VS2010 or Windows SDK7.1 to get the option in Platform Toolset if you use VS2013.) Then you should copy the .obj files generated in the release build path to the Python/src folder.
+You should first follow the instructions to `build the Windows binary <https://github.com/peterwittek/somoclu>`_ with ``HAVE_MPI`` and ``CLI`` disabled with the same version Visual Studio as your Python is built with.(Since currently Python is built by VS2008 by default and CUDA v6.5 removed VS2008 support, you may use CUDA 6.0 with VS2008 or find a Python prebuilt with VS2010. And remember to install VS2010 or Windows SDK7.1 to get the option in Platform Toolset if you use VS2013.) The recommended configuration is VS2010  Platform Toolset with Python 3.4. Then you should copy the .obj files generated in the release build path to the ``Python\somoclu\src`` folder.
 
-Then modify the win_cuda_dir in setup.py to your CUDA path and run the install command
+Then modify the environment variable ``CUDA_PATH`` or ``win_cuda_dir`` in ``setup.py`` to your CUDA path and run the install command
 
 ::
 
