@@ -429,8 +429,12 @@ int main(int argc, char** argv)
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
-          gridType, compactSupport == 1, gaussian == 1,
-          outPrefix, snapshots);
+          gridType, compactSupport == 1, gaussian == 1
+#ifdef CLI
+	, outPrefix, snapshots);
+#else
+	);
+#endif
 
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);

@@ -78,21 +78,29 @@ class custom_build_ext(build_ext):
         build_ext.build_extensions(self)
 
 cmdclass = {}
-if sys.platform.startswith('win') and os.path.exists(win_cuda_dir):
-    arch = int(platform.architecture()[0][0:2])
-    somoclu_module = Extension('_somoclu_wrap',
-                               sources=['somoclu/somoclu_wrap.cxx'],
-                               extra_objects=[
-                                        'somoclu/src/denseCpuKernels.obj',
-                                        'somoclu/src/sparseCpuKernels.obj',
-                                        'somoclu/src/training.obj',
-                                        'somoclu/src/mapDistanceFunctions.obj',
-                                        'somoclu/src/uMatrix.obj',
-                                        'somoclu/src/denseGpuKernels.cu.obj'],
-                               define_macros=[('CUDA', None)],
-                               library_dirs=[win_cuda_dir+"/lib/x"+str(arch)],
-                               libraries=['cudart', 'cublas'],
-                               include_dirs=[numpy_include])
+if sys.platform.startswith('win'):
+    if win_cuda_dir == "":
+        if 'CUDA_PATH' in os.environ:
+            win_cuda_dir = os.environ['CUDA_PATH']
+    elif os.path.exists(win_cuda_dir):
+        pass
+    else:
+        win_cuda_dir = None
+    if win_cuda_dir:
+        arch = int(platform.architecture()[0][0:2])
+        somoclu_module = Extension('_somoclu_wrap',
+                                   sources=['somoclu/somoclu_wrap.cxx'],
+                                   extra_objects=[
+                                            'somoclu/src/denseCpuKernels.obj',
+                                            'somoclu/src/sparseCpuKernels.obj',
+                                            'somoclu/src/training.obj',
+                                            'somoclu/src/mapDistanceFunctions.obj',
+                                            'somoclu/src/uMatrix.obj',
+                                            'somoclu/src/denseGpuKernels.cu.obj'],
+                                   define_macros=[('CUDA', None)],
+                                   library_dirs=[win_cuda_dir+"/lib/x"+str(arch)],
+                                   libraries=['cudart', 'cublas'],
+                                   include_dirs=[numpy_include])
 else:
     if sys.platform.startswith('win'):
         extra_compile_args = ['-openmp']
