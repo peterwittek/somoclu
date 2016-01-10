@@ -5,7 +5,9 @@ import numpy
 import os
 import sys
 import platform
-win_cuda_dir = ""
+import traceback
+win_cuda_dir = None
+
 
 def find_cuda():
     if 'CUDAHOME' in os.environ:
@@ -78,7 +80,7 @@ class custom_build_ext(build_ext):
         build_ext.build_extensions(self)
 
 cmdclass = {}
-if sys.platform.startswith('win'):
+if sys.platform.startswith('win') and win_cuda_dir is not None:
     if win_cuda_dir == "":
         if 'CUDA_PATH' in os.environ:
             win_cuda_dir = os.environ['CUDA_PATH']
@@ -102,27 +104,33 @@ if sys.platform.startswith('win'):
                                    libraries=['cudart', 'cublas'],
                                    include_dirs=[numpy_include])
 else:
-    if sys.platform.startswith('win'):
-        extra_compile_args = ['-openmp']
-        openmp = ''
-    else:
-        extra_compile_args = ['-fopenmp']
-        if 'CC' in os.environ and 'clang-omp' in os.environ['CC']:
-            openmp = 'iomp5'
-        else:
-            openmp = 'gomp'
     sources_files = ['somoclu/src/denseCpuKernels.cpp',
                      'somoclu/src/sparseCpuKernels.cpp',
                      'somoclu/src/mapDistanceFunctions.cpp',
                      'somoclu/src/training.cpp',
                      'somoclu/src/uMatrix.cpp',
                      'somoclu/somoclu_wrap.cxx']
-    somoclu_module = Extension('_somoclu_wrap',
+    if sys.platform.startswith('win'):
+        extra_compile_args = ['-openmp']
+        cmdclass = {}
+        somoclu_module = Extension('_somoclu_wrap',
                                sources=sources_files,
                                include_dirs=[numpy_include, 'src'],
-                               extra_compile_args={'cc': extra_compile_args},
-                               libraries=[openmp],
+                               extra_compile_args=extra_compile_args,
                                )
+    else:
+        extra_compile_args = ['-fopenmp']
+        if 'CC' in os.environ and 'clang-omp' in os.environ['CC']:
+            openmp = 'iomp5'
+        else:
+            openmp = 'gomp'
+        cmdclass = {'build_ext': custom_build_ext}
+        somoclu_module = Extension('_somoclu_wrap',
+                                   sources=sources_files,
+                                   include_dirs=[numpy_include, 'src'],
+                                   extra_compile_args={'cc': extra_compile_args},
+                                   libraries=[openmp],
+                                   )
     if CUDA is not None:
         somoclu_module.sources.append('somoclu/src/denseGpuKernels.cu')
         somoclu_module.define_macros = [('CUDA', None)]
@@ -134,7 +142,7 @@ else:
                                                    '--ptxas-options=-v', '-c',
                                                    '--compiler-options','-fPIC ' +
                                                    extra_compile_args[0]]
-    cmdclass = {'build_ext': custom_build_ext}
+
 
 
 try:
@@ -154,6 +162,7 @@ try:
           cmdclass=cmdclass,
           )
 except:
+    traceback.print_exc()
     setup(name='somoclu',
           version='1.6',
           license='GPL3',
