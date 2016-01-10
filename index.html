@@ -88,7 +88,7 @@
 $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 </code></pre>
 
-<p>With random initialization, the initial codebook will be filled with random numbers ranging from 0 to 1. Either supply your own initial codebook or normalize your data to fall in this range. </p>
+<p>With random initialization, the initial codebook will be filled with random numbers ranging from 0 to 1. Either supply your own initial codebook or normalize your data to fall in this range.</p>
 
 <p>If the range of the values of the features includes negative numbers, the codebook will eventually adjust. It is, however, not advised to have negative values, especially if the codebook is initialized from 0 to 1. This comes from the batch training nature of the parallel implementation. The batch update rule will change the codebook values with weighted averages of the data points, and with negative values, the updates can cancel out.</p>
 
@@ -119,9 +119,9 @@ $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 <h2>
 <a id="visualisation" class="anchor" href="#visualisation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Visualisation</h2>
 
-<p>The primary purpose of generating a map is visualisation. Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures.</p>
+<p>The primary purpose of generating a map is visualisation. Apart from the Python interface, Somoclu does not come with its own functions for visualisation, since there are numerous generic tools that are capable of plotting high-quality figures. The R version integrates with <a href="https://cran.r-project.org/package=kohonen">kohonen</a> and the MATLAB version with <a href="www.cis.hut.fi/somtoolbox/">somtoolbox</a>.</p>
 
-<p>The output formats of the U-matrix and the codebook are compatible with <a href="http://databionic-esom.sourceforge.net/">Databionic ESOM Tools</a> for more advanced visualisation.</p>
+<p>The output formats U-matrix and the codebook of the command-line version are compatible with <a href="http://databionic-esom.sourceforge.net/">Databionic ESOM Tools</a> for more advanced visualisation.</p>
 
 <h1>
 <a id="input-file-formats" class="anchor" href="#input-file-formats" aria-hidden="true"><span class="octicon octicon-link"></span></a>Input File Formats</h1>
@@ -167,9 +167,9 @@ $ mpirun -np 4 somoclu -k 0 --rows 20 --columns 20 data/rgbs.txt data/rgbs
 <pre><code>$ sudo pip install somoclu
 </code></pre>
 
-<p>Some pre-built binaries in the wheel format or windows installer are provided at <a href="https://pypi.python.org/pypi/somoclu#downloads">PyPI Dowloads</a>, they are tested with <a href="https://www.continuum.io/downloads">Anaconda </a> distributions. If you encounter errors like <code>ImportError: DLL load failed: The specified module could not be found</code> when <code>import somoclu</code>, you may need to use <a href="http://www.dependencywalker.com/">Dependency Walker</a> as shown <a href="http://stackoverflow.com/a/24704384/1136027">here</a> on <code>_somoclu_wrap.pyd</code> to find out missing DLLs and place them at the write place. Usually right version (32/64bit) of <code>vcomp90.dll, msvcp90.dll, msvcr90.dll</code> should be put to <code>C:\Windows\System32</code> or <code>C:\Windows\SysWOW64</code>.</p>
+<p>Some pre-built binaries in the wheel format or Windows installer are provided at <a href="https://pypi.python.org/pypi/somoclu#downloads">PyPI Dowloads</a>, they are tested with <a href="https://www.continuum.io/downloads">Anaconda</a> distributions. If you encounter errors like <code>ImportError: DLL load failed: The specified module could not be found</code> when <code>import somoclu</code>, you may need to use <a href="http://www.dependencywalker.com/">Dependency Walker</a> as shown <a href="http://stackoverflow.com/a/24704384/1136027">here</a> on <code>_somoclu_wrap.pyd</code> to find out missing DLLs and place them at the write place. Usually right version (32/64bit) of <code>vcomp90.dll, msvcp90.dll, msvcr90.dll</code> should be put to <code>C:\Windows\System32</code> or <code>C:\Windows\SysWOW64</code>.</p>
 
-<p>The wheel binaries for OSX are compiled with <a href="http://clang-omp.github.io/">clang-omp</a> , and depend on libiomp5, which you can install by:</p>
+<p>The wheel binaries for OSX are compiled with <a href="http://clang-omp.github.io/">clang-omp</a>, and depend on libiomp5, which you can install by:</p>
 
 <pre><code>$ brew install libiomp
 </code></pre>
