@@ -12,9 +12,7 @@ Key features of the Python interface:
 * Gaussian or bubble neighborhood functions.
 * Visualization of maps, including those that were trained outside of Python.
 
-The documentation is available on `Read the Docs <http://somoclu.readthedocs.org>`_. Further details are found in the following paper:
-
-Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. `arXiv:1305.1422 <http://arxiv.org/abs/1305.1422>`_.
+The documentation is available on `Read the Docs <http://somoclu.readthedocs.org>`_. Further details are found in the manuscript describing the library [1].
 
 Usage
 -----
@@ -150,3 +148,8 @@ Then modify the environment variable ``CUDA_PATH`` or ``win_cuda_dir`` in ``setu
     $ sudo python setup.py install
 
 Then it should be able to build and install the module.
+
+Citation
+--------
+
+1. Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. `arXiv:1305.1422 <http://arxiv.org/abs/1305.1422>`_.

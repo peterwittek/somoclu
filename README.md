@@ -14,9 +14,7 @@ Key features:
 * Integration with [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/).
 * [Python](http://somoclu.readthedocs.org/), [R](https://cran.r-project.org/web/packages/Rsomoclu/), and [MATLAB](https://github.com/peterwittek/somoclu/tree/master/src/MATLAB) interfaces for the dense CPU and GPU kernels.
 
-For more information, refer to the following paper:
-
-Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. [arXiv:1305.1422](http://arxiv.org/abs/1305.1422).
+For more information, refer to the manuscript about the library [1].
 
 Usage
 ===
@@ -215,3 +213,8 @@ The usage is identical to the Linux version through command line (see the releva
 Acknowledgment
 ==============
 This work was supported by the European Commission Seventh Framework Programme under Grant Agreement Number FP7-601138 PERICLES and by the AWS in Education Machine Learning Grant award.
+
+Citation
+========
+
+1. Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. [arXiv:1305.1422](http://arxiv.org/abs/1305.1422).
