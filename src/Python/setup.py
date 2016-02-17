@@ -149,7 +149,7 @@ try:
     setup(name='somoclu',
           version='1.6',
           license='GPL3',
-          author="peterwittek",
+          author="Peter Wittek, Shi Chao Gao",
           author_email="",
           maintainer="shichaogao",
           maintainer_email="xgdgsc@gmail.com",
@@ -159,6 +159,16 @@ try:
           ext_modules=[somoclu_module],
           packages=["somoclu"],
           install_requires=['numpy', 'matplotlib'],
+          classifiers=[
+            'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+            'Operating System :: OS Independent',
+            'Development Status :: 5 - Production/Stable',
+            'Topic :: Scientific/Engineering :: Artificial Intelligence',
+            'Topic :: Scientific/Engineering :: Visualization',
+            'Intended Audience :: Science/Research',
+            'Programming Language :: Python',
+            'Programming Language :: C++'
+          ],
           cmdclass=cmdclass,
           )
 except:
@@ -166,7 +176,7 @@ except:
     setup(name='somoclu',
           version='1.6',
           license='GPL3',
-          author="peterwittek",
+          author="Peter Wittek, Shi Chao Gao",
           author_email="",
           maintainer="shichaogao",
           maintainer_email="xgdgsc@gmail.com",
@@ -174,5 +184,15 @@ except:
           platforms=["unix", "windows"],
           description="Massively parallel implementation of self-organizing maps",
           packages=["somoclu"],
+          classifiers=[
+            'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+            'Operating System :: OS Independent',
+            'Development Status :: 5 - Production/Stable',
+            'Topic :: Scientific/Engineering :: Artificial Intelligence',
+            'Topic :: Scientific/Engineering :: Visualization',
+            'Intended Audience :: Science/Research',
+            'Programming Language :: Python',
+            'Programming Language :: C++'
+          ],
           install_requires=['numpy', 'matplotlib']
           )
