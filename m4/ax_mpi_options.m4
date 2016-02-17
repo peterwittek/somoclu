@@ -77,11 +77,10 @@ if test -z "${MPI_DIR}";	then
 
 	AC_MSG_CHECKING([for MPI directory])
 
-	CANDIDATES=/usr
 	pathlibs="$(echo $LD_LIBRARY_PATH|sed -e 's/:/ /g')"
 	counter=1
 	end=no
-  CANDIDATES="/usr"
+	CANDIDATES="/usr /usr/lib/openmpi"
 	until [test x"$end" = x"yes"]
 	do
 		pathlib="$(echo $pathlibs | awk -v awk_var=$counter '{print $awk_var}' )"
@@ -127,7 +126,7 @@ if test -z "${MPI_DIR}";	then
 			AC_MSG_RESULT([${MPI_DIR}])
 	fi
 fi
-
+echo $CANDIDATES
 
 AC_ARG_WITH(mpi-incdir,
 AS_HELP_STRING([--with-mpi-incdir=DIR],[MPI include directory @<:@default MPIROOT/include@:>@]),
