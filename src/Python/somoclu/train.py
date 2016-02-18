@@ -40,10 +40,12 @@ class Somoclu(object):
                            * 1: dense GPU kernel (if compiled with it)
     :type kerneltype: int.
     :param maptype: Optional parameter to specify the map topology:
+
                            * "planar": Planar map (default)
                            * "toroid": Toroid map
     :type maptype: str.
     :param gridtype: Optional parameter to specify the grid form of the nodes:
+
                            * "rectangular": rectangular neurons (default)
                            * "hexagonal": hexagonal neurons
     :type gridtype: str.
@@ -52,14 +54,16 @@ class Somoclu(object):
                            Default: False.
     :type compactsupport: bool.
     :param neighborhood: Optional parameter to specify the neighborhood:
+
                            * "gaussian": Gaussian neighborhood (default)
                            * "bubble": bubble neighborhood function
     :type neighborhood: str.
     :param initialization: Optional parameter to specify the initalization:
+
                            * "random": random weights in the codebook
                            * "pca": codebook is initialized from the first
-                                    subspace spanned by the first two
-                                    eigenvectors of the correlation matrix
+                             subspace spanned by the first two eigenvectors of
+                             the correlation matrix
     :type initialization: str.
     """
 
@@ -156,6 +160,7 @@ class Somoclu(object):
                         best matching unit in the final epoch. Default: 1.
         :type radiusN: int.
         :param radiuscooling: The cooling strategy between radius0 and radiusN:
+
                                    * "linear": Linear interpolation (default)
                                    * "exponential": Exponential decay
         :param scale0: The initial learning scale. Default value: 0.1.
@@ -163,6 +168,7 @@ class Somoclu(object):
         :param scaleN: The learning scale in the final epoch. Default: 0.01.
         :type scaleN: int.
         :param scalecooling: The cooling strategy between scale0 and scaleN:
+
                                    * "linear": Linear interpolation (default)
                                    * "exponential": Exponential decay
         :type scalecooling: str.
@@ -403,6 +409,18 @@ class Somoclu(object):
         self.codebook.shape = (codebook_size, )
 
     def cluster(self, algorithm=None):
+        """Cluster the codebook. The clusters of the data instances can be
+        assigned based on the BMUs. The method populates the class variable
+        Somoclu.clusters. If viewing methods are called after clustering, but
+        without colors for best matching units, colors will be automatically
+        assigned based on cluster membership.
+
+        :param algorithm: Optional parameter to specify a scikit-learn
+                          clustering algorithm. The default is K-means with
+                          eight clusters.
+        :type filename: sklearn.base.ClusterMixin.
+        """
+
         import sklearn.base
         if algorithm is None:
             import sklearn.cluster
