@@ -48,18 +48,25 @@ class Somoclu(object):
                            * "hexagonal": hexagonal neurons
     :type gridtype: str.
     :param compactsupport: Optional parameter to cut off map updates beyond the
-                           training radius with the Gaussian neighborhood. 
+                           training radius with the Gaussian neighborhood.
                            Default: False.
     :type compactsupport: bool.
     :param neighborhood: Optional parameter to specify the neighborhood:
                            * "gaussian": Gaussian neighborhood (default)
                            * "bubble": bubble neighborhood function
     :type neighborhood: str.
+    :param initialization: Optional parameter to specify the initalization:
+                           * "random": random weights in the codebook
+                           * "pca": codebook is initialized from the first
+                                    subspace spanned by the first two
+                                    eigenvectors of the correlation matrix
+    :type initialization: str.
     """
 
     def __init__(self, n_columns, n_rows, data=None, initialcodebook=None,
                  kerneltype=0, maptype="planar", gridtype="rectangular",
-                 compactsupport=False, neighborhood="gaussian"):
+                 compactsupport=False, neighborhood="gaussian",
+                 initialization=None):
         """Constructor for the class.
         """
         self._n_columns, self._n_rows = n_columns, n_rows
@@ -69,11 +76,21 @@ class Somoclu(object):
         self._compact_support = compactsupport
         self._neighborhood = neighborhood
         self._check_parameters()
+        if initialcodebook is not None and initialization is not None:
+            raise Exception("An initial codebook is given but initilization"
+                            " is also requested")
         self.bmus = None
         self.umatrix = np.zeros(n_columns * n_rows, dtype=np.float32)
         self.codebook = initialcodebook
+        if initialization is None or initialization == "random":
+            self._initialization = "random"
+        elif initialization == "pca":
+            self._initialization = "pca"
+        else:
+            raise Exception("Unknown initialization method")
         self.n_vectors = 0
         self.n_dim = 0
+        self.clusters = None
         self._data = None
         if data is not None:
             self.update_data(data)
@@ -159,7 +176,7 @@ class Somoclu(object):
                    self.n_dim, self.n_vectors, radius0, radiusN,
                    radiuscooling, scale0, scaleN, scalecooling,
                    self._kernel_type, self._map_type, self._grid_type,
-                   self._compact_support, self._neighborhood == "gaussian", 
+                   self._compact_support, self._neighborhood == "gaussian",
                    self.codebook, self.bmus, self.umatrix)
         self.umatrix.shape = (self._n_rows, self._n_columns)
         self.bmus.shape = (self.n_vectors, 2)
@@ -293,7 +310,13 @@ class Somoclu(object):
 
         if bestmatches:
             if bestmatchcolors is None:
-                colors = "white"
+                if self.clusters is None:
+                    colors = "white"
+                else:
+                    colors = []
+                    for bm in self.bmus:
+                        colors.append(self.clusters[bm[1], bm[0]])
+                    colors = self.filter_array(colors, zoom)
             else:
                 colors = self.filter_array(bestmatchcolors, zoom)
             plt.scatter(bmu_coords[:, 0], bmu_coords[:, 1], c=colors)
@@ -338,6 +361,26 @@ class Somoclu(object):
             raise Exception("Invalid parameter for kernelTye: " +
                             self._kernel_type)
 
+    def _pca_init(self):
+        from sklearn.decomposition import RandomizedPCA
+        coord = np.zeros((self._n_columns*self._n_rows, 2))
+        for i in range(self._n_columns*self._n_rows):
+            coord[i, 0] = int(i / self._n_columns)
+            coord[i, 1] = int(i % self._n_columns)
+        coord = coord/[self._n_rows-1, self._n_columns-1]
+        coord = (coord - .5)*2
+        me = np.mean(self._data, 0)
+        self.codebook = np.tile(me, (self._n_columns*self._n_rows, 1))
+        pca = RandomizedPCA(n_components=2)
+        pca.fit(self._data - me)
+        eigvec = pca.components_
+        eigval = pca.explained_variance_
+        norms = np.linalg.norm(eigvec, axis=1)
+        eigvec = ((eigvec.T/norms)*eigval).T
+        for j in range(self._n_columns*self._n_rows):
+            for i in range(eigvec.shape[0]):
+                self.codebook[j, :] = self.codebook[j, :] + \
+                                      coord[j, i] * eigvec[i, :]
 
     def _init_codebook(self):
         """Internal function to set the codebook or to indicate it to the C++
@@ -345,8 +388,11 @@ class Somoclu(object):
         """
         codebook_size = self._n_columns * self._n_rows * self.n_dim
         if self.codebook is None:
-            self.codebook = np.zeros(codebook_size, dtype=np.float32)
-            self.codebook[0:2] = [1000, 2000]
+            if self._initialization == "random":
+                self.codebook = np.zeros(codebook_size, dtype=np.float32)
+                self.codebook[0:2] = [1000, 2000]
+            else:
+                self._pca_init()
         elif self.codebook.size != codebook_size:
             raise Exception("Invalid size for initial codebook")
         else:
@@ -355,6 +401,21 @@ class Somoclu(object):
                       "copy was made")
                 self.codebook = np.float32(self.codebook)
         self.codebook.shape = (codebook_size, )
+
+    def cluster(self, algorithm=None):
+        import sklearn.base
+        if algorithm is None:
+            import sklearn.cluster
+            algorithm = sklearn.cluster.KMeans()
+        elif not isinstance(algorithm, sklearn.base.ClusterMixin):
+            raise Exception("Cannot use algorithm of type " + type(algorithm))
+        original_shape = self.codebook.shape
+        self.codebook.shape = (self._n_columns*self._n_rows, self.n_dim)
+        linear_clusters = algorithm.fit_predict(self.codebook)
+        self.codebook.shape = original_shape
+        self.clusters = np.zeros((self._n_rows, self._n_columns), dtype=int)
+        for i, c in enumerate(linear_clusters):
+            self.clusters[i // self._n_columns, i % self._n_columns] = c
 
 
 def _check_cooling_parameters(radiuscooling, scalecooling):

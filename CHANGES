@@ -1,3 +1,7 @@
+Since version 1.6:
+  - New: Option for PCA initialization is added to the Python interface.
+  - New: Clustering of the codebook with arbitrary clustering algorithm in scikit-learn is now possible in the Python interface.
+
 Version 1.6: 2016-01-10
   - New: R wrapper integrates with kohonen package.
   - New: MATLAB wrapper integrates with soomtoolbox.
