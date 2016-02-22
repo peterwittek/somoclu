@@ -1,4 +1,4 @@
-Version: 1.6
+Version: 1.6.1
 
 Maintainer: ShichaoGao<xgdgsc at gmail.com>
 
