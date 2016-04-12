@@ -61,6 +61,14 @@ void train(float *data, int data_length, unsigned int nEpoch,
            float *codebook, int codebook_size,
            int *globalBmus, int globalBmus_size,
            float *uMatrix, int uMatrix_size) {
+#ifdef HAVE_R
+#ifndef CUDA
+	if(kernelType == DENSE_GPU){
+		Rprintf("Error: CUDA kernel not compiled \n");
+		return;
+	}
+#endif // CUDA
+#endif // HAVE_R
     train(0, data, NULL, codebook, globalBmus, uMatrix, nSomX, nSomY,
           nDimensions, nVectors, nVectors,
           nEpoch, radius0, radiusN, radiusCooling,
@@ -300,10 +308,10 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                               codebook, nSomX, nSomY, nDimensions,
                               nVectors, nVectorsPerRank, radius, scale,
                               mapType, gridType, compact_support, gaussian, globalBmus);
-        break;
 #else
         my_abort("Compiled without CUDA!");
 #endif
+        break;
     case SPARSE_CPU:
         trainOneEpochSparseCPU(itask, sparseData, numerator, denominator,
                                codebook, nSomX, nSomY, nDimensions,
