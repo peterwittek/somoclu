@@ -323,11 +323,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                            unsigned int nVectorsPerRank, float radius,
                            float scale, string mapType, string gridType,
                            bool compact_support, bool gaussian, int *globalBmus) {
-#ifdef _WIN32
-	unsigned int* bmus = (unsigned int *)alloca(sizeof(unsigned int)* nVectorsPerRank * 2);
-#else
     unsigned int *bmus = new unsigned int[nVectorsPerRank * 2];
-#endif
     getBmusOnGpu(bmus, codebook, nSomX, nSomY, nDimensions, nVectorsPerRank);
     float *localNumerator = new float[nSomY * nSomX * nDimensions];
     float *localDenominator = new float[nSomY * nSomX];
