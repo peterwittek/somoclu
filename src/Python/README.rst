@@ -12,11 +12,11 @@ Key features of the Python interface:
 * Gaussian or bubble neighborhood functions.
 * Visualization of maps, including those that were trained outside of Python.
 
-The documentation is available on `Read the Docs <http://somoclu.readthedocs.org>`_. Further details are found in the manuscript describing the library [1].
+The documentation is available on `Read the Docs <https://somoclu.readthedocs.io/>`_. Further details are found in the manuscript describing the library [1].
 
 Usage
 -----
-A simple example is below. For more example, please refer to the `documentation <http://somoclu.readthedocs.org>`_ and a more thorough ipython notebook example at `Somoclu in Python.ipynb <http://nbviewer.ipython.org/github/peterwittek/ipython-notebooks/blob/master/Somoclu%20in%20Python.ipynb>`_.
+A simple example is below. For more example, please refer to the `documentation <https://somoclu.readthedocs.io/>`_ and a more thorough ipython notebook example at `Somoclu in Python.ipynb <http://nbviewer.ipython.org/github/peterwittek/ipython-notebooks/blob/master/Somoclu%20in%20Python.ipynb>`_.
 
 ::
 

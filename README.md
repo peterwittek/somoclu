@@ -12,7 +12,7 @@ Key features:
 * Both dense and sparse input data are supported.
 * Large maps of several hundred thousand neurons are feasible.
 * Integration with [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/).
-* [Python](http://somoclu.readthedocs.org/), [R](https://cran.r-project.org/web/packages/Rsomoclu/), and [MATLAB](https://github.com/peterwittek/somoclu/tree/master/src/MATLAB) interfaces for the dense CPU and GPU kernels.
+* [Python](https://somoclu.readthedocs.io/), [R](https://cran.r-project.org/web/packages/Rsomoclu/), and [MATLAB](https://github.com/peterwittek/somoclu/tree/master/src/MATLAB) interfaces for the dense CPU and GPU kernels.
 
 For more information, refer to the manuscript about the library [1].
 
@@ -122,7 +122,7 @@ If the input file is sparse, but a dense kernel is invoked, Somoclu will execute
 
 Interfaces
 ==========
-[Python](http://somoclu.readthedocs.org/), [R](https://cran.r-project.org/web/packages/Rsomoclu/), and [MATLAB](https://github.com/peterwittek/somoclu/tree/master/src/MATLAB) interfaces are available for the dense CPU  and GPU kernels. MPI and the sparse kernel are not support through the interfaces. For respective examples, see the folders in src.
+[Python](https://somoclu.readthedocs.io/), [R](https://cran.r-project.org/web/packages/Rsomoclu/), and [MATLAB](https://github.com/peterwittek/somoclu/tree/master/src/MATLAB) interfaces are available for the dense CPU  and GPU kernels. MPI and the sparse kernel are not support through the interfaces. For respective examples, see the folders in src.
 
 The Python version is also available in [PyPI](https://pypi.python.org/pypi/somoclu). You can install it with
 
