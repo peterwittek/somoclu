@@ -1,3 +1,7 @@
+Since 1.6.1:
+  - Fixed: Training can continue on the same data in the Python wrapper.
+  - Fixed: GPU memory allocation problem on Windows.
+
 Version 1.6.1: 2016-02-22
   - New: Option for PCA initialization is added to the Python interface.
   - New: Clustering of the codebook with arbitrary clustering algorithm in scikit-learn is now possible in the Python interface.
