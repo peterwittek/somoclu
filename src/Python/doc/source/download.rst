@@ -15,10 +15,16 @@ The code is available on PyPI, hence it can be installed by
 
     $ sudo pip install somoclu
 
-If you want the latest git version, follow the standard procedure for installing Python modules:
+If you want the latest git version, clone the repository, make the Python target, and follow the standard procedure for installing Python modules:
 
 ::
 
+    $ git clone https://github.com/peterwittek/somoclu.git
+    $ cd somoclu
+    $ ./autogen.sh
+    $ ./configure
+    $ make python
+    $ cd src/python
     $ sudo python setup.py install
 
 Build on Mac OS X
