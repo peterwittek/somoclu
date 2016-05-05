@@ -178,6 +178,7 @@ class Somoclu(object):
             raise Exception("No data was provided!")
         self._init_codebook()
         self.umatrix.shape = (self._n_rows*self._n_columns, )
+        self.bmus.shape = (self.n_vectors*2, )
         wrap_train(np.ravel(self._data), epochs, self._n_columns, self._n_rows,
                    self.n_dim, self.n_vectors, radius0, radiusN,
                    radiuscooling, scale0, scaleN, scalecooling,
