@@ -59,7 +59,7 @@ float get_distance(float* codebook, svm_node **sparseData,
 void get_bmu_coord(float* codebook, svm_node **sparseData,
                    unsigned int nSomY, unsigned int nSomX,
                    unsigned int nDimensions, int* coords, unsigned int n) {
-    float mindist = 9999.99;
+    float mindist = 0.0f;
     float dist = 0.0f;
 
     /// Check nSomX * nSomY nodes one by one and compute the distance
@@ -69,7 +69,7 @@ void get_bmu_coord(float* codebook, svm_node **sparseData,
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
             dist = get_distance(codebook, sparseData, som_y, som_x, nSomX,
                                 nDimensions, n);
-            if (dist < mindist) {
+            if ((som_y == 0 && som_x == 0) || (dist < mindist)) {
                 mindist = dist;
                 coords[0] = som_x;
                 coords[1] = som_y;
