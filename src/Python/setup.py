@@ -34,10 +34,10 @@ def find_cuda():
     arch = int(platform.architecture()[0][0:2])
     if sys.platform.startswith('win'):
         os.path.join(libdir, "x"+str(arch))
-    if os.path.exists(os.path.join(home, libdir)):
-        cudaconfig['lib'] = libdir
-    elif os.path.exists(os.path.join(home, libdir + "64")):
+    if os.path.exists(os.path.join(home, libdir + "64")):
         cudaconfig['lib'] = libdir + "64"
+    elif os.path.exists(os.path.join(home, libdir)):
+        cudaconfig['lib'] = libdir
     else:
         raise EnvironmentError('The CUDA libraries could not be located')
     return cudaconfig

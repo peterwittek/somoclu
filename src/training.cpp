@@ -139,7 +139,6 @@ void train(int itask, float *data, svm_node **sparseData,
 #ifdef HAVE_MPI
         double epoch_time = MPI_Wtime();
 #endif
-
         trainOneEpoch(itask, data, sparseData, codebook, globalBmus,
                       nEpoch, currentEpoch,
                       nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
@@ -322,7 +321,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
         trainOneEpochDenseGPU(itask, data, numerator, denominator,
                               codebook, nSomX, nSomY, nDimensions,
                               nVectors, nVectorsPerRank, radius, scale,
-                              mapType, gridType, compact_support, gaussian, globalBmus);
+                              mapType, gridType, compact_support, gaussian, globalBmus, only_bmus);
 #else
         my_abort("Compiled without CUDA!");
 #endif
@@ -332,7 +331,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                                codebook, nSomX, nSomY, nDimensions,
                                nVectors, nVectorsPerRank, radius, scale,
                                mapType, gridType, compact_support, gaussian,
-                               globalBmus);
+                               globalBmus, only_bmus);
         break;
     }
 

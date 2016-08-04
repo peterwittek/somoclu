@@ -84,7 +84,8 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                             unsigned int nDimensions, unsigned int nVectors,
                             unsigned int nVectorsPerRank, float radius,
                             float scale, string mapType, string gridType,
-                            bool compact_support, bool gaussian, int *globalBmus) {
+                            bool compact_support, bool gaussian,
+                            int *globalBmus, bool only_bmus) {
     int p1[2] = {0, 0};
     int *bmus = new int[nVectorsPerRank * 2];
 #ifdef _OPENMP
@@ -108,7 +109,17 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
             }
         }
     }
-
+    if (only_bmus) {
+#ifdef HAVE_MPI
+        MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
+#else
+        for (unsigned int i = 0; i < 2 * nVectorsPerRank; ++i) {
+            globalBmus[i] = bmus[i];
+        }
+#endif
+        delete [] bmus;
+        return;
+    }
     float *localNumerator = new float[nSomY * nSomX * nDimensions];
     float *localDenominator = new float[nSomY * nSomX];
 #ifdef _OPENMP

@@ -120,7 +120,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nVectorsPerRank, float radius,
                            float scale, string mapType,
                            string gridType, bool compact_support, bool gaussian,
-                           int *globalBmus, bool only_bmus=false);
+                           int *globalBmus, bool only_bmus);
 void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                             float *denominator, float *codebook,
                             unsigned int nSomX, unsigned int nSomY,
@@ -128,7 +128,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                             unsigned int nVectorsPerRank, float radius,
                             float scale, string mapType,
                             string gridType, bool compact_support, bool gaussian,
-                            int *globalBmus);
+                            int *globalBmus, bool only_bmus);
 void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
                         unsigned int nSomY, unsigned int nDimensions);
 
@@ -145,7 +145,7 @@ extern "C" {
                                unsigned int nVectorsPerRank, float radius,
                                float scale, string mapType,
                                string gridType, bool compact_support, bool gaussian,
-                               int *globalBmus);
+                               int *globalBmus, bool only_bmus);
 #endif
     void my_abort(string err);
 }
