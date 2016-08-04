@@ -223,9 +223,13 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
     srand(seed);
 #endif
     #pragma omp parallel for
-    for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-        for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-            for (unsigned int d = 0; d < nDimensions; d++) {
+#ifdef _WIN32
+    for (int som_y = 0; som_y < nSomY; som_y++) {
+#else
+	for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+#endif
+		for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
+			for (unsigned int d = 0; d < nDimensions; d++) {
 #ifdef HAVE_R
                 int w = 0xFFF & (int) (RAND_MAX * unif_rand());
 #else
