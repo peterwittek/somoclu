@@ -337,9 +337,13 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
         delete [] bmus;
         return;
     }
+#ifdef HAVE_MPI
     float *localNumerator = new float[nSomY * nSomX * nDimensions];
     float *localDenominator = new float[nSomY * nSomX];
-
+#else
+    float *localNumerator = numerator;
+    float *localDenominator = denominator;
+#endif
     #pragma omp parallel default(shared)
     {
         #pragma omp for
@@ -392,18 +396,12 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
     MPI_Reduce(localDenominator, denominator,
                nSomY * nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
+    delete [] localNumerator;
+    delete [] localDenominator;
 #else
-    for (unsigned int i = 0; i < nSomY * nSomX * nDimensions; ++i) {
-        numerator[i] = localNumerator[i];
-    }
-    for (unsigned int i = 0; i < nSomY * nSomX; ++i) {
-        denominator[i] = localDenominator[i];
-    }
     for (unsigned int i = 0; i < 2 * nVectorsPerRank; ++i) {
         globalBmus[i] = bmus[i];
     }
 #endif
     delete [] bmus;
-    delete [] localNumerator;
-    delete [] localDenominator;
 }
