@@ -179,6 +179,12 @@ void train(int itask, float *data, svm_node **sparseData,
 #endif
 #endif
     }
+    trainOneEpoch(itask, data, sparseData, codebook, globalBmus,
+                  nEpoch, currentEpoch,
+                  nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
+                  radius0, radiusN, radiusCooling,
+                  scale0, scaleN, scaleCooling, kernelType, mapType,
+                  gridType, compact_support, gaussian, true);
 #ifdef CUDA
     if (kernelType == DENSE_GPU) {
         freeGpu();
@@ -256,14 +262,15 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                    float scale0, float scaleN,
                    string scaleCooling,
                    unsigned int kernelType, string mapType,
-                   string gridType, bool compact_support, bool gaussian) {
+                   string gridType, bool compact_support, bool gaussian,
+                   bool only_bmus) {
 
     float N = (float)nEpoch;
     float *numerator;
     float *denominator;
     float scale = scale0;
     float radius = radius0;
-    if (itask == 0) {
+    if (itask == 0 && !only_bmus) {
         numerator = new float[nSomY * nSomX * nDimensions];
         denominator = new float[nSomY * nSomX];
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
@@ -290,10 +297,12 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
 //        cout << "Epoch: " << currentEpoch << " Radius: " << radius << endl;
     }
 #ifdef HAVE_MPI
-    MPI_Bcast(&radius, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&scale, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(codebook, nSomY * nSomX * nDimensions, MPI_FLOAT,
-              0, MPI_COMM_WORLD);
+    if (!only_bmus) {
+        MPI_Bcast(&radius, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
+        MPI_Bcast(&scale, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
+        MPI_Bcast(codebook, nSomY * nSomX * nDimensions, MPI_FLOAT,
+                  0, MPI_COMM_WORLD);
+    }
 #endif
 
     /// 1. Each task fills localNumerator and localDenominator
@@ -305,7 +314,8 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
         trainOneEpochDenseCPU(itask, data, numerator, denominator,
                               codebook, nSomX, nSomY, nDimensions,
                               nVectors, nVectorsPerRank, radius, scale,
-                              mapType, gridType, compact_support, gaussian, globalBmus);
+                              mapType, gridType, compact_support, gaussian,
+                              globalBmus, only_bmus);
         break;
     case DENSE_GPU:
 #ifdef CUDA
@@ -321,7 +331,8 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
         trainOneEpochSparseCPU(itask, sparseData, numerator, denominator,
                                codebook, nSomX, nSomY, nDimensions,
                                nVectors, nVectorsPerRank, radius, scale,
-                               mapType, gridType, compact_support, gaussian, globalBmus);
+                               mapType, gridType, compact_support, gaussian,
+                               globalBmus);
         break;
     }
 
@@ -329,7 +340,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
-    if (itask == 0) {
+   if (itask == 0 && !only_bmus) {
         #pragma omp parallel for
 #ifdef _WIN32
         for (int som_y = 0; som_y < nSomY; som_y++) {
@@ -347,8 +358,6 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                 }
             }
         }
-    }
-    if (itask == 0) {
         delete [] numerator;
         delete [] denominator;
     }

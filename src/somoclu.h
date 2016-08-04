@@ -81,7 +81,8 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                    float scale0, float scaleN,
                    string scaleCooling,
                    unsigned int kernelType, string mapType,
-                   string gridType, bool compact_support, bool gaussian);
+                   string gridType, bool compact_support, bool gaussian,
+                   bool only_bmus=false);
 void train(float *data, int data_length,
            unsigned int nEpoch,
            unsigned int nSomX, unsigned int nSomY,
@@ -119,7 +120,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nVectorsPerRank, float radius,
                            float scale, string mapType,
                            string gridType, bool compact_support, bool gaussian,
-                           int *globalBmus);
+                           int *globalBmus, bool only_bmus=false);
 void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                             float *denominator, float *codebook,
                             unsigned int nSomX, unsigned int nSomY,
