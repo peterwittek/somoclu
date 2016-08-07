@@ -270,6 +270,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
     float scale = scale0;
     float radius = radius0;
     if (itask == 0 && !only_bmus) {
+#ifdef HAVE_MPI      
         numerator = new float[nSomY * nSomX * nDimensions];
         denominator = new float[nSomY * nSomX];
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
@@ -280,7 +281,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                 }
             }
         }
-
+#endif
         if (radiusCooling == "linear") {
             radius = linearCooling(float(radius0), radiusN, N, currentEpoch);
         }
@@ -338,8 +339,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
     /// 3. Update codebook using numerator and denominator
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
-#endif
-   if (itask == 0 && !only_bmus) {
+    if (itask == 0 && !only_bmus) {
         #pragma omp parallel for
 #ifdef _WIN32
         for (int som_y = 0; som_y < nSomY; som_y++) {
@@ -360,4 +360,5 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
         delete [] numerator;
         delete [] denominator;
     }
+#endif // HAVE_MPI    
 }
