@@ -324,17 +324,18 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                            float scale, string mapType, string gridType,
                            bool compact_support, bool gaussian,
                            int *globalBmus, bool only_bmus) {
-    unsigned int *bmus = new unsigned int[nVectorsPerRank * 2];
+    int *bmus;
+#ifdef HAVE_MPI
+    bmus = new int[nVectorsPerRank * 2];
+#else
+    bmus = globalBmus;
+#endif
     getBmusOnGpu(bmus, codebook, nSomX, nSomY, nDimensions, nVectorsPerRank);
     if (only_bmus) {
 #ifdef HAVE_MPI
         MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
-#else
-        for (unsigned int i = 0; i < 2 * nVectorsPerRank; ++i) {
-            globalBmus[i] = bmus[i];
-        }
-#endif
         delete [] bmus;
+#endif
         return;
     }
 #ifdef HAVE_MPI
@@ -398,10 +399,6 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
     MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
     delete [] localNumerator;
     delete [] localDenominator;
-#else
-    for (unsigned int i = 0; i < 2 * nVectorsPerRank; ++i) {
-        globalBmus[i] = bmus[i];
-    }
-#endif
     delete [] bmus;
+#endif
 }

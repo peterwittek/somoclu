@@ -87,7 +87,12 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                             bool compact_support, bool gaussian,
                             int *globalBmus, bool only_bmus) {
     int p1[2] = {0, 0};
-    int *bmus = new int[nVectorsPerRank * 2];
+    int *bmus;
+#ifdef HAVE_MPI
+    bmus = new int[nVectorsPerRank * 2];
+#else
+    bmus = globalBmus;
+#endif
 #ifdef _OPENMP
     #pragma omp parallel default(shared) private(p1)
 #endif
@@ -112,12 +117,8 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
     if (only_bmus) {
 #ifdef HAVE_MPI
         MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
-#else
-        for (unsigned int i = 0; i < 2 * nVectorsPerRank; ++i) {
-            globalBmus[i] = bmus[i];
-        }
-#endif
         delete [] bmus;
+#endif
         return;
     }
 #ifdef HAVE_MPI
@@ -230,6 +231,6 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
     MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
     delete [] localNumerator;
     delete [] localDenominator;
-#endif
     delete [] bmus;
+#endif
 }

@@ -79,7 +79,12 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            bool compact_support, bool gaussian, int *globalBmus,
                            bool only_bmus) {
     unsigned int p1[2] = {0, 0};
-    unsigned int *bmus = new unsigned int[nVectorsPerRank * 2];
+    int *bmus;
+#ifdef HAVE_MPI
+    bmus = new int[nVectorsPerRank * 2];
+#else
+    bmus = globalBmus;
+#endif
 #ifdef _OPENMP
     #pragma omp parallel default(shared) private(p1)
 #endif
@@ -104,12 +109,8 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
     if (only_bmus) {
 #ifdef HAVE_MPI
         MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
-#else
-        for (unsigned int i = 0; i < 2 * nVectorsPerRank; ++i) {
-            globalBmus[i] = bmus[i];
-        }
-#endif
         delete [] bmus;
+#endif
         return;
     }
 #ifdef HAVE_MPI
@@ -221,11 +222,6 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
     MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
     delete [] localNumerator;
     delete [] localDenominator;
-#else
-    delete [] localNumerator;
-    for (unsigned int i = 0; i < 2 * nVectorsPerRank; ++i) {
-        globalBmus[i] = bmus[i];
-    }
-#endif
     delete [] bmus;
+#endif
 }
