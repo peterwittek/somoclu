@@ -178,7 +178,7 @@ void freeGpu() {
  * @param nVectorsPerRank - the number of data points assigned to this GPU
  */
 
-void getBmusOnGpu(unsigned int *bmus, float *codebook, int nSomX, int nSomY, int nDimensions, int nVectorsPerRank) {
+void getBmusOnGpu(int *bmus, float *codebook, int nSomX, int nSomY, int nDimensions, int nVectorsPerRank) {
     deviceCodebook = thrust::device_vector<float>(codebook, codebook + nSomX * nSomY * nDimensions);
     deviceCodebookNorms = normsOfRowSpace<float>(deviceCodebook, nSomX * nSomY, nDimensions);
     thrust::device_vector<float> deviceGramMatrix(nSomX * nSomY * nVectorsPerRank, 0);
@@ -338,13 +338,8 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
 #endif
         return;
     }
-#ifdef HAVE_MPI
     float *localNumerator = new float[nSomY * nSomX * nDimensions];
     float *localDenominator = new float[nSomY * nSomX];
-#else
-    float *localNumerator = numerator;
-    float *localDenominator = denominator;
-#endif
     #pragma omp parallel default(shared)
     {
         #pragma omp for
@@ -397,8 +392,26 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
     MPI_Reduce(localDenominator, denominator,
                nSomY * nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
+    delete [] bmus;
+#else
+        #pragma omp parallel for
+#ifdef _WIN32
+        for (int som_y = 0; som_y < nSomY; som_y++) {
+#else
+        for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+#endif
+            for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
+                float denom = localDenominator[som_y * nSomX + som_x];
+                for (unsigned int d = 0; d < nDimensions; d++) {
+                    float newWeight = localNumerator[som_y * nSomX * nDimensions
+                                                + som_x * nDimensions + d] / denom;
+                    if (newWeight > 0.0) {
+                        codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] = newWeight;
+                    }
+                }
+            }
+        }
+#endif
     delete [] localNumerator;
     delete [] localDenominator;
-    delete [] bmus;
-#endif
 }
