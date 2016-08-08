@@ -133,8 +133,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                     localNumerator[som_y * nSomX * nDimensions + som_x * nDimensions + d] = 0.0;
             }
         }
-    }
-    
+    }  
 #ifdef _OPENMP
     #pragma omp parallel default(shared)
 #endif
