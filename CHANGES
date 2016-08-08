@@ -1,4 +1,7 @@
-Since 1.6.1:
+Version 1.6.2: 2016-08-09
+  - Changed: In-place codebook updates when compiled without MPI. This improves update speed and substantially cuts memory use.
+  - Changed: Compatible with Visual Studio 15.
+  - Fixed: The BMUs returned after training were from before the last epoch. Now another round of BMU search is done.
   - Fixed: Training can continue on the same data in the Python wrapper.
   - Fixed: GPU memory allocation problem on Windows.
 
