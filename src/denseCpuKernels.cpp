@@ -213,6 +213,9 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
 #endif
             } // Looping over som_x
         } // Looping over som_y
+#ifndef HAVE_MPI
+    delete [] localNumerator;
+#endif
     } // OPENMP
 #ifdef HAVE_MPI
     MPI_Reduce(localNumerator, numerator,

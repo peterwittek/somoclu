@@ -142,7 +142,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                     localNumerator[som_y * nSomX * nDimensions + som_x * nDimensions + d] = 0.0;
             }
         }
-    }  
+    }
 #ifdef _OPENMP
     #pragma omp parallel default(shared)
 #endif
@@ -167,7 +167,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
 #endif
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-#ifdef _OPENMP
+#ifndef HAVE_MPI
                 localDenominator = 0;
                 for (unsigned int d = 0; d < nDimensions; d++)
                     localNumerator[d] = 0.0;
@@ -222,6 +222,9 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
 #endif
             } // Looping over som_x
         } // Looping over som_y
+#ifndef HAVE_MPI
+    delete [] localNumerator;
+#endif
     } // OPENMP
 #ifdef HAVE_MPI
     MPI_Reduce(localNumerator, numerator,
@@ -229,8 +232,9 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
     MPI_Reduce(localDenominator, denominator,
                nSomY * nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
-    delete [] localNumerator;
+
     delete [] localDenominator;
+    delete [] localNumerator;
     delete [] bmus;
 #endif
 }
