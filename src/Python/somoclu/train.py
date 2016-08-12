@@ -439,7 +439,7 @@ class Somoclu(object):
     def get_surface_state(self, data = None):
         """Return the dot product of the codebook and the data.
 
-        :param algorithm: Optional parameter to specify data, otherwise the
+        :param data: Optional parameter to specify data, otherwise the
         data used previously to train the SOM is used.
         """
         if data is None:
