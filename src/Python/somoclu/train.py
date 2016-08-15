@@ -436,15 +436,21 @@ class Somoclu(object):
         for i, c in enumerate(linear_clusters):
             self.clusters[i // self._n_columns, i % self._n_columns] = c
 
-    def get_surface_state(self, data = None):
+    def get_surface_state(self, data=None):
         """Return the dot product of the codebook and the data.
 
         :param data: Optional parameter to specify data, otherwise the
-        data used previously to train the SOM is used.
+                     data used previously to train the SOM is used.
+        :type data: 2D numpy.array of float32.
+
+        :returns: The the dot product of the codebook and the data.
+        :rtype: 2D numpy.array
         """
         if data is None:
             data = self._data
-        return np.dot(self.codebook.reshape((self.codebook.shape[0] * self.codebook.shape[1], self.codebook.shape[2])), data.T).T
+        return np.dot(self.codebook.reshape((self.codebook.shape[0] *
+                                             self.codebook.shape[1],
+                                             self.codebook.shape[2])), data.T).T
 
 def _check_cooling_parameters(radiuscooling, scalecooling):
     """Helper function to verify the cooling parameters of the training.

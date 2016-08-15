@@ -61,7 +61,18 @@ Function Reference
                         clustering algorithm. The default is K-means with
                         eight clusters.
       :type filename: sklearn.base.ClusterMixin.
-   
+
+   .. py:method:: Somoclu.get_surface_state(data=None))
+
+      Return the dot product of the codebook and the data.
+
+      :param data: Optional parameter to specify data, otherwise the
+                   data used previously to train the SOM is used.
+      :type data: 2D numpy.array of float32.
+
+      :returns: The the dot product of the codebook and the data.
+      :rtype: 2D numpy.array
+ 
    .. py:method:: Somoclu.load_bmus(filename)
    
       Load the best matching units from a file to the Somoclu object.
