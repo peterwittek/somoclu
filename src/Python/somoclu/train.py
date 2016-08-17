@@ -80,6 +80,7 @@ class Somoclu(object):
         self._compact_support = compactsupport
         self._neighborhood = neighborhood
         self._check_parameters()
+        self.activation_map = None
         if initialcodebook is not None and initialization is not None:
             raise Exception("An initial codebook is given but initilization"
                             " is also requested")
@@ -285,16 +286,20 @@ class Somoclu(object):
                                  bestmatches, bestmatchcolors, labels, zoom,
                                  filename)
 
-    def view_activation_map(self, activation_map, data_index, figsize=None,
+    def view_activation_map(self, data_vector=None, data_index=None,
+                            activation_map=None, figsize=None,
                             colormap=cm.Spectral_r, colorbar=False,
                             bestmatches=False, bestmatchcolors=None,
                             labels=None, zoom=None, filename=None):
-        """Plot the activation map of a given data instance
+        """Plot the activation map of a given data instance or a new data
+        vector
 
-        :param activation_map: The activation map returned by get_surface_state
-        :type activation_map: numpy.array
-        :param data_index: The index of the data instance
+        :param data_vector: Optional parameter for a new vector
+        :type data_vector: int
+        :param data_index: Optional parameter for the index of the data instance
         :type data_index: int
+        :param activation_map: Optional parameter to pass the an activation map
+        :type activation_map: numpy.array
         :param figsize: Optional parameter to specify the size of the figure.
         :type figsize: (int, int)
         :param colormap: Optional parameter to specify the color map to be
@@ -317,9 +322,31 @@ class Somoclu(object):
                          this file.
         :type filename: str.
         """
-        return self._view_matrix(activation_map[data_index].
-                                 reshape((self.codebook.shape[0],
-                                          self.codebook.shape[1])), figsize,
+        if data_vector is None and data_index is None:
+            raise Exception("Either specify a vector to see its activation "
+                            "or give an index of the training data instances")
+        if data_vector is not None and data_index is not None:
+            raise Exception("You cannot specify both a data vector and the "
+                            "index of a training data instance")
+        if data_vector is not None and activation_map is not None:
+            raise Exception("You cannot pass a previously computated"
+                            "activation map with a data vector")
+        if data_vector is not None:
+            matrix = np.dot(self.codebook.
+                            reshape((self.codebook.shape[0] *
+                                     self.codebook.shape[1],
+                                     self.codebook.shape[2])),
+                            data_vector).T
+            matrix.shape = (self.codebook.shape[0], self.codebook.shape[1])
+        else:
+            if activation_map is None and self.activation_map is None:
+                self.get_surface_state()
+            if activation_map is None:
+                activation_map = self.activation_map
+            matrix = activation_map[data_index].reshape((self.codebook.shape[0],
+                                                         self.codebook.shape[1]))
+        print(matrix.shape)
+        return self._view_matrix(matrix, figsize,
                                  colormap,
                                  colorbar, bestmatches, bestmatchcolors,
                                  labels, zoom, filename)
@@ -488,9 +515,12 @@ class Somoclu(object):
         """
         if data is None:
             data = self._data
-        return np.dot(self.codebook.reshape((self.codebook.shape[0] *
-                                             self.codebook.shape[1],
-                                             self.codebook.shape[2])), data.T).T
+        self.activation_map = np.dot(self.codebook.
+                                     reshape((self.codebook.shape[0] *
+                                              self.codebook.shape[1],
+                                              self.codebook.shape[2])),
+                                     data.T).T
+        return self.activation_map
 
 def _check_cooling_parameters(radiuscooling, scalecooling):
     """Helper function to verify the cooling parameters of the training.
