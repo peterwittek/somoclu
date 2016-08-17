@@ -285,6 +285,46 @@ class Somoclu(object):
                                  bestmatches, bestmatchcolors, labels, zoom,
                                  filename)
 
+    def view_activation_map(self, activation_map, data_index, figsize=None,
+                            colormap=cm.Spectral_r, colorbar=False,
+                            bestmatches=False, bestmatchcolors=None,
+                            labels=None, zoom=None, filename=None):
+        """Plot the activation map of a given data instance
+
+        :param activation_map: The activation map returned by get_surface_state
+        :type activation_map: numpy.array
+        :param data_index: The index of the data instance
+        :type data_index: int
+        :param figsize: Optional parameter to specify the size of the figure.
+        :type figsize: (int, int)
+        :param colormap: Optional parameter to specify the color map to be
+                         used.
+        :type colormap: matplotlib.colors.Colormap
+        :param colorbar: Optional parameter to include a colormap as legend.
+        :type colorbar: bool.
+        :param bestmatches: Optional parameter to plot best matching units.
+        :type bestmatches: bool.
+        :param bestmatchcolors: Optional parameter to specify the color of each
+                                best matching unit.
+        :type bestmatchcolors: list of int.
+        :param labels: Optional parameter to specify the label of each point.
+        :type labels: list of str.
+        :param zoom: Optional parameter to zoom into a region on the map. The
+                     first two coordinates of the tuple are the row limits, the
+                     second tuple contains the column limits.
+        :type zoom: ((int, int), (int, int))
+        :param filename: If specified, the plot will not be shown but saved to
+                         this file.
+        :type filename: str.
+        """
+        return self._view_matrix(activation_map[data_index].
+                                 reshape((self.codebook.shape[0],
+                                          self.codebook.shape[1])), figsize,
+                                 colormap,
+                                 colorbar, bestmatches, bestmatchcolors,
+                                 labels, zoom, filename)
+
+
     def _view_matrix(self, matrix, figsize, colormap, colorbar, bestmatches,
                      bestmatchcolors, labels, zoom, filename):
         """Internal function to plot a map with best matching units and labels.
