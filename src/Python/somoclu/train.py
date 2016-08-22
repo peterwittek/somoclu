@@ -296,7 +296,7 @@ class Somoclu(object):
         vector
 
         :param data_vector: Optional parameter for a new vector
-        :type data_vector: int
+        :type data_vector: numpy.array
         :param data_index: Optional parameter for the index of the data instance
         :type data_index: int
         :param activation_map: Optional parameter to pass the an activation map
@@ -333,11 +333,18 @@ class Somoclu(object):
             raise Exception("You cannot pass a previously computated"
                             "activation map with a data vector")
         if data_vector is not None:
-            matrix = np.dot(self.codebook.
-                            reshape((self.codebook.shape[0] *
-                                     self.codebook.shape[1],
-                                     self.codebook.shape[2])),
-                            data_vector).T
+            try:
+                d1, d2 = data_vector.shape
+                w = data_vector.copy()
+            except ValueError:
+                d1, = data_vector.shape
+                w = data_vector.reshape(1, d1)
+            if w.shape[1] == 1:
+                w = w.T
+            matrix = cdist(self.codebook.reshape((self.codebook.shape[0] *
+                                                  self.codebook.shape[1],
+                                                  self.codebook.shape[2])),
+                           w, 'euclidean').T
             matrix.shape = (self.codebook.shape[0], self.codebook.shape[1])
         else:
             if activation_map is None and self.activation_map is None:
@@ -346,7 +353,6 @@ class Somoclu(object):
                 activation_map = self.activation_map
             matrix = activation_map[data_index].reshape((self.codebook.shape[0],
                                                          self.codebook.shape[1]))
-        print(matrix.shape)
         return self._view_matrix(matrix, figsize,
                                  colormap,
                                  colorbar, bestmatches, bestmatchcolors,
