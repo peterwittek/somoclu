@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.collections as mcoll
+from scipy.spatial.distance import cdist
 
 try:
     from .somoclu_wrap import train as wrap_train
@@ -504,7 +505,7 @@ class Somoclu(object):
             self.clusters[i // self._n_columns, i % self._n_columns] = c
 
     def get_surface_state(self, data=None):
-        """Return the dot product of the codebook and the data.
+        """Return the Euclidean distance between codebook and data.
 
         :param data: Optional parameter to specify data, otherwise the
                      data used previously to train the SOM is used.
@@ -515,11 +516,13 @@ class Somoclu(object):
         """
         if data is None:
             data = self._data
-        self.activation_map = np.dot(self.codebook.
+
+        self.activation_map = cdist(self.codebook.
                                      reshape((self.codebook.shape[0] *
                                               self.codebook.shape[1],
                                               self.codebook.shape[2])),
-                                     data.T).T
+                                    data,
+                                    'euclidean').T
         return self.activation_map
 
 def _check_cooling_parameters(radiuscooling, scalecooling):
