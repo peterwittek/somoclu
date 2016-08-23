@@ -298,7 +298,7 @@ class Somoclu(object):
         :param data_vector: Optional parameter for a new vector
         :type data_vector: numpy.array
         :param data_index: Optional parameter for the index of the data instance
-        :type data_index: int
+        :type data_index: int.
         :param activation_map: Optional parameter to pass the an activation map
         :type activation_map: numpy.array
         :param figsize: Optional parameter to specify the size of the figure.
@@ -523,13 +523,14 @@ class Somoclu(object):
         if data is None:
             data = self._data
 
-        self.activation_map = cdist(self.codebook.
-                                     reshape((self.codebook.shape[0] *
-                                              self.codebook.shape[1],
-                                              self.codebook.shape[2])),
-                                    data,
-                                    'euclidean').T
-        return self.activation_map
+        am = cdist(self.codebook.reshape((self.codebook.shape[0] *
+                                          self.codebook.shape[1],
+                                          self.codebook.shape[2])),
+                   data, 'euclidean').T
+        if data is None:
+            self.activation_map = am
+        return am
+
 
 def _check_cooling_parameters(radiuscooling, scalecooling):
     """Helper function to verify the cooling parameters of the training.
