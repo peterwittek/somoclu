@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.collections as mcoll
+import sys
 from scipy.spatial.distance import cdist
 
 try:
@@ -19,6 +20,16 @@ try:
 except ImportError:
     print("Warning: training function cannot be imported. Only pre-trained "
           "maps can be analyzed.")
+    if sys.platform.startswith('win'):
+        print("If you installed Somoclu with pip on Windows, this typically "
+              "means missing DLLs. Please refer to the documentation and to "
+              "this issue:")
+        print("https://github.com/peterwittek/somoclu/issues/28")
+    elif sys.platform.startswith('darwin'):
+        print("If you installed Somoclu with pip on OS X, this typically "
+              "means missing libiomp. Please refer to the documentation and to "
+              "this issue:")
+        print("https://github.com/peterwittek/somoclu/issues/28")
 
 
 class Somoclu(object):
