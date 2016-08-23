@@ -1,0 +1,18 @@
+To cite Somoclu in publications, please use:
+
+Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. arXiv:1305.1422.
+
+A BibTeX entry for LaTeX users is
+
+@Article{wittek2015somoclu,
+  author =    {Wittek, Peter and Gao, Shi Chao and Lim, Ik Soo and Zhao, Li},
+  title =     {Somoclu: An Efficient Parallel Library for Self-Organizing Maps},
+  journal =   {arXiv:1305.1422},
+  year =      {2015}
+}
+
+You may also consider adding a link to the code. Please cite the PyPI version:
+
+https://pypi.python.org/pypi/somoclu/
+
+This ensures that Depsy (http://depsy.org/) can aggregate the usage statistics of the library.
