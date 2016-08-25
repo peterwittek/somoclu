@@ -1,0 +1,18 @@
+citHeader("To cite Rsomoclu in publications use:")
+
+citEntry(entry = "Article",
+  title        = "Somoclu: An Efficient Parallel Library for Self-Organizing Maps",
+  author       = personList(as.person("Peter Wittek"),
+	                          as.person("Shi Chao Gao"),
+                            as.person("Ik Soo Lim"),
+                  		      as.person("Li Zhao")),
+  journal      = "arXiv:1305.1422",
+  year         = "2015",
+  url          = "http://arxiv.org/abs/1305.1422",
+
+  textVersion  =
+  paste("Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015).",
+        "Somoclu: An Efficient Parallel Library for Self-Organizing Maps.",
+        "arXiv:1305.1422.",
+        "URL http://arxiv.org/abs/1305.1422.")
+)
