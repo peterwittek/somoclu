@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import matplotlib.collections as mcoll
 import sys
 from scipy.spatial.distance import cdist
+import seaborn as sns
 
 try:
     from .somoclu_wrap import train as wrap_train
@@ -543,7 +544,35 @@ class Somoclu(object):
         if data is None:
             self.activation_map = am
         return am
-
+        
+    def view_similarity_matrix(self, labels, save_as):
+        X = self.activation_map
+        # Calculate the pairwise correlations as a metric for similarity
+        corrmat = 1-pairwise_distances(X, metric="correlation")
+    
+        # Set up the matplotlib figure
+        f, ax = plt.subplots(figsize=(12,9))
+    
+        # Y axis has inverted labels (seaborn default, no idea why)
+        yticklabels = np.atleast_2d(labels)
+        yticklabels = np.fliplr(yticklabels)[0]
+    
+        # Draw the heatmap using seaborn
+        sns.heatmap(corrmat, vmax=1, vmin=-1, square=True,
+        xticklabels = labels, yticklabels = labels, cmap = "RdBu_r", center = 0)
+        f.tight_layout()
+    
+        # This sets the ticks to a readable angle
+        plt.yticks(rotation=0)
+        plt.xticks(rotation=90)
+    
+        # This sets the labels for the two axes
+        ax.set_yticklabels(yticklabels, ha = 'right', va='center', size= 8)
+        ax.set_xticklabels(labels, ha = 'center', va = 'top', size= 8)
+    
+        # Save and close the figure
+        plt.savefig(save_as+'_heatmap.png', bbox_inches='tight')
+        plt.close()
 
 def _check_cooling_parameters(radiuscooling, scalecooling):
     """Helper function to verify the cooling parameters of the training.
