@@ -552,6 +552,20 @@ class Somoclu(object):
 
     def view_similarity_matrix(self, data=None, labels=None, figsize=None,
                                filename=None):
+        """Plot the similarity map according to the activation map
+
+        :param data: Optional parameter for data points to calculate the
+                     similarity with
+        :type data: numpy.array
+        :param figsize: Optional parameter to specify the size of the figure.
+        :type figsize: (int, int)
+        :param labels: Optional parameter to specify the label of each point.
+        :type labels: list of str.
+        :param filename: If specified, the plot will not be shown but saved to
+                         this file.
+        :type filename: str.
+        """
+
         if not have_heatmap:
             raise Exception("Import dependencies missing for viewing "
                             "similarity matrix. You must have seaborn and "

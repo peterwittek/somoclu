@@ -1,6 +1,7 @@
 Since 1.6.2:
   - New: Method `get_surface_state` of the `Somoclu` object in Python calculates the activation map for all data instances.
   - New: Method `view_activation_map` of the `Somoclu` object in Python allows plotting the activation map for the training data instances or for a new data instance.
+  - New: Method `view_similarity_matrix` of the `Somoclu` object in Python visualizes the similarity matrix of data points according to their distance to the nodes in the map.
 
 Version 1.6.2: 2016-08-09
   - Changed: In-place codebook updates when compiled without MPI. This improves update speed and substantially cuts memory use.

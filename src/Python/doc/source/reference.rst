@@ -196,6 +196,21 @@ Function Reference
                        this file.
       :type filename: str.
 
+   .. py:method:: Somoclu.view_similarity_matrix(data=None, labels=None, figsize=None, filename=None)
+
+      Plot the similarity map according to the activation map
+
+      :param data: Optional parameter for data points to calculate the
+                   similarity with
+      :type data: numpy.array
+      :param figsize: Optional parameter to specify the size of the figure.
+      :type figsize: (int, int)
+      :param labels: Optional parameter to specify the label of each point.
+      :type labels: list of str.
+      :param filename: If specified, the plot will not be shown but saved to
+                       this file.
+      :type filename: str.
+
    .. py:method:: Somoclu.view_umatrix(figsize=None, colormap=<Mock name=cm.Spectral_r, colorbar=False, bestmatches=False, bestmatchcolors=None, labels=None, zoom=None, filename=None)
 
       Plot the U-matrix of the trained map.
@@ -221,4 +236,3 @@ Function Reference
       :param filename: If specified, the plot will not be shown but saved to
                        this file.
       :type filename: str.
-
