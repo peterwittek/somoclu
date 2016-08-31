@@ -14,7 +14,12 @@ import matplotlib.pyplot as plt
 import matplotlib.collections as mcoll
 import sys
 from scipy.spatial.distance import cdist
-import seaborn as sns
+try:
+    import seaborn as sns
+    from sklearn.metrics.pairwise import pairwise_distances
+    have_heatmap = True
+except ImportError:
+    have_heatmap = False
 
 try:
     from .somoclu_wrap import train as wrap_train
@@ -544,35 +549,51 @@ class Somoclu(object):
         if data is None:
             self.activation_map = am
         return am
-        
-    def view_similarity_matrix(self, labels, save_as):
-        X = self.activation_map
+
+    def view_similarity_matrix(self, data=None, labels=None, figsize=None,
+                               filename=None):
+        if not have_heatmap:
+            raise Exception("Import dependencies missing for viewing "
+                            "similarity matrix. You must have seaborn and "
+                            "scikit-learn")
+        if data is None and self.activation_map is None:
+            self.get_surface_state()
+        if data is None:
+            X = self.activation_map
+        else:
+            X = data
         # Calculate the pairwise correlations as a metric for similarity
         corrmat = 1-pairwise_distances(X, metric="correlation")
-    
+
         # Set up the matplotlib figure
-        f, ax = plt.subplots(figsize=(12,9))
-    
+        if figsize is None:
+            figsize = (12, 9)
+        f, ax = plt.subplots(figsize=figsize)
+
         # Y axis has inverted labels (seaborn default, no idea why)
         yticklabels = np.atleast_2d(labels)
         yticklabels = np.fliplr(yticklabels)[0]
-    
+
         # Draw the heatmap using seaborn
-        sns.heatmap(corrmat, vmax=1, vmin=-1, square=True,
-        xticklabels = labels, yticklabels = labels, cmap = "RdBu_r", center = 0)
+        sns.heatmap(corrmat, vmax=1, vmin=-1, square=True, xticklabels=labels,
+                    yticklabels=labels, cmap="RdBu_r", center=0)
         f.tight_layout()
-    
+
         # This sets the ticks to a readable angle
         plt.yticks(rotation=0)
         plt.xticks(rotation=90)
-    
+
         # This sets the labels for the two axes
-        ax.set_yticklabels(yticklabels, ha = 'right', va='center', size= 8)
-        ax.set_xticklabels(labels, ha = 'center', va = 'top', size= 8)
-    
+        ax.set_yticklabels(yticklabels, ha='right', va='center', size=8)
+        ax.set_xticklabels(labels, ha='center', va='top', size=8)
+
         # Save and close the figure
-        plt.savefig(save_as+'_heatmap.png', bbox_inches='tight')
-        plt.close()
+        if filename is not None:
+            plt.savefig(filename, bbox_inches='tight')
+        else:
+            plt.show()
+        return plt
+
 
 def _check_cooling_parameters(radiuscooling, scalecooling):
     """Helper function to verify the cooling parameters of the training.
