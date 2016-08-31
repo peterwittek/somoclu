@@ -531,13 +531,15 @@ class Somoclu(object):
         :returns: The the dot product of the codebook and the data.
         :rtype: 2D numpy.array
         """
-        if data is None:
-            data = self._data
 
+        if data is None:
+            d = self._data
+        else:
+            d = data
         am = cdist(self.codebook.reshape((self.codebook.shape[0] *
                                           self.codebook.shape[1],
                                           self.codebook.shape[2])),
-                   data, 'euclidean').T
+                   d, 'euclidean').T
         if data is None:
             self.activation_map = am
         return am
