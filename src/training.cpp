@@ -84,6 +84,55 @@ void train(float *data, int data_length, unsigned int nEpoch,
                      gridType);
 }
 
+void julia_train(float *data, int data_length, unsigned int nEpoch,
+           unsigned int nSomX, unsigned int nSomY,
+           unsigned int nDimensions, unsigned int nVectors,
+           unsigned int radius0, unsigned int radiusN, unsigned int _radiusCooling,
+           float scale0, float scaleN, unsigned int _scaleCooling,
+           unsigned int kernelType, unsigned int _mapType,
+           unsigned int _gridType, bool compact_support, bool gaussian,
+           float *codebook, int codebook_size,
+           int *globalBmus, int globalBmus_size,
+           float *uMatrix, int uMatrix_size) {
+    string radiusCooling;
+    string scaleCooling;
+    string mapType;
+    string gridType;
+    if (_radiusCooling == 0) {
+        radiusCooling = "linear";
+    } else {
+        radiusCooling = "exponential";
+    }
+    if (_scaleCooling == 0) {
+        scaleCooling = "linear";
+    } else {
+        scaleCooling = "exponential";
+    }
+    if (_mapType == 0) {
+        mapType = "planar";
+    } else {
+        mapType = "toroid";
+    }
+    if (_gridType == 0) {
+        gridType = "square";
+    } else {
+        gridType = "hexagonal";
+    }
+    train(0, data, NULL, codebook, globalBmus, uMatrix, nSomX, nSomY,
+          nDimensions, nVectors, nVectors,
+          nEpoch, radius0, radiusN, radiusCooling,
+          scale0, scaleN, scaleCooling,
+          kernelType, mapType,
+          gridType, compact_support, gaussian
+#ifdef CLI
+          , "", 0);
+#else
+         );
+#endif
+    calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
+                     gridType);
+}
+
 void train(int itask, float *data, svm_node **sparseData,
            float *codebook, int *globalBmus, float *uMatrix,
            unsigned int nSomX, unsigned int nSomY,

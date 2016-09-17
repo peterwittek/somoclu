@@ -148,5 +148,18 @@ extern "C" {
                                int *globalBmus, bool only_bmus);
 #endif
     void my_abort(string err);
+    void julia_train(float *data, int data_length,
+                     unsigned int nEpoch,
+                     unsigned int nSomX, unsigned int nSomY,
+                     unsigned int nDimensions, unsigned int nVectors,
+                     unsigned int radius0, unsigned int radiusN,
+                     unsigned int radiusCooling,
+                     float scale0, float scaleN,
+                     unsigned int scaleCooling,
+                     unsigned int kernelType, unsigned int mapType,
+                     unsigned int gridType, bool compact_support, bool gaussian,
+                     float* codebook, int codebook_size,
+                     int* globalBmus, int globalBmus_size,
+                     float* uMatrix, int uMatrix_size);
 }
 #endif  // SOMOCLU_H

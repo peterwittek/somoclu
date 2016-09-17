@@ -65,6 +65,12 @@ somoclu: $(OBJS)
 %.cu.co: %.cu
 		$(NVCC) $(DEFS) $(CUDA_CFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
+julia: lib
+	cp libsomoclu.so Julia/
+
+julia_clean:
+	-rm -f Julia/libsomoclu.so
+
 matlab: lib
 	if [ -e denseGpuKernels.cu.co ]; then cp denseGpuKernels.cu.co denseGpuKernels.cu.o; fi
 	$(MEX_BIN) $(MEX_FLAGS) MATLAB/MexSomoclu.cpp training.cpp $(MEX_OBJS) $(MEX_LIBS)
