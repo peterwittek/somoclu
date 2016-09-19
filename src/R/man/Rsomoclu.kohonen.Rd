@@ -22,8 +22,8 @@ library('kohonen')
 data_file <- system.file("data", "rgbs.txt.gz", package = 'Rsomoclu')
 input_data <- read.table(data_file)
 input_data <- data.matrix(input_data)
-nSomX <- 50
-nSomY <- 50
+nSomX <- 20
+nSomY <- 20
 nEpoch <- 10
 radius0 <- 0
 radiusN <- 0
