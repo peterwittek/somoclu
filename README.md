@@ -12,7 +12,7 @@ Key features:
 * Both dense and sparse input data are supported.
 * Large maps of several hundred thousand neurons are feasible.
 * Integration with [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/).
-* [Python](https://somoclu.readthedocs.io/), [R](https://cran.r-project.org/web/packages/Rsomoclu/), and [MATLAB](https://github.com/peterwittek/somoclu/tree/master/src/MATLAB) interfaces for the dense CPU and GPU kernels.
+* [Python](https://somoclu.readthedocs.io/), [R](https://cran.r-project.org/web/packages/Rsomoclu/), [Julia](https://github.com/peterwittek/Somoclu.jl), and [MATLAB](https://github.com/peterwittek/somoclu/tree/master/src/MATLAB) interfaces for the dense CPU and GPU kernels.
 
 For more information, refer to the manuscript about the library [1].
 
@@ -143,6 +143,8 @@ The R version is available on CRAN. You can install it with
 To get it working with the GPU kernel, download the source zip file and specify your CUDA directory the following way:
 
     R CMD INSTALL src/Rsomoclu_version.tar.gz --configure-args=/path/to/cuda
+
+The Julia version is available on [GitHub](https://github.com/peterwittek/Somoclu.jl).
 
 For using the MATLAB toolbox, define the location of your MATLAB install to the configure script:
 
