@@ -183,9 +183,9 @@ class Somoclu(object):
                                    * "linear": Linear interpolation (default)
                                    * "exponential": Exponential decay
         :param scale0: The initial learning scale. Default value: 0.1.
-        :type scale0: int.
+        :type scale0: float.
         :param scaleN: The learning scale in the final epoch. Default: 0.01.
-        :type scaleN: int.
+        :type scaleN: float.
         :param scalecooling: The cooling strategy between scale0 and scaleN:
 
                                    * "linear": Linear interpolation (default)
