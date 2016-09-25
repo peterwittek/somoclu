@@ -50,7 +50,7 @@ endif
 
 OBJS=$(LIBOBJS) io.o somoclu.o
 
-all: somoclu
+all: somoclu lib
 
 lib: $(LIBOBJS)
 	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o libsomoclu.so $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
