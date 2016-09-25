@@ -60,10 +60,16 @@ somoclu: $(OBJS)
 	$(CXX) $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -o $@ $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 
 %.o: %.cpp
-		$(CXX) $(DEFS) $(CXXFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
+		$(CXX) $(DEFS) $(CXXFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $<
 
 %.cu.co: %.cu
-		$(NVCC) $(DEFS) $(CUDA_CFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
+		$(NVCC) $(DEFS) $(CUDA_CFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $<
+
+julia: lib
+	cp libsomoclu.so Julia/
+
+julia_clean:
+	-rm -f Julia/libsomoclu.so
 
 matlab: lib
 	if [ -e denseGpuKernels.cu.co ]; then cp denseGpuKernels.cu.co denseGpuKernels.cu.o; fi
@@ -138,8 +144,9 @@ clean: python_clean r_clean matlab_clean
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
-	$(INSTALL_PROGRAM) -m 0755 somoclu \
-	 $(DESTDIR)$(bindir)
+	-$(INSTALL_PROGRAM) -m 0755 somoclu $(DESTDIR)$(bindir)
+	$(INSTALL) -d $(DESTDIR)$(libdir)
+	$(INSTALL_PROGRAM) -m 0755 libsomoclu.so $(DESTDIR)$(libdir)
 
 uninstall:
 	-rm $(DESTDIR)$(bindir)/somoclu &>/dev/null
