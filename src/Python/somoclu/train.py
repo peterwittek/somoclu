@@ -8,11 +8,11 @@ Created on Sun July 26 15:07:47 2015
 @author: Peter Wittek
 """
 from __future__ import division, print_function
-import numpy as np
+import sys
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.collections as mcoll
-import sys
+import numpy as np
 from scipy.spatial.distance import cdist
 try:
     import seaborn as sns
@@ -351,10 +351,10 @@ class Somoclu(object):
                             "activation map with a data vector")
         if data_vector is not None:
             try:
-                d1, d2 = data_vector.shape
+                d1, _ = data_vector.shape
                 w = data_vector.copy()
             except ValueError:
-                d1, = data_vector.shape
+                d1, _ = data_vector.shape
                 w = data_vector.reshape(1, d1)
             if w.shape[1] == 1:
                 w = w.T
@@ -370,11 +370,9 @@ class Somoclu(object):
                 activation_map = self.activation_map
             matrix = activation_map[data_index].reshape((self.codebook.shape[0],
                                                          self.codebook.shape[1]))
-        return self._view_matrix(matrix, figsize,
-                                 colormap,
-                                 colorbar, bestmatches, bestmatchcolors,
-                                 labels, zoom, filename)
-
+        return self._view_matrix(matrix, figsize, colormap, colorbar,
+                                 bestmatches, bestmatchcolors, labels, zoom,
+                                 filename)
 
     def _view_matrix(self, matrix, figsize, colormap, colorbar, bestmatches,
                      bestmatchcolors, labels, zoom, filename):
@@ -388,7 +386,7 @@ class Somoclu(object):
         if self._grid_type == "hexagonal":
             offsets = _hexplot(matrix[zoom[0][0]:zoom[0][1],
                                       zoom[1][0]:zoom[1][1]], fig, colormap)
-            filtered_bmus = self.filter_array(self.bmus, zoom)
+            filtered_bmus = self._filter_array(self.bmus, zoom)
             filtered_bmus[:, 0] = filtered_bmus[:, 0] - zoom[1][0]
             filtered_bmus[:, 1] = filtered_bmus[:, 1] - zoom[0][0]
             bmu_coords = np.zeros(filtered_bmus.shape)
@@ -398,7 +396,7 @@ class Somoclu(object):
             plt.imshow(matrix[zoom[0][0]:zoom[0][1], zoom[1][0]:zoom[1][1]],
                        aspect='auto')
             plt.set_cmap(colormap)
-            bmu_coords = self.filter_array(self.bmus, zoom)
+            bmu_coords = self._filter_array(self.bmus, zoom)
             bmu_coords[:, 0] = bmu_coords[:, 0] - zoom[1][0]
             bmu_coords[:, 1] = bmu_coords[:, 1] - zoom[0][0]
         if colorbar:
@@ -414,13 +412,13 @@ class Somoclu(object):
                     colors = []
                     for bm in self.bmus:
                         colors.append(self.clusters[bm[1], bm[0]])
-                    colors = self.filter_array(colors, zoom)
+                    colors = self._filter_array(colors, zoom)
             else:
-                colors = self.filter_array(bestmatchcolors, zoom)
+                colors = self._filter_array(bestmatchcolors, zoom)
             plt.scatter(bmu_coords[:, 0], bmu_coords[:, 1], c=colors)
 
         if labels is not None:
-            for label, col, row in zip(self.filter_array(labels, zoom),
+            for label, col, row in zip(self._filter_array(labels, zoom),
                                        bmu_coords[:, 0], bmu_coords[:, 1]):
                 if label is not None:
                     plt.annotate(label, xy=(col, row), xytext=(10, -5),
@@ -435,7 +433,7 @@ class Somoclu(object):
             plt.show()
         return plt
 
-    def filter_array(self, a, zoom):
+    def _filter_array(self, a, zoom):
         filtered_array = []
         for index, bmu in enumerate(self.bmus):
             if bmu[0] >= zoom[1][0] and bmu[0] < zoom[1][1] and \
