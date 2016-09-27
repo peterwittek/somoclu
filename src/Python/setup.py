@@ -170,6 +170,7 @@ try:
             'Programming Language :: C++'
           ],
           cmdclass=cmdclass,
+          test_suite="tests"
           )
 except:
     traceback.print_exc()
@@ -194,5 +195,6 @@ except:
             'Programming Language :: Python',
             'Programming Language :: C++'
           ],
-          install_requires=['numpy', 'matplotlib']
+          install_requires=['numpy', 'matplotlib'],
+          test_suite="tests"
           )
