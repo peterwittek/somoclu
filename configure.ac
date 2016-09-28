@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.61])
-AC_INIT([Somoclu], [1.6.2])
+AC_INIT([Somoclu], [1.7.0])
 m4_include([m4/ax_mpi_options.m4])
 m4_include([m4/ax_mpi_tests.m4])
 AC_CONFIG_SRCDIR([src/somoclu.h])
@@ -32,7 +32,7 @@ fi
 CXXFLAGS="${CXXFLAGS} ${OPENMP_CFLAGS}"
 
 if [[[ $string == *"ICC"* ]]]
-then  
+then
   CXXFLAGS="${CXXFLAGS} -fast"
 else
   AS_IF([test "x$GXX" = "xyes"],[CXXFLAGS="${CXXFLAGS} -O3 -ffast-math -march=native"])
@@ -81,11 +81,11 @@ if test x"$with_cuda" != x"no" ; then
      echo "Building a version without CUDA.    "
      echo "---------------------------------------"
      cuda_enabled=no
-  else 
+  else
      cuda_enabled=no
   fi
 else
-  cuda_enabled=no  
+  cuda_enabled=no
 fi
 
 AM_CONDITIONAL([HAVE_CUDA], [test x"$cuda_enabled" = x"yes"])
@@ -96,7 +96,7 @@ AC_ARG_WITH([mpi],
    [  --with-mpi=PATH    prefix where MPI is installed])
 
 mpi_enabled=no
-if test x"$with_mpi" != x"no" ; then	
+if test x"$with_mpi" != x"no" ; then
     AX_MPI_OPTIONS
     if test x"$MPI_CXX" != x"none"; then
       AX_MPI_TESTS

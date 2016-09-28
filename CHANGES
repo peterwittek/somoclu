@@ -1,4 +1,4 @@
-Since 1.6.2:
+Version 1.7.0: 2016-09-30
   - New: Julia interface is available (https://github.com/peterwittek/Somoclu.jl).
   - New: Method `get_surface_state` of the `Somoclu` object in Python calculates the activation map for all data instances.
   - New: Method `view_activation_map` of the `Somoclu` object in Python allows plotting the activation map for the training data instances or for a new data instance.

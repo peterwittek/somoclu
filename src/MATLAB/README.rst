@@ -1,4 +1,4 @@
-Version: 1.6.2
+Version: 1.7.0
 
 Maintainer: ShichaoGao<xgdgsc at gmail.com>
 
@@ -31,7 +31,7 @@ If you encounter errors like:
 ::
   /usr/local/MATLAB/R2013a/sys/os/glnx86/libstdc++.so.6:
   version `GLIBCXX_3.4.20' not found
-  
+
 You can rename ``libstdc++.so.6*`` under ``MATLAB_ROOT/sys/os/glnxa64`` to solve this issue.
 
 Note for Mac OS X users:
@@ -54,7 +54,7 @@ and set environment using:
     alias cpp=/usr/local/bin/cpp-5
     alias ld=/usr/local/bin/gcc-5
     alias cc=/usr/local/bin/gcc-5
-    
+
 before running ``./configure`` .
 
 Then follow the instructions at https://github.com/peterwittek/somoclu to build somoclu itself.
@@ -99,7 +99,7 @@ Then modify ``~/.matlab/VERSION/mexopts.sh`` to use gcc as follows:
 3. change ``MACOSX_DEPLOYMENT_TARGET='10.9'`` where ``10.9`` is your OS X version number.
 
 an example is given at https://gist.github.com/xgdgsc/9832340, then you can follow the instruction step 2 at the top to build the extension and test.
-  
+
 
 Using clang-omp
 ---------------
