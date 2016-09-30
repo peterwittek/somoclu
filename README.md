@@ -144,7 +144,7 @@ To get it working with the GPU kernel, download the source zip file and specify 
 
     R CMD INSTALL src/Rsomoclu_version.tar.gz --configure-args=/path/to/cuda
 
-The Julia version is available on [GitHub](https://github.com/peterwittek/Somoclu.jl).
+The Julia version is available on [GitHub](https://github.com/peterwittek/Somoclu.jl). Clone it with `Pkg.clone("https://github.com/peterwittek/Somoclu.jl")` and build it with `Pkg.build("Somoclu")`.
 
 For using the MATLAB toolbox, define the location of your MATLAB install to the configure script:
 
