@@ -52,8 +52,12 @@ OBJS=$(LIBOBJS) io.o somoclu.o
 
 all: somoclu lib
 
-lib: $(LIBOBJS)
+libwrapper: $(LIBOBJS)
 	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o libsomoclu.so $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
+
+lib: $(LIBOBJS) io.o
+	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o libsomoclu.so $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
+
 
 somoclu: CXXFLAGS+= -DCLI
 somoclu: $(OBJS)
@@ -65,7 +69,7 @@ somoclu: $(OBJS)
 %.cu.co: %.cu
 		$(NVCC) $(DEFS) $(CUDA_CFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $<
 
-matlab: lib
+matlab: libwrapper
 	if [ -e denseGpuKernels.cu.co ]; then cp denseGpuKernels.cu.co denseGpuKernels.cu.o; fi
 	$(MEX_BIN) $(MEX_FLAGS) MATLAB/MexSomoclu.cpp training.cpp $(MEX_OBJS) $(MEX_LIBS)
 	mv MexSomoclu* MATLAB

@@ -18,11 +18,10 @@
  */
 
 #include <cstdlib>
-#include <cmath>
+#include <cstring>
 #include <sstream>
 #include <iostream>
 #include <fstream>
-#include <string.h>
 
 #include "somoclu.h"
 

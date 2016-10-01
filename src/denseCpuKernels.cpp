@@ -17,7 +17,6 @@
  *
  */
 
-#include <cmath>
 #include <iostream>
 #include "somoclu.h"
 #ifdef HAVE_R

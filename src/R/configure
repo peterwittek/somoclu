@@ -16,7 +16,7 @@ mv src/Makefile.root.in src/Makefile.in
 rm src/Makevars*
 cd src
 ./configure --with-cuda=$1 --without-mpi
-make lib
+make libwrapper
 rm Makefile*
 mv src/*.o ./
 mv src/*.co ./
