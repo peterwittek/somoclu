@@ -241,7 +241,7 @@ void train(int itask, float *data, svm_node **sparseData,
 }
 
 float linearCooling(float start, float end, float nEpoch, float epoch) {
-    float diff = (start - end) / (nEpoch - 1);
+    float diff = (start - end) / nEpoch;
     return start - (epoch * diff);
 }
 
