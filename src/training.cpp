@@ -241,7 +241,7 @@ void train(int itask, float *data, svm_node **sparseData,
 }
 
 float linearCooling(float start, float end, float nEpoch, float epoch) {
-    float diff = (start - end) / nEpoch;
+    float diff = (start - end) / (nEpoch-1);
     return start - (epoch * diff);
 }
 
@@ -319,7 +319,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
     float scale = scale0;
     float radius = radius0;
     if (itask == 0 && !only_bmus) {
-#ifdef HAVE_MPI      
+#ifdef HAVE_MPI
         numerator = new float[nSomY * nSomX * nDimensions];
         denominator = new float[nSomY * nSomX];
         for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
@@ -409,5 +409,5 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
         delete [] numerator;
         delete [] denominator;
     }
-#endif // HAVE_MPI    
+#endif // HAVE_MPI
 }
