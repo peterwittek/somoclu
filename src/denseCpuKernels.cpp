@@ -17,6 +17,7 @@
  *
  */
 
+#include <cmath>
 #include <iostream>
 #include "somoclu.h"
 #ifdef HAVE_R
@@ -205,9 +206,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
 #ifndef HAVE_MPI // We update in-place
                 for (unsigned int d = 0; d < nDimensions; d++) {
                     float newWeight = localNumerator[d] / localDenominator;
-                    if (newWeight > 0.0) {
-                        codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] = newWeight;
-                    }
+                    codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] = newWeight;
                 }
 #endif
             } // Looping over som_x
