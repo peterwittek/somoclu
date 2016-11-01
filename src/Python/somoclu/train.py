@@ -458,7 +458,7 @@ class Somoclu(object):
                             self._kernel_type)
 
     def _pca_init(self):
-        from sklearn.decomposition import RandomizedPCA
+        from sklearn.decomposition import PCA
         coord = np.zeros((self._n_columns*self._n_rows, 2))
         for i in range(self._n_columns*self._n_rows):
             coord[i, 0] = int(i / self._n_columns)
@@ -467,7 +467,7 @@ class Somoclu(object):
         coord = (coord - .5)*2
         me = np.mean(self._data, 0)
         self.codebook = np.tile(me, (self._n_columns*self._n_rows, 1))
-        pca = RandomizedPCA(n_components=2)
+        pca = PCA(n_components=2, svd_solver="randomized")
         pca.fit(self._data - me)
         eigvec = pca.components_
         eigval = pca.explained_variance_
