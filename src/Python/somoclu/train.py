@@ -13,6 +13,7 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.collections as mcoll
 import numpy as np
+from functools import partial
 from scipy.spatial.distance import cdist
 try:
     import seaborn as sns
@@ -33,8 +34,8 @@ except ImportError:
         print("https://github.com/peterwittek/somoclu/issues/28")
     elif sys.platform.startswith('darwin'):
         print("If you installed Somoclu with pip on OS X, this typically "
-              "means missing libiomp. Please refer to the documentation and to "
-              "this issue:")
+              "means missing libiomp. Please refer to the documentation and to"
+              " this issue:")
         print("https://github.com/peterwittek/somoclu/issues/28")
 
 
@@ -458,7 +459,11 @@ class Somoclu(object):
                             self._kernel_type)
 
     def _pca_init(self):
-        from sklearn.decomposition import PCA
+        try:
+            from sklearn.decomposition import PCA
+            PCA = partial(PCA, svd_solver="randomized")
+        except:
+            from sklearn.decomposition import RandomizedPCA as PCA
         coord = np.zeros((self._n_columns*self._n_rows, 2))
         for i in range(self._n_columns*self._n_rows):
             coord[i, 0] = int(i / self._n_columns)
@@ -467,7 +472,7 @@ class Somoclu(object):
         coord = (coord - .5)*2
         me = np.mean(self._data, 0)
         self.codebook = np.tile(me, (self._n_columns*self._n_rows, 1))
-        pca = PCA(n_components=2, svd_solver="randomized")
+        pca = PCA(n_components=2)
         pca.fit(self._data - me)
         eigvec = pca.components_
         eigval = pca.explained_variance_
