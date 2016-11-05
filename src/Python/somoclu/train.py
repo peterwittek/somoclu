@@ -552,6 +552,21 @@ class Somoclu(object):
             self.activation_map = am
         return am
 
+    def get_bmus(self, activation_map):
+        """Returns Best Matching Units indexes of the activation map.
+
+        :param activation_map: Activation map computed with self.get_surface_state()
+        :type activation_map: 2D numpy.array
+
+        :returns: The bmus indexes corresponding to this activation map
+                  (same as self.bmus for the training samples).
+        :rtype: 2D numpy.array
+        """
+
+        Y, X = np.unravel_index(activation_map.argmin(axis=1),
+                                (self._n_rows, self._n_columns))
+        return np.vstack((X,Y)).T
+
     def view_similarity_matrix(self, data=None, labels=None, figsize=None,
                                filename=None):
         """Plot the similarity map according to the activation map
