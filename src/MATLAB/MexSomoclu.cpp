@@ -56,8 +56,8 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     	}
     }
 
-    unsigned int radius0 = (unsigned int) mxGetPr(prhs[4])[0];
-    unsigned int radiusN = (unsigned int) mxGetPr(prhs[5])[0];
+    float radius0 = (float) mxGetPr(prhs[4])[0];
+    float radiusN = (float) mxGetPr(prhs[5])[0];
     char* radiusCooling_c = mxArrayToString(prhs[6]);
     string radiusCooling;
     if(radiusCooling_c != NULL) {
