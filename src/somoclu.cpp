@@ -50,7 +50,7 @@ void printUsage() {
          "     [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX\n" \
          "Arguments:\n" \
          "     -c FILENAME           Specify an initial codebook for the map.\n" \
-         "     -d NUMBER             Coefficient in the Gaussian neighborhood function exp(-||x-y||^2/2*(coeff*radius)^2) (default: 0.5)\n" \
+         "     -d NUMBER             Coefficient in the Gaussian neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2)) (default: 0.5)\n" \
          "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
          "     -g TYPE               Grid type: rectangular or hexagonal (default: rectangular)\n"\
          "     -h, --help            This help text\n" \

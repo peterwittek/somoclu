@@ -35,7 +35,7 @@ Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
   \item{compactSupport}{Compact support for Gaussian neighborhood, (default:TRUE)}
   \item{neighborhood}{Neighborhood function: gaussian or bubble (default: "gaussian")}
   \item{codebook}{initial codebook, (default:NULL)}
-  \item{stdCoeff}{The coefficient in the Gaussian neighborhood function exp(-||x-y||^2/2*(coeff*radius)^2), (default:0.5)}
+  \item{stdCoeff}{The coefficient in the Gaussian neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2)), (default:0.5)}
   %% \item{initialCodebookFilename}{Specify an initial codebook for the map}
 }
 \value{

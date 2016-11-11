@@ -30,7 +30,7 @@ function [sMap, sTrain, globalBmus, uMatrix] = somoclu_train(sMap, D, varargin)
 %   'gridType' 'lattice'  (string)  Grid type: square or hexagonal (default: square)
 %   'compactSupport'  Compact support for map update (0: false, 1: true, default: 0)
 %   'neighborhood'  Neighborhood function (bubble or gaussian, default: gaussian)
-%   'sdtCoeff' Coefficient in the Gaussian neighborhood function exp(-||x-y||^2/2*(coeff*radius)^2)
+%   'sdtCoeff' Coefficient in the Gaussian neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2)) (default: 0.5)
 %   'nEpoch' 'trainlen' (scalar)  Maximum number of epochs
 %   'sTrain','som_train '  = 'train'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

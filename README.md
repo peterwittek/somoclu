@@ -28,7 +28,7 @@ Arguments:
 
     -c FILENAME              Specify an initial codebook for the map.
     -d NUMBER                Coefficient in the Gaussian neighborhood function
-                             exp(-||x-y||^2/2*(coeff*radius)^2) (default: 0.5)
+                             exp(-||x-y||^2/(2*(coeff*radius)^2)) (default: 0.5)
     -e NUMBER                Maximum number of epochs
     -g TYPE                  Grid type: square or hexagonal (default: square)
     -h, --help               This help text

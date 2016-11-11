@@ -34,7 +34,7 @@ Function Reference
    :type gridtype: str.
    :param compactsupport: Optional parameter to cut off map updates beyond the
                           training radius with the Gaussian neighborhood.
-                          Default: False.
+                          Default: True.
    :type compactsupport: bool.
    :param neighborhood: Optional parameter to specify the neighborhood:
 
@@ -42,7 +42,7 @@ Function Reference
                           * "bubble": bubble neighborhood function
    :type neighborhood: str.
    :param std_coeff: Optional parameter to set the coefficient in the Gaussian
-                     neighborhood function exp(-||x-y||^2/2*(coeff*radius)^2)
+                     neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2))
                      Default: 0.5
    :type std_coeff: float.
    :param initialization: Optional parameter to specify the initalization:
