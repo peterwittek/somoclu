@@ -80,7 +80,7 @@ void printUsage() {
 
 void processCommandLine(int argc, char** argv, string *inFilename,
                         string* outPrefix, unsigned int *nEpoch,
-                        unsigned int *radius0, unsigned int *radiusN,
+                        float *radius0, float *radiusN,
                         string *radiusCooling,
                         float *scale0, float *scaleN,
                         string *scaleCooling,
@@ -175,13 +175,13 @@ void processCommandLine(int argc, char** argv, string *inFilename,
             }
             break;
         case 'r':
-            *radius0 = atoi(optarg);
+            *radius0 = atof(optarg);
             if (*radius0 <= 0) {
                 my_abort("The argument of option -r should be a positive integer.");
             }
             break;
         case 'R':
-            *radiusN = atoi(optarg);
+            *radiusN = atof(optarg);
             if (*radiusN <= 0) {
                 my_abort("The argument of option -R should be a positive integer.");
             }
@@ -282,8 +282,8 @@ int main(int argc, char** argv)
     string gridType;
     unsigned int compactSupport;
     unsigned int gaussian;
-    unsigned int radius0 = 0;
-    unsigned int radiusN = 0;
+    float radius0 = 0;
+    float radiusN = 0;
     string radiusCooling;
     float scale0 = 0.0;
     float scaleN = 0.0;
@@ -309,7 +309,7 @@ int main(int argc, char** argv)
     }
 #ifdef HAVE_MPI
     MPI_Bcast(&nEpoch, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&radius0, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&radius0, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nSomX, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);

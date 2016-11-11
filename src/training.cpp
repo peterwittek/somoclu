@@ -54,7 +54,7 @@ void my_abort(string err) {
 void train(float *data, int data_length, unsigned int nEpoch,
            unsigned int nSomX, unsigned int nSomY,
            unsigned int nDimensions, unsigned int nVectors,
-           unsigned int radius0, unsigned int radiusN, string radiusCooling,
+           float radius0, float radiusN, string radiusCooling,
            float scale0, float scaleN, string scaleCooling,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support, bool gaussian,
@@ -88,7 +88,7 @@ void train(float *data, int data_length, unsigned int nEpoch,
 void julia_train(float *data, int data_length, unsigned int nEpoch,
            unsigned int nSomX, unsigned int nSomY,
            unsigned int nDimensions, unsigned int nVectors,
-           unsigned int radius0, unsigned int radiusN, unsigned int _radiusCooling,
+           float radius0, float radiusN, unsigned int _radiusCooling,
            float scale0, float scaleN, unsigned int _scaleCooling,
            unsigned int kernelType, unsigned int _mapType,
            unsigned int _gridType, bool compact_support, bool gaussian,
@@ -140,7 +140,7 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int nSomX, unsigned int nSomY,
            unsigned int nDimensions, unsigned int nVectors,
            unsigned int nVectorsPerRank, unsigned int nEpoch,
-           unsigned int radius0, unsigned int radiusN, string radiusCooling,
+           float radius0, float radiusN, string radiusCooling,
            float scale0, float scaleN, string scaleCooling,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support, bool gaussian, float std_coeff
@@ -307,7 +307,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                    unsigned int nSomX, unsigned int nSomY,
                    unsigned int nDimensions, unsigned int nVectors,
                    unsigned int nVectorsPerRank,
-                   unsigned int radius0, unsigned int radiusN,
+                   float radius0, float radiusN,
                    string radiusCooling,
                    float scale0, float scaleN,
                    string scaleCooling,
@@ -334,7 +334,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
         }
 #endif
         if (radiusCooling == "linear") {
-            radius = linearCooling(float(radius0), radiusN, N, currentEpoch);
+            radius = linearCooling(radius0, radiusN, N, currentEpoch);
         }
         else {
             radius = exponentialCooling(radius0, radiusN, N, currentEpoch);
@@ -345,7 +345,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
         else {
             scale = exponentialCooling(scale0, scaleN, N, currentEpoch);
         }
-//        cout << "Epoch: " << currentEpoch << " Radius: " << radius << endl;
+        //  << "Epoch: " << currentEpoch << " Radius: " << radius << endl;
     }
 #ifdef HAVE_MPI
     if (!only_bmus) {
@@ -389,25 +389,27 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
 
     /// 3. Update codebook using numerator and denominator
 #ifdef HAVE_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-    if (itask == 0 && !only_bmus) {
-        #pragma omp parallel for
+    if (!only_bmus) {
+      MPI_Barrier(MPI_COMM_WORLD);
+      if (itask == 0 && !only_bmus) {
+          #pragma omp parallel for
 #ifdef _WIN32
-        for (int som_y = 0; som_y < nSomY; som_y++) {
+          for (int som_y = 0; som_y < nSomY; som_y++) {
 #else
-        for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+          for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
 #endif
-            for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-                float denom = denominator[som_y * nSomX + som_x];
-                for (unsigned int d = 0; d < nDimensions; d++) {
-                    float newWeight = numerator[som_y * nSomX * nDimensions
-                                                + som_x * nDimensions + d] / denom;
-                    codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] = newWeight;
-                }
-            }
-        }
-        delete [] numerator;
-        delete [] denominator;
+              for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
+                  float denom = denominator[som_y * nSomX + som_x];
+                  for (unsigned int d = 0; d < nDimensions; d++) {
+                      float newWeight = numerator[som_y * nSomX * nDimensions
+                                                  + som_x * nDimensions + d] / denom;
+                      codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] = newWeight;
+                  }
+              }
+          }
+          delete [] numerator;
+          delete [] denominator;
+      }
     }
 #endif // HAVE_MPI
 }

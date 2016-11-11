@@ -214,8 +214,10 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
                 } // Looping over data instances
 #ifndef HAVE_MPI // We update in-place
                 for (unsigned int d = 0; d < nDimensions; d++) {
+                  if (localDenominator != 0) {
                     float newWeight = localNumerator[d] / localDenominator;
                     codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] = newWeight;
+                  }
                 }
 #endif
             } // Looping over som_x
