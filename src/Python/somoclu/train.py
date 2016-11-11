@@ -179,10 +179,10 @@ class Somoclu(object):
         :param radius0: The initial radius on the map where the update happens
                         around a best matching unit. Default value of 0 will
                         trigger a value of min(n_columns, n_rows)/2.
-        :type radius0: int.
+        :type radius0: float.
         :param radiusN: The radius on the map where the update happens around a
                         best matching unit in the final epoch. Default: 1.
-        :type radiusN: int.
+        :type radiusN: float.
         :param radiuscooling: The cooling strategy between radius0 and radiusN:
 
                                    * "linear": Linear interpolation (default)
