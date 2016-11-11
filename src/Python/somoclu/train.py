@@ -69,13 +69,17 @@ class Somoclu(object):
     :type gridtype: str.
     :param compactsupport: Optional parameter to cut off map updates beyond the
                            training radius with the Gaussian neighborhood.
-                           Default: False.
+                           Default: True.
     :type compactsupport: bool.
     :param neighborhood: Optional parameter to specify the neighborhood:
 
                            * "gaussian": Gaussian neighborhood (default)
                            * "bubble": bubble neighborhood function
     :type neighborhood: str.
+    :param std_coeff: Optional parameter to set the coefficient in the Gaussian
+                      neighborhood function exp(-||x-y||^2/2*(coeff*radius)^2)
+                      Default: 0.5
+    :type std_coeff: float.
     :param initialization: Optional parameter to specify the initalization:
 
                            * "random": random weights in the codebook
@@ -87,7 +91,7 @@ class Somoclu(object):
 
     def __init__(self, n_columns, n_rows, data=None, initialcodebook=None,
                  kerneltype=0, maptype="planar", gridtype="rectangular",
-                 compactsupport=False, neighborhood="gaussian",
+                 compactsupport=True, neighborhood="gaussian", std_coeff=0.5,
                  initialization=None):
         """Constructor for the class.
         """
@@ -97,6 +101,7 @@ class Somoclu(object):
         self._grid_type = gridtype
         self._compact_support = compactsupport
         self._neighborhood = neighborhood
+        self._std_coeff = std_coeff
         self._check_parameters()
         self.activation_map = None
         if initialcodebook is not None and initialization is not None:
@@ -203,7 +208,7 @@ class Somoclu(object):
                    radiuscooling, scale0, scaleN, scalecooling,
                    self._kernel_type, self._map_type, self._grid_type,
                    self._compact_support, self._neighborhood == "gaussian",
-                   self.codebook, self.bmus, self.umatrix)
+                   self._std_coeff, self.codebook, self.bmus, self.umatrix)
         self.umatrix.shape = (self._n_rows, self._n_columns)
         self.bmus.shape = (self.n_vectors, 2)
         self.codebook.shape = (self._n_rows, self._n_columns, self.n_dim)

@@ -50,6 +50,7 @@ void printUsage() {
          "     [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX\n" \
          "Arguments:\n" \
          "     -c FILENAME           Specify an initial codebook for the map.\n" \
+         "     -d NUMBER             Coefficient in the Gaussian neighborhood function exp(-||x-y||^2/2*(coeff*radius)^2) (default: 0.5)\n" \
          "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
          "     -g TYPE               Grid type: rectangular or hexagonal (default: rectangular)\n"\
          "     -h, --help            This help text\n" \
@@ -57,19 +58,19 @@ void printUsage() {
          "                              0: Dense CPU\n" \
          "                              1: Dense GPU\n" \
          "                              2: Sparse CPU\n" \
-         "     -m TYPE               Map type: planar or toroid (default: planar) \n" \
-         "     -n FUNCTION           Neighborhood function (bubble or gaussian, default: gaussian)\n"\
-         "     -p NUMBER             Compact support for Gaussian neighborhood (0: false, 1: true, default: 0)\n"\
-         "     -t STRATEGY           Radius cooling strategy: linear or exponential (default: linear)\n" \
-         "     -r NUMBER             Start radius (default: half of the map in direction min(x,y))\n" \
-         "     -R NUMBER             End radius (default: 1)\n" \
-         "     -T STRATEGY           Learning rate cooling strategy: linear or exponential (default: linear)\n" \
          "     -l NUMBER             Starting learning rate (default: 0.1)\n" \
          "     -L NUMBER             Finishing learning rate (default: 0.01)\n" \
+         "     -m TYPE               Map type: planar or toroid (default: planar) \n" \
+         "     -n FUNCTION           Neighborhood function (bubble or gaussian, default: gaussian)\n"\
+         "     -p NUMBER             Compact support for Gaussian neighborhood (0: false, 1: true, default: 1)\n"\
+         "     -r NUMBER             Start radius (default: half of the map in direction min(x,y))\n" \
+         "     -R NUMBER             End radius (default: 1)\n" \
          "     -s NUMBER             Save interim files (default: 0):\n" \
          "                              0: Do not save interim files\n" \
          "                              1: Save U-matrix only\n" \
          "                              2: Also save codebook and best matching neurons\n" \
+         "     -t STRATEGY           Radius cooling strategy: linear or exponential (default: linear)\n" \
+         "     -T STRATEGY           Learning rate cooling strategy: linear or exponential (default: linear)\n" \
          "     -x, --columns NUMBER  Number of columns in map (size of SOM in direction x) (default: " << N_SOM_X << ")\n" \
          "     -y, --rows NUMBER     Number of rows in map (size of SOM in direction y) (default: " << N_SOM_Y << ")\n" \
          "Examples:\n" \
@@ -87,7 +88,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                         unsigned int *kernelType, string *mapType,
                         unsigned int *snapshots,
                         string *gridType, unsigned int *compactSupport,
-                        unsigned int *gaussian,
+                        unsigned int *gaussian, float *std_coeff,
                         string *initialCodebookFilename) {
 
     // Setting default values
@@ -104,8 +105,9 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     *scaleN = 0.01;
     *scaleCooling = "linear";
     *gridType = "rectangular";
-    *compactSupport = 0;
+    *compactSupport = 1;
     *gaussian = 1;
+    *std_coeff = 0.5;
     string neighborhood_function = "gaussian";
     static struct option long_options[] = {
         {"help",  no_argument,       0,  'h'},
@@ -116,11 +118,17 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     int c;
     extern int optind, optopt;
     int option_index = 0;
-    while ((c = getopt_long (argc, argv, "hx:y:e:g:k:l:m:n:p:r:s:t:c:L:R:T:",
+    while ((c = getopt_long (argc, argv, "hx:y:d:e:g:k:l:m:n:p:r:s:t:c:L:R:T:",
                              long_options, &option_index)) != -1) {
         switch (c) {
         case 'c':
             *initialCodebookFilename = optarg;
+            break;
+        case 'd':
+            *std_coeff = atof(optarg);
+            if (*std_coeff <= 0) {
+                my_abort("The argument of option -l should be a positive float.");
+            }
             break;
         case 'e':
             *nEpoch = atoi(optarg);
@@ -284,14 +292,14 @@ int main(int argc, char** argv)
     string inFilename;
     string initialCodebookFilename;
     string outPrefix;
-
+    float std_coeff = 0.0;
     if (rank == 0) {
         processCommandLine(argc, argv, &inFilename, &outPrefix,
                            &nEpoch, &radius0, &radiusN, &radiusCooling,
                            &scale0, &scaleN, &scaleCooling,
                            &nSomX, &nSomY,
                            &kernelType, &mapType, &snapshots,
-                           &gridType, &compactSupport, &gaussian,
+                           &gridType, &compactSupport, &gaussian, &std_coeff,
                            &initialCodebookFilename);
 #ifndef CUDA
         if (kernelType == DENSE_GPU) {
@@ -429,7 +437,7 @@ int main(int argc, char** argv)
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
-          gridType, compactSupport == 1, gaussian == 1
+          gridType, compactSupport == 1, gaussian == 1, std_coeff
 #ifdef CLI
 	, outPrefix, snapshots);
 #else

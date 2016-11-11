@@ -30,6 +30,7 @@ function [sMap, sTrain, globalBmus, uMatrix] = somoclu_train(sMap, D, varargin)
 %   'gridType' 'lattice'  (string)  Grid type: square or hexagonal (default: square)
 %   'compactSupport'  Compact support for map update (0: false, 1: true, default: 0)
 %   'neighborhood'  Neighborhood function (bubble or gaussian, default: gaussian)
+%   'sdtCoeff' Coefficient in the Gaussian neighborhood function exp(-||x-y||^2/2*(coeff*radius)^2)
 %   'nEpoch' 'trainlen' (scalar)  Maximum number of epochs
 %   'sTrain','som_train '  = 'train'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -81,10 +82,11 @@ sTrain.radius_fin = 1;
 sTrain.radius_cooling = 'linear';
 sTrain.alpha_type = 'linear';
 sTrain.kernel_type = 0;
-sTrain.compact_support = false;
+sTrain.compact_support = true;
 sTrain.neighborhood = 'gaussian';
 sTrain.scale0 = 0.1
 sTrain.scaleN = 0.01
+sTrain.stdCoeff = 0.5
 
 i=1; 
 while i<=length(varargin), 
@@ -111,6 +113,7 @@ while i<=length(varargin),
       end 
      case {'scaleCooling', 'alpha_type'}, i=i+1; sTrain.alpha_type = varargin{i};
      case 'neighborhood', i=i+1; sTrain.neighborhood = varargin{i};
+     case 'stdCoeff', i=i+1; sTrain.stdCoeff = varargin{i};
      case {'scale0', 'alpha_ini'}, i=i+1; sTrain.scale0 = varargin{i};
      case 'scaleN', i=i+1; sTrain.scaleN = varargin{i};
      case {'sTrain','train','som_train'}, i=i+1; sTrain = varargin{i};
@@ -151,7 +154,7 @@ sTrain.radius_ini, sTrain.radius_fin, ...
 sTrain.radius_cooling,  sTrain.scale0, sTrain.scaleN, ...
 sTrain.alpha_type, ...
 sTrain.kernel_type, sTopol.shape, sTopol.lattice, ...
-sTrain.compact_support, sTrain.gaussian, sMap.codebook);
+sTrain.compact_support, sTrain.gaussian, sTrain.stdCoeff, sMap.codebook);
 rowNums=colon(1,size(globalBmus,1))'
 globalBmus = [rowNums globalBmus]
 sTrain = som_set(sTrain,'time',datestr(now,0));

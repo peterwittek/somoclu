@@ -46,7 +46,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     int* globalBmus = new int[globalBmus_size];
     float* uMatrix = new float[uMatrix_size];
 
-    double * pCodebook = mxGetPr(prhs[14]);
+    double * pCodebook = mxGetPr(prhs[16]);
     if(pCodebook != NULL) {
     	for(int i = 0; i < uMatrix_size; i++) {
     		for(int j = 0; j < nDimensions; j++) {
@@ -67,8 +67,8 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         radiusCooling = "";
     }
     mxFree(radiusCooling_c);
-    unsigned int scale0 = (unsigned int) mxGetPr(prhs[7])[0];
-    unsigned int scaleN = (unsigned int) mxGetPr(prhs[8])[0];
+    float scale0 = (float) mxGetPr(prhs[7])[0];
+    float scaleN = (float) mxGetPr(prhs[8])[0];
     char* scaleCooling_c = mxArrayToString(prhs[9]);
     string scaleCooling;
     if(scaleCooling_c != NULL) {
@@ -100,12 +100,12 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     mxFree(gridType_c);
     bool compactSupport = (bool) mxGetPr(prhs[13])[0];
     bool gaussian = (bool) mxGetPr(prhs[14])[0];
-
+    float stdCoeff = (float) mxGetPr(prhs[15])[0];
     //Call train routine
     train(data, data_length, nEpoch, nSomX, nSomY,
           nDimensions, nVectors, radius0, radiusN,
           radiusCooling, scale0, scaleN, scaleCooling,
-          kernelType, mapType, gridType, compactSupport, gaussian,
+          kernelType, mapType, gridType, compactSupport, gaussian, stdCoeff,
           codebook, codebook_size, globalBmus, globalBmus_size,
           uMatrix, uMatrix_size);
 

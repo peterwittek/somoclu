@@ -323,7 +323,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                            unsigned int nVectorsPerRank, float radius,
                            float scale, string mapType, string gridType,
                            bool compact_support, bool gaussian,
-                           int *globalBmus, bool only_bmus) {
+                           int *globalBmus, bool only_bmus, float std_coeff) {
     int *bmus;
 #ifdef HAVE_MPI
     bmus = new int[nVectorsPerRank * 2];
@@ -389,7 +389,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
                                 dist = euclideanDistanceOnHexagonalToroidMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1], nSomX, nSomY);
                             }
                         }
-                        float neighbor_fuct = getWeight(dist, radius, scale, compact_support, gaussian);
+                        float neighbor_fuct = getWeight(dist, radius, scale, compact_support, gaussian, std_coeff);
 #ifdef HAVE_MPI
                         for (unsigned int d = 0; d < nDimensions; d++) {
                             localNumerator[som_y * nSomX * nDimensions + som_x * nDimensions + d] +=

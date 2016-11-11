@@ -58,6 +58,7 @@ void train(float *data, int data_length, unsigned int nEpoch,
            float scale0, float scaleN, string scaleCooling,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support, bool gaussian,
+           float std_coeff,
            float *codebook, int codebook_size,
            int *globalBmus, int globalBmus_size,
            float *uMatrix, int uMatrix_size) {
@@ -74,7 +75,7 @@ void train(float *data, int data_length, unsigned int nEpoch,
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
-          gridType, compact_support, gaussian
+          gridType, compact_support, gaussian, std_coeff
 #ifdef CLI
           , "", 0);
 #else
@@ -91,6 +92,7 @@ void julia_train(float *data, int data_length, unsigned int nEpoch,
            float scale0, float scaleN, unsigned int _scaleCooling,
            unsigned int kernelType, unsigned int _mapType,
            unsigned int _gridType, bool compact_support, bool gaussian,
+           float std_coeff,
            float *codebook, int codebook_size,
            int *globalBmus, int globalBmus_size,
            float *uMatrix, int uMatrix_size) {
@@ -123,7 +125,7 @@ void julia_train(float *data, int data_length, unsigned int nEpoch,
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
-          gridType, compact_support, gaussian
+          gridType, compact_support, gaussian, std_coeff
 #ifdef CLI
           , "", 0);
 #else
@@ -141,7 +143,7 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int radius0, unsigned int radiusN, string radiusCooling,
            float scale0, float scaleN, string scaleCooling,
            unsigned int kernelType, string mapType,
-           string gridType, bool compact_support, bool gaussian
+           string gridType, bool compact_support, bool gaussian, float std_coeff
 #ifdef CLI
            , string outPrefix, unsigned int snapshots)
 #else
@@ -193,7 +195,7 @@ void train(int itask, float *data, svm_node **sparseData,
                       nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
                       radius0, radiusN, radiusCooling,
                       scale0, scaleN, scaleCooling, kernelType, mapType,
-                      gridType, compact_support, gaussian);
+                      gridType, compact_support, gaussian, std_coeff);
 #ifdef CLI
         if (snapshots > 0 && itask == 0) {
             calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions,
@@ -232,7 +234,7 @@ void train(int itask, float *data, svm_node **sparseData,
                   nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
                   radius0, radiusN, radiusCooling,
                   scale0, scaleN, scaleCooling, kernelType, mapType,
-                  gridType, compact_support, gaussian, true);
+                  gridType, compact_support, gaussian, std_coeff, true);
 #ifdef CUDA
     if (kernelType == DENSE_GPU) {
         freeGpu();
@@ -311,7 +313,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                    string scaleCooling,
                    unsigned int kernelType, string mapType,
                    string gridType, bool compact_support, bool gaussian,
-                   bool only_bmus) {
+                   float std_coeff, bool only_bmus) {
 
     float N = (float)nEpoch;
     float *numerator;
@@ -364,14 +366,14 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                               codebook, nSomX, nSomY, nDimensions,
                               nVectors, nVectorsPerRank, radius, scale,
                               mapType, gridType, compact_support, gaussian,
-                              globalBmus, only_bmus);
+                              globalBmus, only_bmus, std_coeff);
         break;
     case DENSE_GPU:
 #ifdef CUDA
         trainOneEpochDenseGPU(itask, data, numerator, denominator,
                               codebook, nSomX, nSomY, nDimensions,
                               nVectors, nVectorsPerRank, radius, scale,
-                              mapType, gridType, compact_support, gaussian, globalBmus, only_bmus);
+                              mapType, gridType, compact_support, gaussian, globalBmus, only_bmus, std_coeff);
 #else
         my_abort("Compiled without CUDA!");
 #endif
@@ -381,7 +383,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                                codebook, nSomX, nSomY, nDimensions,
                                nVectors, nVectorsPerRank, radius, scale,
                                mapType, gridType, compact_support, gaussian,
-                               globalBmus, only_bmus);
+                               globalBmus, only_bmus, std_coeff);
         break;
     }
 

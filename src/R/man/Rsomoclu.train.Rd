@@ -10,7 +10,7 @@ Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                      radiusCooling, scale0, scaleN,
                      scaleCooling,
                      kernelType, mapType, gridType, compactSupport,
-                     neighborhood, codebook)
+                     neighborhood, stdCoeff, codebook)
 }
 \arguments{
   \item{input_data}{input data, matrix format}
@@ -32,9 +32,10 @@ Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                             (default: 0)}
   \item{mapType}{Map type: planar or toroid (default: "planar")}
   \item{gridType}{Grid type: square or hexagonal (default: "rectangular")}
-  \item{compactSupport}{Compact support for Gaussian neighborhood, (default:FALSE)}
+  \item{compactSupport}{Compact support for Gaussian neighborhood, (default:TRUE)}
   \item{neighborhood}{Neighborhood function: gaussian or bubble (default: "gaussian")}
   \item{codebook}{initial codebook, (default:NULL)}
+  \item{stdCoeff}{The coefficient in the Gaussian neighborhood function exp(-||x-y||^2/2*(coeff*radius)^2), (default:0.5)}
   %% \item{initialCodebookFilename}{Specify an initial codebook for the map}
 }
 \value{
@@ -65,11 +66,13 @@ gridType <- "rectangular"
 compactSupport <- FALSE
 codebook <- NULL
 neighborhood <- "gaussian"
+stdCoeff <- 0.5
 res <- Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                       radius0, radiusN,
                       radiusCooling, scale0, scaleN,
                       scaleCooling,
-                      kernelType, mapType, gridType, compactSupport, neighborhood, codebook)
+                      kernelType, mapType, gridType, compactSupport, neighborhood,
+                      stdCoeff, codebook)
 res$codebook
 res$globalBmus
 res$uMatrix

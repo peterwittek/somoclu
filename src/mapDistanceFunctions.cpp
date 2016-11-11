@@ -67,17 +67,17 @@ float euclideanDistanceOnHexagonalToroidMap(const unsigned int som_x, const unsi
     return sqrt(float(xdist * xdist + ydist * ydist));
 }
 
-float gaussianNeighborhood(float distance, float radius, float stddevs) {
-    float norm = (2 * (radius + 1) * (radius + 1)) / (stddevs * stddevs);
-    return exp((-(float) distance * distance) / norm);
+float gaussianNeighborhood(float distance, float radius, float std_coeff) {
+    float std = radius * std_coeff;
+    return exp((- distance * distance) / (2 * std * std));
 }
 
 float getWeight(float distance, float radius, float scaling, bool compact_support = false,
-                bool gaussian = true) {
+                bool gaussian = true, float std_coeff=0.5) {
     float result = 0.0;
     if (gaussian) {
         if (!compact_support || distance <= radius) {
-            result = gaussianNeighborhood(distance, radius, 2);
+            result = gaussianNeighborhood(distance, radius, std_coeff);
         }
     } else {
         if (distance <= radius) {

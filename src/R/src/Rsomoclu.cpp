@@ -16,6 +16,7 @@ RcppExport SEXP Rtrain(SEXP data_p,
                        SEXP kernelType_p, SEXP mapType_p,
                        SEXP gridType_p, SEXP compactSupport_p,
                        SEXP neighborhood_p,
+                       SEXP stdCoeff_p,
                        SEXP codebook_p) {
     Rcpp::NumericMatrix dataMatrix(data_p);
     Rcpp::NumericMatrix codebookMatrix(codebook_p);
@@ -27,8 +28,9 @@ RcppExport SEXP Rtrain(SEXP data_p,
     unsigned int radius0 = (unsigned int) as<int> (radius0_p);
     unsigned int radiusN = (unsigned int) as<int> (radiusN_p);
     string radiusCooling = as<string>(radiusCooling_p);
-    unsigned int scale0 = (unsigned int) as<int> (scale0_p);
-    unsigned int scaleN = (unsigned int) as<int> (scaleN_p);
+    float scale0 = as<float> (scale0_p);
+    float scaleN = as<float> (scaleN_p);
+    float std_coeff = as<float> (stdCoeff_p);
     string scaleCooling = as<string> (scaleCooling_p);
     unsigned int kernelType = (unsigned int) as<int>(kernelType_p);
     bool compactSupport = as<bool>(compactSupport_p);
@@ -46,14 +48,12 @@ RcppExport SEXP Rtrain(SEXP data_p,
     }
     int codebook_size =  nSomY * nSomX * nDimensions;
     float* codebook = new float[codebook_size];
-	for(int i = 0; i < uMatrix_size; i++) {
-		for(int j = 0; j < nDimensions; j++) {
-			codebook[i * nDimensions + j] = (float) codebookMatrix(i ,j);
-		}
-	}
-
+    for(int i = 0; i < uMatrix_size; i++) {
+      for(int j = 0; j < nDimensions; j++) {
+        codebook[i * nDimensions + j] = (float) codebookMatrix(i ,j);
+      }
+    }
     int globalBmus_size = nVectors * 2;
-
     int* globalBmus = new int[globalBmus_size];
     float* uMatrix = new float[uMatrix_size];
     train(data, data_length, nEpoch, nSomX, nSomY,
@@ -61,6 +61,7 @@ RcppExport SEXP Rtrain(SEXP data_p,
           radiusCooling, scale0, scaleN, scaleCooling,
           kernelType, mapType,
           gridType, compactSupport, neighborhood == "gaussian",
+          std_coeff,
           codebook, codebook_size, globalBmus, globalBmus_size,
           uMatrix, uMatrix_size);
     Rcpp::NumericMatrix globalBmusMatrix(nVectors, 2);

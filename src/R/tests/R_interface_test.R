@@ -17,12 +17,13 @@ gridType <- "rectangular"
 compactSupport <- FALSE
 codebook <- NULL
 neighborhood <- "gaussian"
+stdCoeff <- 0.5
 res <- Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                       radius0, radiusN,
                       radiusCooling, scale0, scaleN,
                       scaleCooling,
                       kernelType, mapType, gridType, 
-                      compactSupport, neighborhood, codebook)
+                      compactSupport, neighborhood, stdCoeff, codebook)
 res$codebook
 res$globalBmus
 res$uMatrix

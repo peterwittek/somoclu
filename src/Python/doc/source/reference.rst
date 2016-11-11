@@ -41,6 +41,10 @@ Function Reference
                           * "gaussian": Gaussian neighborhood (default)
                           * "bubble": bubble neighborhood function
    :type neighborhood: str.
+   :param std_coeff: Optional parameter to set the coefficient in the Gaussian
+                     neighborhood function exp(-||x-y||^2/2*(coeff*radius)^2)
+                     Default: 0.5
+   :type std_coeff: float.
    :param initialization: Optional parameter to specify the initalization:
 
                           * "random": random weights in the codebook
