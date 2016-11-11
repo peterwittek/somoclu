@@ -400,10 +400,12 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
 #endif
               for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                   float denom = denominator[som_y * nSomX + som_x];
-                  for (unsigned int d = 0; d < nDimensions; d++) {
-                      float newWeight = numerator[som_y * nSomX * nDimensions
-                                                  + som_x * nDimensions + d] / denom;
-                      codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] = newWeight;
+                  if (denom != 0) {
+                    for (unsigned int d = 0; d < nDimensions; d++) {
+                        float newWeight = numerator[som_y * nSomX * nDimensions
+                                                    + som_x * nDimensions + d] / denom;
+                        codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] = newWeight;
+                    }
                   }
               }
           }
