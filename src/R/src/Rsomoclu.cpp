@@ -25,8 +25,8 @@ RcppExport SEXP Rtrain(SEXP data_p,
     int nEpoch = as<int>(nEpoch_p);
     unsigned int nSomX = (unsigned int) as<int> (nSomX_p);
     unsigned int nSomY = (unsigned int) as<int> (nSomY_p);
-    unsigned int radius0 = (unsigned int) as<int> (radius0_p);
-    unsigned int radiusN = (unsigned int) as<int> (radiusN_p);
+    float radius0 = as<float> (radius0_p);
+    float radiusN = as<float> (radiusN_p);
     string radiusCooling = as<string>(radiusCooling_p);
     float scale0 = as<float> (scale0_p);
     float scaleN = as<float> (scaleN_p);
