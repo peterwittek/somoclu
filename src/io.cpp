@@ -273,6 +273,8 @@ void readSparseMatrixDimensions(string filename, unsigned int &nRows,
             int dummy_index;
             while(getline(linestream, value, ' ')) {
                 int separator = value.find(":");
+                if (separator == -1) // it's a label ?
+                    continue;
                 istringstream myStream(value.substr(0, separator));
                 myStream >> dummy_index;
                 if(dummy_index > max_index) {
