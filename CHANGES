@@ -4,6 +4,7 @@ Since 1.7.1:
   - Changed: Updated PCA initialization in the Python interface to work with `sk-learn` 0.18 onwards.
   - Changed: Radii can be float values.
   - Fixed: Only positive values were written back to codebook during update.
+  - Fixed: Sparse data is read correctly when there are class labels.
 
 Version 1.7.1: 2016-10-02
   - Fixed: macOS build works again.
