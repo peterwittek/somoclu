@@ -1,4 +1,4 @@
-Since 1.7.1:
+Version 1.7.2: 2016-11-24
   - New: The coefficient of the Gaussian neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2)) is now exposed in all interfaces as a parameter.
   - New: `get_bmu` function in the Python interface to get the best matching units given an activation map.
   - Changed: Updated PCA initialization in the Python interface to work with `sk-learn` 0.18 onwards.

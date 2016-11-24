@@ -2,7 +2,7 @@
 Function Reference
 ******************
 
-.. py:class:: Somoclu(n_columns, n_rows, data=None, initialcodebook=None, kerneltype=0, maptype='planar', gridtype='rectangular', compactsupport=False, neighborhood='gaussian', initialization=None)
+.. py:class:: Somoclu(n_columns, n_rows, data=None, initialcodebook=None, kerneltype=0, maptype='planar', gridtype='rectangular', compactsupport=False, neighborhood='gaussian', std_coeff=0.5, initialization=None)
 
    Class for training and visualizing a self-organizing map.
 
@@ -77,6 +77,19 @@ Function Reference
       :returns: The the dot product of the codebook and the data.
       :rtype: 2D numpy.array
 
+
+   .. py:method:: Somoclu.get_bmus(activation_map)
+
+      Return Best Matching Unit indexes of the activation map.
+
+      :param activation_map: Activation map computed with self.get_surface_state()
+      :type activation_map: 2D numpy.array
+
+      :returns: The bmus indexes corresponding to this activation map
+                (same as self.bmus for the training samples).
+      :rtype: 2D numpy.array
+
+
    .. py:method:: Somoclu.load_bmus(filename)
 
       Load the best matching units from a file to the Somoclu object.
@@ -118,9 +131,9 @@ Function Reference
                                  * "linear": Linear interpolation (default)
                                  * "exponential": Exponential decay
       :param scale0: The initial learning scale. Default value: 0.1.
-      :type scale0: int.
+      :type scale0: float.
       :param scaleN: The learning scale in the final epoch. Default: 0.01.
-      :type scaleN: int.
+      :type scaleN: float.
       :param scalecooling: The cooling strategy between scale0 and scaleN:
 
                                  * "linear": Linear interpolation (default)

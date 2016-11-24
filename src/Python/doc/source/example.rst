@@ -24,7 +24,7 @@ First, we import the necessary modules:
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
     import somoclu
-    %matplotlib inline  
+    %matplotlib inline
 
 Then we generate and plot some random data in three categories:
 
@@ -56,7 +56,7 @@ that qualifies as an emergent self-organizing map for this data:
 .. code:: python
 
     n_rows, n_columns = 100, 160
-    som = somoclu.Somoclu(n_columns, n_rows, data=data)
+    som = somoclu.Somoclu(n_columns, n_rows, data=data, compactsupport=False)
     %time som.train()
 
 
@@ -119,7 +119,7 @@ lower right corner:
 
 .. code:: python
 
-    som.view_umatrix(bestmatches=True, bestmatchcolors=colors, labels=labels, 
+    som.view_umatrix(bestmatches=True, bestmatchcolors=colors, labels=labels,
                      zoom=((50, n_rows), (100, n_columns)))
 
 
@@ -143,7 +143,8 @@ type as follows:
 
 .. code:: python
 
-    som = somoclu.Somoclu(n_columns, n_rows, data=data, maptype="toroid")
+    som = somoclu.Somoclu(n_columns, n_rows, data=data, maptype="toroid",
+                          compactsupport=False)
     som.train()
     som.view_umatrix(bestmatches=True, bestmatchcolors=colors)
 
@@ -165,7 +166,8 @@ neurons are also implemented:
 
 .. code:: python
 
-    som = somoclu.Somoclu(n_columns, n_rows, data=data, gridtype="hexagonal")
+    som = somoclu.Somoclu(n_columns, n_rows, data=data, gridtype="hexagonal",
+                          compactsupport=False)
     som.train()
     som.view_umatrix(bestmatches=True, bestmatchcolors=colors)
 
@@ -195,7 +197,8 @@ this, we need to pass an optional argument to the constructor:
 
 .. code:: python
 
-    som = somoclu.Somoclu(n_columns, n_rows, data=data, maptype="toroid", initialization="pca")
+    som = somoclu.Somoclu(n_columns, n_rows, data=data, maptype="toroid",
+                          compactsupport=False, initialization="pca")
     som.train()
     som.view_umatrix(bestmatches=True, bestmatchcolors=colors)
 
