@@ -37,11 +37,13 @@ gridType <- "rectangular"
 compactSupport <- FALSE
 codebook <- NULL
 neighborhood <- "gaussian"
+stdCoeff <- 0.5
 res <- Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                       radius0, radiusN,
                       radiusCooling, scale0, scaleN,
                       scaleCooling,
-                      kernelType, mapType, gridType, compactSupport, neighborhood, codebook)
+                      kernelType, mapType, gridType, compactSupport, 
+                      neighborhood, stdCoeff, codebook)
 ## Convert to kohonen object for plotting
 sommap = Rsomoclu.kohonen(input_data, res)
 ## Show 'codebook'
