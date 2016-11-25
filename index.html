@@ -55,6 +55,8 @@
 <p>Arguments:</p>
 
 <pre><code>-c FILENAME              Specify an initial codebook for the map.
+-d NUMBER                Coefficient in the Gaussian neighborhood function
+                         exp(-||x-y||^2/(2*(coeff*radius)^2)) (default: 0.5)
 -e NUMBER                Maximum number of epochs
 -g TYPE                  Grid type: square or hexagonal (default: square)
 -h, --help               This help text
@@ -62,20 +64,20 @@
                             0: Dense CPU
                             1: Dense GPU
                             2: Sparse CPU
+-l NUMBER                Starting learning rate (default: 0.1)
+-L NUMBER                Finishing learning rate (default: 0.01)
 -m TYPE                  Map type: planar or toroid (default: planar)
 -n FUNCTION              Neighborhood function (bubble or gaussian, default: gaussian)
 -p NUMBER                Compact support for Gaussian neighborhood
                          (0: false, 1: true, default: 0)
--t STRATEGY              Radius cooling strategy: linear or exponential (default: linear)
 -r NUMBER                Start radius (default: half of the map in direction min(x,y))
 -R NUMBER                End radius (default: 1)
--T STRATEGY              Learning rate cooling strategy: linear or exponential (default: linear)
--l NUMBER                Starting learning rate (default: 0.1)
--L NUMBER                Finishing learning rate (default: 0.01)
 -s NUMBER                Save interim files (default: 0):
                             0: Do not save interim files
                             1: Save U-matrix only
                             2: Also save codebook and best matching
+-t STRATEGY              Radius cooling strategy: linear or exponential (default: linear)
+-T STRATEGY              Learning rate cooling strategy: linear or exponential (default: linear)
 -x, --columns NUMBER     Number of columns in map (size of SOM in direction x)
 -y, --rows    NUMBER     Number of rows in map (size of SOM in direction y)
 </code></pre>
