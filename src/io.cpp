@@ -304,31 +304,45 @@ svm_node** readSparseMatrixChunk(string filename, unsigned int nRows,
         nRowsToRead = nRows - rowOffset;
     }
     svm_node **x_matrix = new svm_node *[nRowsToRead];
-    for(unsigned int i = 0; i < nRowsToRead; i++) {
+    for(unsigned int i = 0; i < nRowsToRead; ) {
         getline(file, line);
-        if (line.substr(0, 1) == "#") {
-            --i;
+        if (line[0] == '#') {
             continue;
         }
         stringstream tmplinestream(line);
         string value;
         int elements = 0;
+        bool label = false;
+        // count values
         while(getline(tmplinestream, value, ' ')) {
+            // skip labels
+            if (elements==0 && label==false && value.find(':') == string::npos)
+            {
+                label=true;
+                continue;
+            }
             elements++;
         }
-        elements++; // To account for the closing dummy node in the row
-        x_matrix[i] = new svm_node[elements];
+        x_matrix[i] = new svm_node[elements+1];  // To account for the closing dummy node in the row
         stringstream linestream(line);
+        if (label)
+            linestream >> value; // skip the label
         int j = 0;
-        while(getline(linestream, value, ' ')) {
-            int separator = value.find(":");
-            istringstream myStream(value.substr(0, separator));
-            myStream >> x_matrix[i][j].index;
-            istringstream myStream2(value.substr(separator + 1));
-            myStream2 >> x_matrix[i][j].value;
+        while (1) {
+            char sep;
+            int idx;
+            float val;
+            linestream >> idx >> sep >> val;
+            if (linestream.fail())
+                break;
+            //assert(sep==':');
+            x_matrix[i][j].index = idx;
+            x_matrix[i][j].value = val;
             j++;
         }
+        //assert(j==elements);
         x_matrix[i][j].index = -1;
+        i++;
     }
     file.close();
     return x_matrix;
