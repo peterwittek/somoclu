@@ -11,6 +11,7 @@ Key features of the Python interface:
 * Rectangular and hexagonal grids.
 * Gaussian or bubble neighborhood functions.
 * Visualization of maps, including those that were trained outside of Python.
+* PCA initialization of codebook.
 
 The documentation is available online. Further details are found in the following paper:
 
