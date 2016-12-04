@@ -34,9 +34,9 @@ A simple example is below. For more example, please refer to the `documentation 
 
     labels = list(range(150))
     n_rows, n_columns = 30, 50
-    som = somoclu.Somoclu(n_columns, n_rows, data=data, maptype="planar",
+    som = somoclu.Somoclu(n_columns, n_rows, maptype="planar",
                           gridtype="rectangular")
-    som.train(epochs=10)
+    som.train(data, epochs=10)
     som.view_umatrix(bestmatches=True, bestmatchcolors=colors, labels=labels)
 
 Installation

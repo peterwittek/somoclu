@@ -45,10 +45,6 @@ class Somoclu(object):
     :type n_columns: int.
     :param n_rows: The number of rows in the map.
     :type n_rows: int.
-    :param data: Optional parameter to provide training data. It is not
-                 necessary if the map is otherwise trained outside Python,
-                 e.g., on a GPU cluster.
-    :type data: 2D numpy.array of float32.
     :param initialcodebook: Optional parameter to start the training with a
                             given codebook.
     :type initialcodebook: 2D numpy.array of float32.
@@ -89,10 +85,10 @@ class Somoclu(object):
     :type initialization: str.
     """
 
-    def __init__(self, n_columns, n_rows, data=None, initialcodebook=None,
+    def __init__(self, n_columns, n_rows, initialcodebook=None,
                  kerneltype=0, maptype="planar", gridtype="rectangular",
                  compactsupport=True, neighborhood="gaussian", std_coeff=0.5,
-                 initialization=None):
+                 initialization=None, data=None):
         """Constructor for the class.
         """
         self._n_columns, self._n_rows = n_columns, n_rows
@@ -121,6 +117,7 @@ class Somoclu(object):
         self.clusters = None
         self._data = None
         if data is not None:
+            print("Warning: passing the data in the constructor is deprecated.")
             self.update_data(data)
 
     def load_bmus(self, filename):
@@ -170,10 +167,14 @@ class Somoclu(object):
                             "match that of the map")
         self.codebook.shape = (self._n_rows, self._n_columns, self.n_dim)
 
-    def train(self, epochs=10, radius0=0, radiusN=1, radiuscooling="linear",
+    def train(self, data=None, epochs=10, radius0=0, radiusN=1,
+              radiuscooling="linear",
               scale0=0.1, scaleN=0.01, scalecooling="linear"):
         """Train the map on the current data in the Somoclu object.
-
+        :param data: Optional parameter to provide training data. It is not
+                     necessary if the data was added via the method
+                     `update_data`.
+        :type data: 2D numpy.array of float32.
         :param epochs: The number of epochs to train the map for.
         :type epochs: int.
         :param radius0: The initial radius on the map where the update happens
@@ -198,8 +199,10 @@ class Somoclu(object):
         :type scalecooling: str.
         """
         _check_cooling_parameters(radiuscooling, scalecooling)
-        if self._data is None:
+        if self._data is None and data is None:
             raise Exception("No data was provided!")
+        elif self._data is None:
+            self.update_data(data)
         self._init_codebook()
         self.umatrix.shape = (self._n_rows * self._n_columns, )
         self.bmus.shape = (self.n_vectors * 2, )

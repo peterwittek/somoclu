@@ -2,7 +2,7 @@
 Function Reference
 ******************
 
-.. py:class:: Somoclu(n_columns, n_rows, data=None, initialcodebook=None, kerneltype=0, maptype='planar', gridtype='rectangular', compactsupport=False, neighborhood='gaussian', std_coeff=0.5, initialization=None)
+.. py:class:: Somoclu(n_columns, n_rows, initialcodebook=None, kerneltype=0, maptype='planar', gridtype='rectangular', compactsupport=False, neighborhood='gaussian', std_coeff=0.5, initialization=None)
 
    Class for training and visualizing a self-organizing map.
 
@@ -10,10 +10,6 @@ Function Reference
    :type n_columns: int.
    :param n_rows: The number of rows in the map.
    :type n_rows: int.
-   :param data: Optional parameter to provide training data. It is not
-                necessary if the map is otherwise trained outside Python,
-                e.g., on a GPU cluster.
-   :type data: 2D numpy.array of float32.
    :param initialcodebook: Optional parameter to start the training with a
                            given codebook.
    :type initialcodebook: 2D numpy.array of float32.
@@ -113,10 +109,14 @@ Function Reference
       :param filename: The name of the file.
       :type filename: str.
 
-   .. py:method:: Somoclu.train(epochs=10, radius0=0, radiusN=1, radiuscooling='linear', scale0=0.1, scaleN=0.01, scalecooling='linear')
+   .. py:method:: Somoclu.train(data=None, epochs=10, radius0=0, radiusN=1, radiuscooling='linear', scale0=0.1, scaleN=0.01, scalecooling='linear')
 
       Train the map on the current data in the Somoclu object.
 
+      :param data: Optional parameter to provide training data. It is not
+                  necessary if the data was added via the method
+                  `update_data`.
+      :type data: 2D numpy.array of float32.
       :param epochs: The number of epochs to train the map for.
       :type epochs: int.
       :param radius0: The initial radius on the map where the update happens

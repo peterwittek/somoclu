@@ -56,8 +56,8 @@ that qualifies as an emergent self-organizing map for this data:
 .. code:: python
 
     n_rows, n_columns = 100, 160
-    som = somoclu.Somoclu(n_columns, n_rows, data=data, compactsupport=False)
-    %time som.train()
+    som = somoclu.Somoclu(n_columns, n_rows, compactsupport=False)
+    %time som.train(data)
 
 
 .. parsed-literal::
@@ -143,9 +143,9 @@ type as follows:
 
 .. code:: python
 
-    som = somoclu.Somoclu(n_columns, n_rows, data=data, maptype="toroid",
+    som = somoclu.Somoclu(n_columns, n_rows, maptype="toroid",
                           compactsupport=False)
-    som.train()
+    som.train(data)
     som.view_umatrix(bestmatches=True, bestmatchcolors=colors)
 
 
@@ -166,9 +166,9 @@ neurons are also implemented:
 
 .. code:: python
 
-    som = somoclu.Somoclu(n_columns, n_rows, data=data, gridtype="hexagonal",
+    som = somoclu.Somoclu(n_columns, n_rows, gridtype="hexagonal",
                           compactsupport=False)
-    som.train()
+    som.train(data)
     som.view_umatrix(bestmatches=True, bestmatchcolors=colors)
 
 
@@ -197,9 +197,9 @@ this, we need to pass an optional argument to the constructor:
 
 .. code:: python
 
-    som = somoclu.Somoclu(n_columns, n_rows, data=data, maptype="toroid",
+    som = somoclu.Somoclu(n_columns, n_rows, maptype="toroid",
                           compactsupport=False, initialization="pca")
-    som.train()
+    som.train(data)
     som.view_umatrix(bestmatches=True, bestmatchcolors=colors)
 
 
@@ -285,8 +285,8 @@ train again a toroid rectangular emergent map on the same data:
 
 .. code:: python
 
-    som = somoclu.Somoclu(n_columns, n_rows, data=data, maptype="toroid")
-    som.train()
+    som = somoclu.Somoclu(n_columns, n_rows, maptype="toroid")
+    som.train(data)
 
 Next, let us assume that the green cluster moves to the left, the other
 points remaining invariant:
