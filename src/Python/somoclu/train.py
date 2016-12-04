@@ -164,7 +164,7 @@ class Somoclu(object):
         self.codebook = np.loadtxt(filename, comments='%')
         if self.n_dim == 0:
             self.n_dim = self.codebook.shape[1]
-        if self.codebook.shape != (self._n_rows*self._n_columns,
+        if self.codebook.shape != (self._n_rows * self._n_columns,
                                    self.n_dim):
             raise Exception("The dimensions of the codebook do not "
                             "match that of the map")
@@ -201,8 +201,8 @@ class Somoclu(object):
         if self._data is None:
             raise Exception("No data was provided!")
         self._init_codebook()
-        self.umatrix.shape = (self._n_rows*self._n_columns, )
-        self.bmus.shape = (self.n_vectors*2, )
+        self.umatrix.shape = (self._n_rows * self._n_columns, )
+        self.bmus.shape = (self.n_vectors * 2, )
         wrap_train(np.ravel(self._data), epochs, self._n_columns, self._n_rows,
                    self.n_dim, self.n_vectors, radius0, radiusN,
                    radiuscooling, scale0, scaleN, scalecooling,
@@ -229,7 +229,7 @@ class Somoclu(object):
         self.n_vectors, self.n_dim = data.shape
         if self.n_dim != oldn_dim and oldn_dim != 0:
             raise Exception("The dimension of the new data does not match!")
-        self.bmus = np.zeros(self.n_vectors*2, dtype=np.intc)
+        self.bmus = np.zeros(self.n_vectors * 2, dtype=np.intc)
 
     def view_component_planes(self, dimensions=None, figsize=None,
                               colormap=cm.Spectral_r, colorbar=False,
@@ -386,7 +386,7 @@ class Somoclu(object):
         if zoom is None:
             zoom = ((0, self._n_rows), (0, self._n_columns))
         if figsize is None:
-            figsize = (8, 8/float(zoom[1][1]/zoom[0][1]))
+            figsize = (8, 8 / float(zoom[1][1] / zoom[0][1]))
         fig = plt.figure(figsize=figsize)
         if self._grid_type == "hexagonal":
             offsets = _hexplot(matrix[zoom[0][0]:zoom[0][1],
@@ -396,7 +396,7 @@ class Somoclu(object):
             filtered_bmus[:, 1] = filtered_bmus[:, 1] - zoom[0][0]
             bmu_coords = np.zeros(filtered_bmus.shape)
             for i, (row, col) in enumerate(filtered_bmus):
-                bmu_coords[i] = offsets[col*zoom[1][1] + row]
+                bmu_coords[i] = offsets[col * zoom[1][1] + row]
         else:
             plt.imshow(matrix[zoom[0][0]:zoom[0][1], zoom[1][0]:zoom[1][1]],
                        aspect='auto')
@@ -469,23 +469,23 @@ class Somoclu(object):
         except:
             from sklearn.decomposition import RandomizedPCA
             pca = RandomizedPCA(n_components=2)
-        coord = np.zeros((self._n_columns*self._n_rows, 2))
-        for i in range(self._n_columns*self._n_rows):
+        coord = np.zeros((self._n_columns * self._n_rows, 2))
+        for i in range(self._n_columns * self._n_rows):
             coord[i, 0] = int(i / self._n_columns)
             coord[i, 1] = int(i % self._n_columns)
-        coord = coord/[self._n_rows-1, self._n_columns-1]
-        coord = (coord - .5)*2
+        coord = coord / [self._n_rows - 1, self._n_columns - 1]
+        coord = (coord - .5) * 2
         me = np.mean(self._data, 0)
-        self.codebook = np.tile(me, (self._n_columns*self._n_rows, 1))
+        self.codebook = np.tile(me, (self._n_columns * self._n_rows, 1))
         pca.fit(self._data - me)
         eigvec = pca.components_
         eigval = pca.explained_variance_
         norms = np.linalg.norm(eigvec, axis=1)
-        eigvec = ((eigvec.T/norms)*eigval).T
-        for j in range(self._n_columns*self._n_rows):
+        eigvec = ((eigvec.T / norms) * eigval).T
+        for j in range(self._n_columns * self._n_rows):
             for i in range(eigvec.shape[0]):
                 self.codebook[j, :] = self.codebook[j, :] + \
-                                      coord[j, i] * eigvec[i, :]
+                    coord[j, i] * eigvec[i, :]
 
     def _init_codebook(self):
         """Internal function to set the codebook or to indicate it to the C++
@@ -527,7 +527,7 @@ class Somoclu(object):
         elif not isinstance(algorithm, sklearn.base.ClusterMixin):
             raise Exception("Cannot use algorithm of type " + type(algorithm))
         original_shape = self.codebook.shape
-        self.codebook.shape = (self._n_columns*self._n_rows, self.n_dim)
+        self.codebook.shape = (self._n_columns * self._n_rows, self.n_dim)
         linear_clusters = algorithm.fit_predict(self.codebook)
         self.codebook.shape = original_shape
         self.clusters = np.zeros((self._n_rows, self._n_columns), dtype=int)
@@ -570,7 +570,7 @@ class Somoclu(object):
 
         Y, X = np.unravel_index(activation_map.argmin(axis=1),
                                 (self._n_rows, self._n_columns))
-        return np.vstack((X,Y)).T
+        return np.vstack((X, Y)).T
 
     def view_similarity_matrix(self, data=None, labels=None, figsize=None,
                                filename=None):
@@ -599,7 +599,7 @@ class Somoclu(object):
         else:
             X = data
         # Calculate the pairwise correlations as a metric for similarity
-        corrmat = 1-pairwise_distances(X, metric="correlation")
+        corrmat = 1 - pairwise_distances(X, metric="correlation")
 
         # Set up the matplotlib figure
         if figsize is None:
@@ -649,24 +649,25 @@ def _hexplot(matrix, fig, colormap):
     umatrix_max = matrix.max()
     n_rows, n_columns = matrix.shape
     cmap = plt.get_cmap(colormap)
-    offsets = np.zeros((n_columns*n_rows, 2))
+    offsets = np.zeros((n_columns * n_rows, 2))
     facecolors = []
     for row in range(n_rows):
         for col in range(n_columns):
             if row % 2 == 0:
-                offsets[row*n_columns + col] = [col+0.5, 2*n_rows-2*row]
-                facecolors.append(cmap((matrix[row, col]-umatrix_min) /
-                                       (umatrix_max)*255))
+                offsets[row * n_columns + col] = [col +
+                                                  0.5, 2 * n_rows - 2 * row]
+                facecolors.append(cmap((matrix[row, col] - umatrix_min) /
+                                       (umatrix_max) * 255))
             else:
-                offsets[row*n_columns + col] = [col, 2*n_rows-2*row]
-                facecolors.append(cmap((matrix[row, col]-umatrix_min) /
-                                       (umatrix_max)*255))
+                offsets[row * n_columns + col] = [col, 2 * n_rows - 2 * row]
+                facecolors.append(cmap((matrix[row, col] - umatrix_min) /
+                                       (umatrix_max) * 255))
     polygon = np.zeros((6, 2), float)
     polygon[:, 0] = 1.1 * np.array([0.5, 0.5, 0.0, -0.5, -0.5, 0.0])
-    polygon[:, 1] = 1.1 * np.array([-np.sqrt(3)/6, np.sqrt(3)/6,
-                                    np.sqrt(3)/2+np.sqrt(3)/6,
-                                    np.sqrt(3)/6, -np.sqrt(3)/6,
-                                    -np.sqrt(3)/2-np.sqrt(3)/6])
+    polygon[:, 1] = 1.1 * np.array([-np.sqrt(3) / 6, np.sqrt(3) / 6,
+                                    np.sqrt(3) / 2 + np.sqrt(3) / 6,
+                                    np.sqrt(3) / 6, -np.sqrt(3) / 6,
+                                    -np.sqrt(3) / 2 - np.sqrt(3) / 6])
     polygons = np.expand_dims(polygon, 0) + np.expand_dims(offsets, 1)
     ax = fig.gca()
     collection = mcoll.PolyCollection(
@@ -677,7 +678,7 @@ def _hexplot(matrix, fig, colormap):
         linewidths=1.0,
         offset_position="data")
     ax.add_collection(collection, autolim=False)
-    corners = ((-0.5, -0.5), (n_columns + 0.5, 2*n_rows + 0.5))
+    corners = ((-0.5, -0.5), (n_columns + 0.5, 2 * n_rows + 0.5))
     ax.update_datalim(corners)
     ax.autoscale_view(tight=True)
     return offsets
