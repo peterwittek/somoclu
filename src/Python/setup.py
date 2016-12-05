@@ -147,7 +147,7 @@ else:
 
 try:
     setup(name='somoclu',
-          version='1.7.2',
+          version='1.7.3',
           license='GPL3',
           author="Peter Wittek, Shi Chao Gao",
           author_email="",
@@ -175,7 +175,7 @@ try:
 except:
     traceback.print_exc()
     setup(name='somoclu',
-          version='1.7.2',
+          version='1.7.3',
           license='GPL3',
           author="Peter Wittek, Shi Chao Gao",
           author_email="",
