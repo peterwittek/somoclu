@@ -54,7 +54,7 @@ The wheel binaries for OSX are compiled with `clang-omp <http://clang-omp.github
 
 ::
 
-    $ brew install libiomp
+    $ brew install homebrew/boneyard/libiomp
 
 
 If you want the latest git version, first git clone the repo, install `swig <http://www.swig.org/>`_ and run:

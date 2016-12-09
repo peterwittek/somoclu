@@ -134,7 +134,7 @@ Some pre-built binaries in the wheel format or Windows installer are provided at
 
 The wheel binaries for OSX are compiled with [clang-omp](http://clang-omp.github.io/), and depend on libiomp5, which you can install by:
 
-    $ brew install libiomp
+    $ brew install homebrew/boneyard/libiomp
 
 To get it working with the GPU kernel, you might have to follow the instructions at [Somoclu - Python Interface](https://github.com/peterwittek/somoclu/tree/master/src/Python).
 
