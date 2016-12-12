@@ -258,12 +258,13 @@ float *readMatrix(string inFilename, unsigned int &nRows, unsigned int &nColumns
 }
 
 void readSparseMatrixDimensions(string filename, unsigned int &nRows,
-                                unsigned int &nColumns) {
+                                unsigned int &nColumns, bool & zerobased) {
     ifstream file;
     file.open(filename.c_str());
     if (file.is_open()) {
         string line;
         int max_index = -1;
+        zerobased = false;
         while(getline(file, line)) {
             if (line.substr(0, 1) == "#") {
                 continue;
@@ -280,10 +281,15 @@ void readSparseMatrixDimensions(string filename, unsigned int &nRows,
                 if(dummy_index > max_index) {
                     max_index = dummy_index;
                 }
+                if (dummy_index == 0) {
+                    zerobased = true;
+                }
             }
             ++nRows;
         }
-        nColumns = max_index + 1;
+        nColumns = max_index;
+        if (zerobased)
+            ++nColumns;
         file.close();
     }
     else {
@@ -293,7 +299,8 @@ void readSparseMatrixDimensions(string filename, unsigned int &nRows,
 
 svm_node** readSparseMatrixChunk(string filename, unsigned int nRows,
                                  unsigned int nRowsToRead,
-                                 unsigned int rowOffset) {
+                                 unsigned int rowOffset,
+                                 unsigned int colOffset) {
     ifstream file;
     file.open(filename.c_str());
     string line;
@@ -336,7 +343,7 @@ svm_node** readSparseMatrixChunk(string filename, unsigned int nRows,
             if (linestream.fail())
                 break;
             //assert(sep==':');
-            x_matrix[i][j].index = idx;
+            x_matrix[i][j].index = idx-colOffset;
             x_matrix[i][j].value = val;
             j++;
         }

@@ -343,12 +343,13 @@ int main(int argc, char** argv)
     float * dataRoot = NULL;
     unsigned int nDimensions = 0;
     unsigned int nVectors = 0;
+    bool zerobased;
     if(rank == 0 ) {
         if (kernelType == DENSE_CPU || kernelType == DENSE_GPU) {
             dataRoot = readMatrix(inFilename, nVectors, nDimensions);
         }
         else {
-            readSparseMatrixDimensions(inFilename, nVectors, nDimensions);
+            readSparseMatrixDimensions(inFilename, nVectors, nDimensions, zerobased);
         }
     }
 #ifdef HAVE_MPI
@@ -379,7 +380,8 @@ int main(int argc, char** argv)
         while (currentRankProcessed < nProcs) {
             if (rank == currentRankProcessed) {
                 sparseData = readSparseMatrixChunk(inFilename, nVectors, nVectorsPerRank,
-                                                   rank * nVectorsPerRank);
+                                                   rank * nVectorsPerRank,
+                                                   zerobased ? 0 : 1);
             }
             currentRankProcessed++;
 #ifdef HAVE_MPI

@@ -66,10 +66,11 @@ int saveBmus(string filename, int *bmus, unsigned int nSomX,
 float *readMatrix(const string inFilename,
                   unsigned int &nRows, unsigned int &nCols);
 void readSparseMatrixDimensions(const string filename, unsigned int &nRows,
-                                unsigned int &nColumns);
+                                unsigned int &nColumns, bool& zerobased);
 svm_node** readSparseMatrixChunk(const string filename, unsigned int nRows,
                                  unsigned int nRowsToRead,
-                                 unsigned int rowOffset);
+                                 unsigned int rowOffset,
+                                 unsigned int colOffset=0);
 void trainOneEpoch(int itask, float *data, svm_node **sparseData,
                    float *codebook, int *globalBmus,
                    unsigned int nEpoch, unsigned int currentEpoch,
