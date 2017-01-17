@@ -1,39 +1,41 @@
-# @configure_input@
+# src/Makefile.  Generated from Makefile.in by configure.
 
 # Package-related substitution variables
-package	= @PACKAGE_NAME@
-version	= @PACKAGE_VERSION@
-tarname	= @PACKAGE_TARNAME@
+package	= Somoclu
+version	= 1.7.3
+tarname	= somoclu
 distdir	= $(tarname)-$(version)
 
 # Prefix-related substitution variables
-prefix	 = @prefix@
-exec_prefix    = @exec_prefix@
-bindir	 = @bindir@
-libdir	 = @libdir@
+prefix	 = /usr/local
+exec_prefix    = ${prefix}
+bindir	 = ${exec_prefix}/bin
+libdir	 = ${exec_prefix}/lib
+libname = 
 
 # Tool-related substitution variables
-CXX		         = @CXX@
-CXXFLAGS       = @CXXFLAGS@
-LIBS	         = @LIBS@
-DEFS           = @DEFS@
-INSTALL	       = @INSTALL@
-INSTALL_DATA   = @INSTALL_DATA@
-INSTALL_PROGRAM= @INSTALL_PROGRAM@
-INSTALL_SCRIPT = @INSTALL_SCRIPT@
-CUDA_CFLAGS    = @CUDA_CFLAGS@
-CUDA_LIBS      = @CUDA_LIBS@
-CUDA_LDFLAGS   = @CUDA_LDFLAGS@
-NVCC       	   = @NVCC@
-MPI_INC        = @MPI_INC@
-MPI_LIBDIR     = @MPI_LIBDIR@
-MPI_LIBS       = @MPI_LIBS@
-MATLAB_ROOT    = @MATLAB_ROOT@
-MEX_BIN        = @MEX_BIN@
+CXX		         = g++
+CXXFLAGS       = -fPIC -fopenmp -O3 -ffast-math -march=native
+LIBS	         = 
+DEFS           = -DHAVE_CONFIG_H
+INSTALL	       = /bin/install -c
+INSTALL_DATA   = ${INSTALL} -m 644
+INSTALL_PROGRAM= ${INSTALL}
+INSTALL_SCRIPT = ${INSTALL}
+CUDA_CFLAGS    = 
+CUDA_LIBS      = 
+CUDA_LDFLAGS   = 
+NVCC       	   = 
+MPI_INC        = -I/include
+MPI_LIBDIR     = 
+MPI_LIBS       = 
+MATLAB_ROOT    = /usr/local/MATLAB/R2013a
+MEX_BIN        = /usr/local/MATLAB/R2013a/bin/mex
+
 
 # VPATH-related substitution variables
-srcdir	 = @srcdir@
-VPATH	  = @srcdir@
+srcdir	 = .
+
 
 LIBOBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o
 
@@ -48,18 +50,28 @@ ifdef CUDA_LIBS
 	MEX_OBJS+=denseGpuKernels.cu.o
 endif
 
+ifeq ($(OS), Windows_NT)
+	libname = libsomoclu.dll
+else
+	libname = libsomoclu.so
+endif
+
 OBJS=$(LIBOBJS) io.o somoclu.o
 
 all: somoclu lib
 
 libwrapper: $(LIBOBJS)
-	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o libsomoclu.so $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
+	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 
 lib: $(LIBOBJS) io.o
-	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o libsomoclu.so $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
-
+ifeq ($(OS), Windows_NT)
+	$(CXX) -g $(DEFS) $(CXXFLAGS) -shared -o ${libname} $^ $(LIBS)
+else
+	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
+endif
 
 somoclu: CXXFLAGS+= -DCLI
+
 somoclu: $(OBJS)
 	$(CXX) $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -o $@ $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 
@@ -138,13 +150,14 @@ r:
 	R CMD build R
 
 clean: python_clean r_clean matlab_clean
-	-rm -fr $(OBJS) somoclu libsomoclu.so *.cu.o 1>/dev/null
+	-rm -fr $(OBJS) somoclu ${libname} *.cu.o 1>/dev/null
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	-$(INSTALL_PROGRAM) -m 0755 somoclu $(DESTDIR)$(bindir)
 	$(INSTALL) -d $(DESTDIR)$(libdir)
-	$(INSTALL_PROGRAM) -m 0755 libsomoclu.so $(DESTDIR)$(libdir)
+	$(INSTALL_PROGRAM) -m 0755 ${libname}
+	 $(DESTDIR)$(libdir)
 
 uninstall:
 	-rm $(DESTDIR)$(bindir)/somoclu &>/dev/null
