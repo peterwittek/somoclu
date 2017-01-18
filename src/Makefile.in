@@ -1,41 +1,40 @@
-# src/Makefile.  Generated from Makefile.in by configure.
+# @configure_input@
 
-# Package-related substitution variables
-package	= Somoclu
-version	= 1.7.3
-tarname	= somoclu
+ # Package-related substitution variables
+ package	= @PACKAGE_NAME@
+ version	= @PACKAGE_VERSION@
+ tarname	= @PACKAGE_TARNAME@
 distdir	= $(tarname)-$(version)
 
-# Prefix-related substitution variables
-prefix	 = /usr/local
-exec_prefix    = ${prefix}
-bindir	 = ${exec_prefix}/bin
-libdir	 = ${exec_prefix}/lib
+ # Prefix-related substitution variables
+ prefix	 = @prefix@
+ exec_prefix    = @exec_prefix@
+ bindir	 = @bindir@
+ libdir	 = @libdir@
 libname = 
 
 # Tool-related substitution variables
-CXX		         = g++
-CXXFLAGS       = -fPIC -fopenmp -O3 -ffast-math -march=native
-LIBS	         = 
-DEFS           = -DHAVE_CONFIG_H
-INSTALL	       = /bin/install -c
-INSTALL_DATA   = ${INSTALL} -m 644
-INSTALL_PROGRAM= ${INSTALL}
-INSTALL_SCRIPT = ${INSTALL}
-CUDA_CFLAGS    = 
-CUDA_LIBS      = 
-CUDA_LDFLAGS   = 
-NVCC       	   = 
-MPI_INC        = -I/include
-MPI_LIBDIR     = 
-MPI_LIBS       = 
-MATLAB_ROOT    = /usr/local/MATLAB/R2013a
-MEX_BIN        = /usr/local/MATLAB/R2013a/bin/mex
+ CXX		         = @CXX@
+ CXXFLAGS       = @CXXFLAGS@
+ LIBS	         = @LIBS@
+ DEFS           = @DEFS@
+ INSTALL	       = @INSTALL@
+ INSTALL_DATA   = @INSTALL_DATA@
+ INSTALL_PROGRAM= @INSTALL_PROGRAM@
+ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ CUDA_LIBS      = @CUDA_LIBS@
+ CUDA_CFLAGS    = @CUDA_CFLAGS@
+ CUDA_LDFLAGS   = @CUDA_LDFLAGS@
+ NVCC       	   = @NVCC@
+ MPI_INC        = @MPI_INC@
+ MPI_LIBDIR     = @MPI_LIBDIR@
+ MPI_LIBS       = @MPI_LIBS@
+ MATLAB_ROOT    = @MATLAB_ROOT@
+ MEX_BIN        = @MEX_BIN@
 
-
-# VPATH-related substitution variables
-srcdir	 = .
-
+ # VPATH-related substitution variables
+ -srcdir	 = @srcdir@
+ -VPATH	  = @srcdir@
 
 LIBOBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o
 
