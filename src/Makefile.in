@@ -1,40 +1,40 @@
 # @configure_input@
 
- # Package-related substitution variables
- package	= @PACKAGE_NAME@
- version	= @PACKAGE_VERSION@
- tarname	= @PACKAGE_TARNAME@
+# Package-related substitution variables
+package	= @PACKAGE_NAME@
+version	= @PACKAGE_VERSION@
+tarname	= @PACKAGE_TARNAME@
 distdir	= $(tarname)-$(version)
 
- # Prefix-related substitution variables
- prefix	 = @prefix@
- exec_prefix    = @exec_prefix@
- bindir	 = @bindir@
- libdir	 = @libdir@
+# Prefix-related substitution variables
+prefix	 = @prefix@
+exec_prefix    = @exec_prefix@
+bindir	 = @bindir@
+libdir	 = @libdir@
 libname = 
 
 # Tool-related substitution variables
- CXX		         = @CXX@
- CXXFLAGS       = @CXXFLAGS@
- LIBS	         = @LIBS@
- DEFS           = @DEFS@
- INSTALL	       = @INSTALL@
- INSTALL_DATA   = @INSTALL_DATA@
- INSTALL_PROGRAM= @INSTALL_PROGRAM@
- INSTALL_SCRIPT = @INSTALL_SCRIPT@
- CUDA_LIBS      = @CUDA_LIBS@
- CUDA_CFLAGS    = @CUDA_CFLAGS@
- CUDA_LDFLAGS   = @CUDA_LDFLAGS@
- NVCC       	   = @NVCC@
- MPI_INC        = @MPI_INC@
- MPI_LIBDIR     = @MPI_LIBDIR@
- MPI_LIBS       = @MPI_LIBS@
- MATLAB_ROOT    = @MATLAB_ROOT@
- MEX_BIN        = @MEX_BIN@
+CXX		         = @CXX@
+CXXFLAGS       = @CXXFLAGS@
+LIBS	         = @LIBS@
+DEFS           = @DEFS@
+INSTALL	       = @INSTALL@
+INSTALL_DATA   = @INSTALL_DATA@
+INSTALL_PROGRAM= @INSTALL_PROGRAM@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+CUDA_CFLAGS    = @CUDA_CFLAGS@
+CUDA_LIBS      = @CUDA_LIBS@
+CUDA_LDFLAGS   = @CUDA_LDFLAGS@
+NVCC       	   = @NVCC@
+MPI_INC        = @MPI_INC@
+MPI_LIBDIR     = @MPI_LIBDIR@
+MPI_LIBS       = @MPI_LIBS@
+MATLAB_ROOT    = @MATLAB_ROOT@
+MEX_BIN        = @MEX_BIN@
 
- # VPATH-related substitution variables
- -srcdir	 = @srcdir@
- -VPATH	  = @srcdir@
+# VPATH-related substitution variables
+srcdir	 = @srcdir@
+VPATH	  = @srcdir@
 
 LIBOBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o
 
@@ -48,6 +48,7 @@ ifdef CUDA_LIBS
 	MEX_LIBS+=$(CUDA_LDFLAGS) $(CUDA_LIBS) -lnvblas -lmwgpu
 	MEX_OBJS+=denseGpuKernels.cu.o
 endif
+
 
 ifeq ($(OS), Windows_NT)
 	libname = libsomoclu.dll
@@ -69,8 +70,8 @@ else
 	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 endif
 
-somoclu: CXXFLAGS+= -DCLI
 
+somoclu: CXXFLAGS+= -DCLI
 somoclu: $(OBJS)
 	$(CXX) $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -o $@ $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 
@@ -155,8 +156,7 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	-$(INSTALL_PROGRAM) -m 0755 somoclu $(DESTDIR)$(bindir)
 	$(INSTALL) -d $(DESTDIR)$(libdir)
-	$(INSTALL_PROGRAM) -m 0755 ${libname}
-	 $(DESTDIR)$(libdir)
+	$(INSTALL_PROGRAM) -m 0755 ${libname} $(DESTDIR)$(libdir)
 
 uninstall:
 	-rm $(DESTDIR)$(bindir)/somoclu &>/dev/null
