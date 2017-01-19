@@ -148,9 +148,17 @@ extern "C" {
                                float scale, string mapType,
                                string gridType, bool compact_support, bool gaussian,
                                int *globalBmus, bool only_bmus, float std_coeff);
+
+
 #endif
-    void my_abort(string err);
-    void julia_train(float *data, int data_length,
+
+#ifdef _WIN32
+	__declspec(dllexport) void my_abort(string err);
+	__declspec(dllexport) void julia_train(float *data, int data_length,
+#else
+	void my_abort(string err);
+	void julia_train(float *data, int data_length,
+#endif
                      unsigned int nEpoch,
                      unsigned int nSomX, unsigned int nSomY,
                      unsigned int nDimensions, unsigned int nVectors,

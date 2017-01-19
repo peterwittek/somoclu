@@ -11,6 +11,7 @@ prefix	 = @prefix@
 exec_prefix    = @exec_prefix@
 bindir	 = @bindir@
 libdir	 = @libdir@
+libname = 
 
 # Tool-related substitution variables
 CXX		         = @CXX@
@@ -48,15 +49,26 @@ ifdef CUDA_LIBS
 	MEX_OBJS+=denseGpuKernels.cu.o
 endif
 
+
+ifeq ($(OS), Windows_NT)
+	libname = libsomoclu.dll
+else
+	libname = libsomoclu.so
+endif
+
 OBJS=$(LIBOBJS) io.o somoclu.o
 
 all: somoclu lib
 
 libwrapper: $(LIBOBJS)
-	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o libsomoclu.so $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
+	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 
 lib: $(LIBOBJS) io.o
-	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o libsomoclu.so $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
+ifeq ($(OS), Windows_NT)
+	$(CXX) -g $(DEFS) $(CXXFLAGS) -shared -o ${libname} $^ $(LIBS)
+else
+	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
+endif
 
 
 somoclu: CXXFLAGS+= -DCLI
@@ -138,13 +150,13 @@ r:
 	R CMD build R
 
 clean: python_clean r_clean matlab_clean
-	-rm -fr $(OBJS) somoclu libsomoclu.so *.cu.o 1>/dev/null
+	-rm -fr $(OBJS) somoclu ${libname} *.cu.o 1>/dev/null
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	-$(INSTALL_PROGRAM) -m 0755 somoclu $(DESTDIR)$(bindir)
 	$(INSTALL) -d $(DESTDIR)$(libdir)
-	$(INSTALL_PROGRAM) -m 0755 libsomoclu.so $(DESTDIR)$(libdir)
+	$(INSTALL_PROGRAM) -m 0755 ${libname} $(DESTDIR)$(libdir)
 
 uninstall:
 	-rm $(DESTDIR)$(bindir)/somoclu &>/dev/null
