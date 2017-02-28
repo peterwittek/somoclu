@@ -33,6 +33,7 @@ function [sMap, sTrain, globalBmus, uMatrix] = somoclu_train(sMap, D, varargin)
 %   'sdtCoeff' Coefficient in the Gaussian neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2)) (default: 0.5)
 %   'nEpoch' 'trainlen' (scalar)  Maximum number of epochs
 %   'sTrain','som_train '  = 'train'
+%   'verbose'   Verbosity level: 0, 1, or 2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check arguments
 
@@ -87,6 +88,7 @@ sTrain.neighborhood = 'gaussian';
 sTrain.scale0 = 0.1
 sTrain.scaleN = 0.01
 sTrain.stdCoeff = 0.5
+sTrain.verbose = 0
 
 i=1; 
 while i<=length(varargin), 
@@ -118,6 +120,7 @@ while i<=length(varargin),
      case 'scaleN', i=i+1; sTrain.scaleN = varargin{i};
      case {'sTrain','train','som_train'}, i=i+1; sTrain = varargin{i};
      case 'kernelType', i=i+1; sTrain.kernel_type = varargin{i};
+     case 'verbose', i=i+1; sTrain.verbose = varargin{i};
      case 'compactSupport', i=i+1; sTrain.compact_support = varargin{i};
       % unambiguous values
 %      case {'inv','linear','power'}, sTrain.alpha_type = varargin{i}; 
@@ -154,7 +157,8 @@ sTrain.radius_ini, sTrain.radius_fin, ...
 sTrain.radius_cooling,  sTrain.scale0, sTrain.scaleN, ...
 sTrain.alpha_type, ...
 sTrain.kernel_type, sTopol.shape, sTopol.lattice, ...
-sTrain.compact_support, sTrain.gaussian, sTrain.stdCoeff, sMap.codebook);
+sTrain.compact_support, sTrain.gaussian, sTrain.stdCoeff, sMap.codebook, ...
+sTrain.verbose);
 rowNums=colon(1,size(globalBmus,1))'
 globalBmus = [rowNums globalBmus]
 sTrain = som_set(sTrain,'time',datestr(now,0));

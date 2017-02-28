@@ -94,7 +94,7 @@ void train(float *data, int data_length,
            string scaleCooling,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support, bool gaussian,
-           float std_coeff,
+           float std_coeff, unsigned int verbose,
            float* codebook, int codebook_size,
            int* globalBmus, int globalBmus_size,
            float* uMatrix, int uMatrix_size);
@@ -108,7 +108,8 @@ void train(int itask, float *data, svm_node **sparseData,
            float scale0, float scaleN,
            string scaleCooling,
            unsigned int kernelType, string mapType,
-           string gridType, bool compact_support, bool gaussian, float std_coeff
+           string gridType, bool compact_support, bool gaussian,
+           float std_coeff, unsigned int verbose
 #ifdef CLI
            , string outPrefix, unsigned int snapshots);
 #else
@@ -168,7 +169,7 @@ extern "C" {
                      unsigned int scaleCooling,
                      unsigned int kernelType, unsigned int mapType,
                      unsigned int gridType, bool compact_support, bool gaussian,
-                     float std_coeff,
+                     float std_coeff, unsigned int verbose,
                      float* codebook, int codebook_size,
                      int* globalBmus, int globalBmus_size,
                      float* uMatrix, int uMatrix_size);

@@ -1,4 +1,5 @@
 Version 1.7.3:
+  - New: Verbosity parameter in the command-line, Python, MATLAB, and Julia interfaces.
   - Changed: Moved feeding data to train method in the Python interface.
   - Fixed: Sparse matrix reader made more robust.
 

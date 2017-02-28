@@ -50,6 +50,7 @@ Arguments:
                                 2: Also save codebook and best matching
     -t STRATEGY              Radius cooling strategy: linear or exponential (default: linear)
     -T STRATEGY              Learning rate cooling strategy: linear or exponential (default: linear)
+    -v NUMBER                Verbosity level, 0-2 (default: 0)    
     -x, --columns NUMBER     Number of columns in map (size of SOM in direction x)
     -y, --rows    NUMBER     Number of rows in map (size of SOM in direction y)
 

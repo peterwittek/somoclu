@@ -19,19 +19,49 @@
 
 #include <cmath>
 #include <cstdlib>
-#ifdef CLI
-#include <iostream>
-#include <iomanip>
-#include <sstream>
-#else
+#ifndef CLI
 #include <stdexcept>
 #endif  // CLI
 #ifdef HAVE_R
 #include <R.h>
+#else
+#include <iostream>
+#include <iomanip>
 #endif  // HAVE_R
 #include "somoclu.h"
 
 using namespace std;
+
+// From https://stackoverflow.com/questions/17432502/how-can-i-measure-cpu-time-and-wall-clock-time-on-both-linux-windows
+//  Windows
+#ifdef _WIN32
+#include <Windows.h>
+double get_wall_time(){
+    LARGE_INTEGER time,freq;
+    if (!QueryPerformanceFrequency(&freq)){
+        //  Handle error
+        return 0;
+    }
+    if (!QueryPerformanceCounter(&time)){
+        //  Handle error
+        return 0;
+    }
+    return (double)time.QuadPart / freq.QuadPart;
+}
+
+//  Posix/Linux
+#else
+#include <time.h>
+#include <sys/time.h>
+double get_wall_time(){
+    struct timeval time;
+    if (gettimeofday(&time,NULL)){
+        //  Handle error
+        return 0;
+    }
+    return (double)time.tv_sec + (double)time.tv_usec * .000001;
+}
+#endif
 
 void my_abort(string err) {
 #ifdef CLI
@@ -58,7 +88,7 @@ void train(float *data, int data_length, unsigned int nEpoch,
            float scale0, float scaleN, string scaleCooling,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support, bool gaussian,
-           float std_coeff,
+           float std_coeff, unsigned int verbose,
            float *codebook, int codebook_size,
            int *globalBmus, int globalBmus_size,
            float *uMatrix, int uMatrix_size) {
@@ -75,7 +105,7 @@ void train(float *data, int data_length, unsigned int nEpoch,
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
-          gridType, compact_support, gaussian, std_coeff
+          gridType, compact_support, gaussian, std_coeff, verbose
 #ifdef CLI
           , "", 0);
 #else
@@ -92,7 +122,7 @@ void julia_train(float *data, int data_length, unsigned int nEpoch,
            float scale0, float scaleN, unsigned int _scaleCooling,
            unsigned int kernelType, unsigned int _mapType,
            unsigned int _gridType, bool compact_support, bool gaussian,
-           float std_coeff,
+           float std_coeff, unsigned int verbose,
            float *codebook, int codebook_size,
            int *globalBmus, int globalBmus_size,
            float *uMatrix, int uMatrix_size) {
@@ -125,7 +155,7 @@ void julia_train(float *data, int data_length, unsigned int nEpoch,
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
-          gridType, compact_support, gaussian, std_coeff
+          gridType, compact_support, gaussian, std_coeff, verbose
 #ifdef CLI
           , "", 0);
 #else
@@ -143,7 +173,8 @@ void train(int itask, float *data, svm_node **sparseData,
            float radius0, float radiusN, string radiusCooling,
            float scale0, float scaleN, string scaleCooling,
            unsigned int kernelType, string mapType,
-           string gridType, bool compact_support, bool gaussian, float std_coeff
+           string gridType, bool compact_support, bool gaussian,
+           float std_coeff, unsigned int verbose
 #ifdef CLI
            , string outPrefix, unsigned int snapshots)
 #else
@@ -187,9 +218,7 @@ void train(int itask, float *data, svm_node **sparseData,
     unsigned int currentEpoch = 0;             /// 0...nEpoch-1
     while ( currentEpoch < nEpoch ) {
 
-#ifdef HAVE_MPI
-        double epoch_time = MPI_Wtime();
-#endif
+        double epoch_time = get_wall_time();
         trainOneEpoch(itask, data, sparseData, codebook, globalBmus,
                       nEpoch, currentEpoch,
                       nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
@@ -210,25 +239,30 @@ void train(int itask, float *data, svm_node **sparseData,
         }
 #endif
         ++currentEpoch;
-
-#ifdef CLI
-#ifdef HAVE_MPI
-        if (itask == 0) {
-            epoch_time = MPI_Wtime() - epoch_time;
-            cerr << "Epoch Time: " << epoch_time << endl;
-            if ( (currentEpoch != nEpoch) && (currentEpoch % (nEpoch / 100 + 1) != 0) ) {}
-            else {
+#ifndef HAVE_R
+        if (itask == 0 && verbose > 0) {
+            epoch_time = get_wall_time() - epoch_time;
+            cerr << "Time for epoch " << currentEpoch << ": " << std::setw(4) << std::setprecision(4) << epoch_time << " ";
+            if ( (currentEpoch != nEpoch) && (currentEpoch % (nEpoch / 100 + 1) != 0) ) {} else {
                 float ratio  =  currentEpoch / (float)nEpoch;
                 int   c      =  ratio * 50 + 1;
                 cout << std::setw(7) << (int)(ratio * 100) << "% [";
                 for (int x = 0; x < c; x++) cout << "=";
                 for (int x = c; x < 50; x++) cout << " ";
-                cout << "]\n" << flush;
+                if (verbose == 1) {
+                    cout << "]\r" << flush;
+                } else {
+                    cout << "]\n" << flush;
+                }
             }
         }
 #endif
-#endif
     }
+#ifndef HAVE_R    
+    if (itask == 0 && verbose > 0) {    
+        cout << endl;
+    }
+#endif    
     trainOneEpoch(itask, data, sparseData, codebook, globalBmus,
                   nEpoch, currentEpoch,
                   nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,

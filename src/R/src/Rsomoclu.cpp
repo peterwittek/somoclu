@@ -61,7 +61,7 @@ RcppExport SEXP Rtrain(SEXP data_p,
           radiusCooling, scale0, scaleN, scaleCooling,
           kernelType, mapType,
           gridType, compactSupport, neighborhood == "gaussian",
-          std_coeff,
+          std_coeff, 0,
           codebook, codebook_size, globalBmus, globalBmus_size,
           uMatrix, uMatrix_size);
     Rcpp::NumericMatrix globalBmusMatrix(nVectors, 2);

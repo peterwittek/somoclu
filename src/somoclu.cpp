@@ -71,6 +71,7 @@ void printUsage() {
          "                              2: Also save codebook and best matching neurons\n" \
          "     -t STRATEGY           Radius cooling strategy: linear or exponential (default: linear)\n" \
          "     -T STRATEGY           Learning rate cooling strategy: linear or exponential (default: linear)\n" \
+         "     -v NUMBER             Verbosity level, 0-2 (default: 0)\n" \
          "     -x, --columns NUMBER  Number of columns in map (size of SOM in direction x) (default: " << N_SOM_X << ")\n" \
          "     -y, --rows NUMBER     Number of rows in map (size of SOM in direction y) (default: " << N_SOM_Y << ")\n" \
          "Examples:\n" \
@@ -89,6 +90,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                         unsigned int *snapshots,
                         string *gridType, unsigned int *compactSupport,
                         unsigned int *gaussian, float *std_coeff,
+                        unsigned int *verbose,
                         string *initialCodebookFilename) {
 
     // Setting default values
@@ -108,6 +110,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     *compactSupport = 1;
     *gaussian = 1;
     *std_coeff = 0.5;
+    *verbose = 0;
     string neighborhood_function = "gaussian";
     static struct option long_options[] = {
         {"help",  no_argument,       0,  'h'},
@@ -118,7 +121,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     int c;
     extern int optind, optopt;
     int option_index = 0;
-    while ((c = getopt_long (argc, argv, "hx:y:d:e:g:k:l:m:n:p:r:s:t:c:L:R:T:",
+    while ((c = getopt_long (argc, argv, "hx:y:d:e:g:k:l:m:n:p:r:s:t:v:c:L:R:T:",
                              long_options, &option_index)) != -1) {
         switch (c) {
         case 'c':
@@ -217,6 +220,12 @@ void processCommandLine(int argc, char** argv, string *inFilename,
             }
 
             break;
+        case 'v':
+            *verbose = atoi(optarg);
+            if (*verbose < 0 && *verbose > 2) {
+                my_abort("The argument of option -v should be 0, 1, or 2.");
+            }
+            break;
         case 'x':
             *nSomX = atoi(optarg);
             if (*nSomX <= 0) {
@@ -293,6 +302,7 @@ int main(int argc, char** argv)
     string initialCodebookFilename;
     string outPrefix;
     float std_coeff = 0.0;
+    unsigned int verbose = 0;
     if (rank == 0) {
         processCommandLine(argc, argv, &inFilename, &outPrefix,
                            &nEpoch, &radius0, &radiusN, &radiusCooling,
@@ -300,6 +310,7 @@ int main(int argc, char** argv)
                            &nSomX, &nSomY,
                            &kernelType, &mapType, &snapshots,
                            &gridType, &compactSupport, &gaussian, &std_coeff,
+                           &verbose,
                            &initialCodebookFilename);
 #ifndef CUDA
         if (kernelType == DENSE_GPU) {
@@ -397,10 +408,12 @@ int main(int argc, char** argv)
             delete [] dataRoot;
         }
 #endif
-        cout << "nVectors: " << nVectors << " ";
-        cout << "nVectorsPerRank: " << nVectorsPerRank << " ";
-        cout << "nDimensions: " << nDimensions << " ";
-        cout << endl;
+        if (verbose > 0) {
+          cout << "nVectors: " << nVectors << " ";
+          cout << "nVectorsPerRank: " << nVectorsPerRank << " ";
+          cout << "nDimensions: " << nDimensions << " ";
+          cout << endl;
+        }
     }
 
     ///
@@ -426,7 +439,9 @@ int main(int argc, char** argv)
             else if (nSomXY / nSomY != nSomX) {
                 my_abort("Dimension of initial codebook does not match specified SOM grid!");
             }
-            cout << "Read initial codebook: " << initialCodebookFilename << "\n";
+            if (verbose > 0) {
+                cout << "Read initial codebook: " << initialCodebookFilename << "\n";
+            }
         }
     }
 #ifdef HAVE_MPI
@@ -439,7 +454,7 @@ int main(int argc, char** argv)
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
-          gridType, compactSupport == 1, gaussian == 1, std_coeff
+          gridType, compactSupport == 1, gaussian == 1, std_coeff, verbose
 #ifdef CLI
 	, outPrefix, snapshots);
 #else
@@ -448,10 +463,6 @@ int main(int argc, char** argv)
 
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
-    training_time = MPI_Wtime() - training_time;
-    if (rank == 0) {
-        cerr << "Total training Time: " << training_time << endl;
-    }
 #endif
     ///
     /// Save SOM map and u-mat
@@ -464,8 +475,8 @@ int main(int argc, char** argv)
                          gridType);
         int ret =  saveUMatrix(outPrefix + string(".umx"), uMatrix, nSomX, nSomY);
         if (ret < 0)
-            cout << "    Failed to save u-matrix. !" << endl;
-        else {
+            cerr << "    Failed to save u-matrix. !" << endl;
+        else if (verbose > 0) {
             cout << "    Done!" << endl;
         }
         saveBmus(outPrefix + string(".bm"), globalBmus, nSomX, nSomY, nVectors);
@@ -487,12 +498,6 @@ int main(int argc, char** argv)
     delete [] codebook;
     delete [] globalBmus;
     delete [] uMatrix;
-#ifdef HAVE_MPI
-    profile_time = MPI_Wtime() - profile_time;
-    if (rank == 0) {
-        cerr << "Total Execution Time: " << profile_time << endl;
-    }
-#endif
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif

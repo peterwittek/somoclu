@@ -101,11 +101,13 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     bool compactSupport = (bool) mxGetPr(prhs[13])[0];
     bool gaussian = (bool) mxGetPr(prhs[14])[0];
     float stdCoeff = (float) mxGetPr(prhs[15])[0];
+    unsigned int verbose = (unsigned int) mxGetPr(prhs[17])[0];
     //Call train routine
     train(data, data_length, nEpoch, nSomX, nSomY,
           nDimensions, nVectors, radius0, radiusN,
           radiusCooling, scale0, scaleN, scaleCooling,
           kernelType, mapType, gridType, compactSupport, gaussian, stdCoeff,
+          verbose,
           codebook, codebook_size, globalBmus, globalBmus_size,
           uMatrix, uMatrix_size);
 

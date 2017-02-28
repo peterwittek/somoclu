@@ -83,12 +83,14 @@ class Somoclu(object):
                              subspace spanned by the first two eigenvectors of
                              the correlation matrix
     :type initialization: str.
+    :param verbose: Optional parameter to specify verbosity (0, 1, or 2).
+    :type verbose: int.
     """
 
     def __init__(self, n_columns, n_rows, initialcodebook=None,
                  kerneltype=0, maptype="planar", gridtype="rectangular",
                  compactsupport=True, neighborhood="gaussian", std_coeff=0.5,
-                 initialization=None, data=None):
+                 initialization=None, data=None, verbose=0):
         """Constructor for the class.
         """
         self._n_columns, self._n_rows = n_columns, n_rows
@@ -98,6 +100,7 @@ class Somoclu(object):
         self._compact_support = compactsupport
         self._neighborhood = neighborhood
         self._std_coeff = std_coeff
+        self._verbose = verbose
         self._check_parameters()
         self.activation_map = None
         if initialcodebook is not None and initialization is not None:
@@ -201,7 +204,7 @@ class Somoclu(object):
         _check_cooling_parameters(radiuscooling, scalecooling)
         if self._data is None and data is None:
             raise Exception("No data was provided!")
-        elif self._data is None:
+        elif data is not None:
             self.update_data(data)
         self._init_codebook()
         self.umatrix.shape = (self._n_rows * self._n_columns, )
@@ -211,7 +214,8 @@ class Somoclu(object):
                    radiuscooling, scale0, scaleN, scalecooling,
                    self._kernel_type, self._map_type, self._grid_type,
                    self._compact_support, self._neighborhood == "gaussian",
-                   self._std_coeff, self.codebook, self.bmus, self.umatrix)
+                   self._std_coeff, self._verbose, self.codebook, self.bmus,
+                   self.umatrix)
         self.umatrix.shape = (self._n_rows, self._n_columns)
         self.bmus.shape = (self.n_vectors, 2)
         self.codebook.shape = (self._n_rows, self._n_columns, self.n_dim)
@@ -464,6 +468,10 @@ class Somoclu(object):
         if self._kernel_type != 0 and self._kernel_type != 1:
             raise Exception("Invalid parameter for kernelTye: " +
                             self._kernel_type)
+        if self._verbose < 0 and self._verbose > 2:
+            raise Exception("Invalid parameter for verbose: " +
+                            self._kernel_type)
+                            
 
     def _pca_init(self):
         try:

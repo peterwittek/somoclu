@@ -48,6 +48,9 @@ Function Reference
                             subspace spanned by the first two eigenvectors of
                             the correlation matrix
    :type initialization: str.
+   :param verbose: Optional parameter to specify verbosity (0, 1, or 2).
+   :type verbose: int.
+
 
    .. py:method:: Somoclu.cluster(algorithm=None)
 
