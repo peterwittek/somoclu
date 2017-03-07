@@ -406,7 +406,7 @@ class Somoclu(object):
                 bmu_coords[i] = offsets[col * zoom[1][1] + row]
         else:
             plt.imshow(matrix[zoom[0][0]:zoom[0][1], zoom[1][0]:zoom[1][1]],
-                       aspect='auto')
+                       aspect='auto', interpolation='bicubic')
             plt.set_cmap(colormap)
             bmu_coords = self._filter_array(self.bmus, zoom)
             bmu_coords[:, 0] = bmu_coords[:, 0] - zoom[1][0]
@@ -471,7 +471,7 @@ class Somoclu(object):
         if self._verbose < 0 and self._verbose > 2:
             raise Exception("Invalid parameter for verbose: " +
                             self._kernel_type)
-                            
+
 
     def _pca_init(self):
         try:
