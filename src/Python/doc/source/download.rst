@@ -30,7 +30,7 @@ If you want the latest git version, clone the repository, make the Python target
     $ ./autogen.sh
     $ ./configure
     $ make python
-    $ cd src/python
+    $ cd src/Python
     $ sudo python setup.py install
 
 Build on Mac OS X
