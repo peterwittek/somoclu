@@ -27,7 +27,7 @@ Rsomoclu.train <-
 
 Rsomoclu.kohonen <-
   function(input_data, result, n.hood = NULL, toroidal = FALSE) {
-    mapping <- map(structure(list(codes = result$codebook), class = "kohonen"), newdata = input_data)
+    mapping <- map(som(result$codebook), newdata = input_data)
     nSomX = nrow(result$uMatrix)
     nSomY = ncol(result$uMatrix)
     grid = somgrid(nSomX, nSomY)
