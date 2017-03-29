@@ -3,7 +3,7 @@ Version: 1.7.3
 Date: 2016-10-02
 Title: Somoclu
 Depends: Rcpp
-Imports: kohonen, class
+Imports: kohonen
 Suggests:
 Authors@R: c(person(given = "Peter", family = "Wittek", role = c("aut"), email = ""),
              person(given = "Shichao", family = "Gao", role = c("cre"), email = "xgdgsc@gmail.com"))

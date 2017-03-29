@@ -52,6 +52,6 @@ plot(sommap, type="codes", main = c("Codes X", "Codes Y"))
 plot(sommap, type = "property", property = sommap$codes[,1],
      main = colnames(sommap$codes)[1])
 ## Show 'U-Matrix'
-plot(sommap, type="dist.neighbours")
+#plot(sommap, type="dist.neighbours")
 }
 \seealso{\url{http://www.r-bloggers.com/self-organising-maps-for-customer-segmentation-using-r/}}
