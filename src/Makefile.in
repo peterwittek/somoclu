@@ -11,7 +11,7 @@ prefix	 = @prefix@
 exec_prefix    = @exec_prefix@
 bindir	 = @bindir@
 libdir	 = @libdir@
-libname = 
+libname =
 
 # Tool-related substitution variables
 CXX		         = @CXX@
@@ -146,6 +146,7 @@ r:
 	cp ./denseGpuKernels.cu ./R/src/
 	cp ./sparseCpuKernels.cpp ./R/src/
 	cp ../data/rgbs.txt ./R/data/
+	sed -i '1s;^;r g b\n;' ./R/data/rgbs.txt
 	gzip -f ./R/data/rgbs.txt
 	R CMD build R
 
