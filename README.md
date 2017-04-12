@@ -149,7 +149,7 @@ To get it working with the GPU kernel, download the source zip file and specify 
 
 The Julia version is available on [GitHub](https://github.com/peterwittek/Somoclu.jl). Clone it with `Pkg.clone("https://github.com/peterwittek/Somoclu.jl")` and build it with `Pkg.build("Somoclu")`.
 
-For using the MATLAB toolbox, define the location of your MATLAB install to the configure script:
+For using the MATLAB toolbox, install SOM-Toolbox following the instructions at [ilarinieminen/SOM-Toolbox](https://github.com/ilarinieminen/SOM-Toolbox) and define the location of your MATLAB install to the configure script:
 
     ./configure --without-mpi --with-matlab=/usr/local/MATLAB/R2014a
 
