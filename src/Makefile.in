@@ -133,17 +133,17 @@ r_clean:
 
 r:
 	mkdir -p R/data
-	cp ../configure ./R/src/
-	cp ../config.h.in ./R/src/
-	cp ../install-sh ./R/src/
-	cp ../Makefile.in ./R/src/Makefile.root.in
-	cp ./Makefile.in ./R/src/
+	# cp ../configure ./R/src/
+	# cp ../config.h.in ./R/src/
+	# cp ../install-sh ./R/src/
+	# cp ../Makefile.in ./R/src/Makefile.root.in
+	# cp ./Makefile.in ./R/src/
+	# cp ./denseGpuKernels.cu ./R/src/
 	cp ./*.h ./R/src/
 	cp ./mapDistanceFunctions.cpp ./R/src/
 	cp ./training.cpp ./R/src/
 	cp ./uMatrix.cpp ./R/src/
 	cp ./denseCpuKernels.cpp ./R/src/
-	cp ./denseGpuKernels.cu ./R/src/
 	cp ./sparseCpuKernels.cpp ./R/src/
 	cp ../data/rgbs.txt ./R/data/
 	sed -i '1s;^;r g b\n;' ./R/data/rgbs.txt

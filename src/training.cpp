@@ -17,17 +17,13 @@
  *
  */
 
+
 #include <cmath>
 #include <cstdlib>
 #ifndef CLI
 #include <stdexcept>
 #endif  // CLI
-#ifdef HAVE_R
-#include <R.h>
-#else
-#include <iostream>
-#include <iomanip>
-#endif  // HAVE_R
+
 #include "somoclu.h"
 
 using namespace std;
@@ -62,6 +58,13 @@ double get_wall_time(){
     return (double)time.tv_sec + (double)time.tv_usec * .000001;
 }
 #endif
+
+#ifdef HAVE_R
+#include <Rcpp.h>
+#else
+#include <iostream>
+#include <iomanip>
+#endif  // HAVE_R
 
 void my_abort(string err) {
 #ifdef CLI
@@ -258,11 +261,11 @@ void train(int itask, float *data, svm_node **sparseData,
         }
 #endif
     }
-#ifndef HAVE_R    
-    if (itask == 0 && verbose > 0) {    
+#ifndef HAVE_R
+    if (itask == 0 && verbose > 0) {
         cout << endl;
     }
-#endif    
+#endif
     trainOneEpoch(itask, data, sparseData, codebook, globalBmus,
                   nEpoch, currentEpoch,
                   nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
@@ -321,7 +324,7 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
 		for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
 			for (unsigned int d = 0; d < nDimensions; d++) {
 #ifdef HAVE_R
-                int w = 0xFFF & (int) (RAND_MAX * unif_rand());
+                int w = 0xFFF & (int) (RAND_MAX * R::runif(0,1));
 #else
                 int w = 0xFFF & rand();
 #endif
