@@ -22,6 +22,8 @@
 #include <cstdlib>
 #ifndef CLI
 #include <stdexcept>
+#else
+#include <sstream>
 #endif  // CLI
 
 #include "somoclu.h"
