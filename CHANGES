@@ -1,8 +1,10 @@
-Version 1.7.3:
+Version 1.7.3: 2017-04-21
   - New: Verbosity parameter in the command-line, Python, MATLAB, and Julia interfaces.
   - Changed: Calculation of U-matrix parallelized.
   - Changed: Moved feeding data to train method in the Python interface.
   - Fixed: Sparse matrix reader made more robust.
+  - Fixed: Compatibility with kohonen 3 resolved.
+  - Fixed: Compatibility with Matplotlib 2 resolved.
 
 Version 1.7.2: 2016-11-24
   - New: The coefficient of the Gaussian neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2)) is now exposed in all interfaces as a parameter.
