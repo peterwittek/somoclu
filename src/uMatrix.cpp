@@ -59,14 +59,22 @@ float *calculateUMatrix(float *uMatrix, float *codebook, unsigned int nSomX,
 #ifdef _OPENMP
         #pragma omp for
 #endif // _OPENMP
+#ifdef _WIN32
+		for (int som_y1 = 0; som_y1 < nSomY; som_y1++) {
+			for (int som_x1 = 0; som_x1 < nSomX; som_x1++) {
+#else
         for (unsigned int som_y1 = 0; som_y1 < nSomY; som_y1++) {
             for (unsigned int som_x1 = 0; som_x1 < nSomX; som_x1++) {
+#endif
                 float dist = 0.0f;
                 unsigned int nodes_number = 0;
-
+#ifdef _WIN32
+				for (int som_y2 = 0; som_y2 < nSomY; som_y2++) {
+					for (int som_x2 = 0; som_x2 < nSomX; som_x2++) {
+#else
                 for (unsigned int som_y2 = 0; som_y2 < nSomY; som_y2++) {
                     for (unsigned int som_x2 = 0; som_x2 < nSomX; som_x2++) {
-
+#endif
                         if (som_x1 == som_x2 && som_y1 == som_y2) continue;
                         float tmp = 0.0f;
                         if (gridType == "rectangular") {
