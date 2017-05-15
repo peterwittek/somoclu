@@ -25,24 +25,24 @@ Rsomoclu.train <-
     res
   }
 
-Rsomoclu.kohonen <-
-  function(input_data, result, n.hood = NULL, toroidal = FALSE) {
-    mapping <- map(som(result$codebook), newdata = input_data)
-    nSomX = nrow(result$uMatrix)
-    nSomY = ncol(result$uMatrix)
-    grid = somgrid(nSomX, nSomY)
-    if (missing(n.hood)) {
-      n.hood <- switch(grid$topo,
-                       hexagonal = "circular",
-                       rectangular = "square")
-    } else {
-      n.hood <- match.arg(n.hood, c("circular", "square"))
-    }
-    grid$n.hood <- n.hood
-    sommap = structure(list(data = input_data, grid = grid, codes = result$codebook, changes = NULL,
-                            unit.classif = mapping$unit.classif,
-                            distances = mapping$distances,
-                            toroidal = toroidal, method="som"),
-                       class = "kohonen")
-    sommap
+Rsomoclu.kohonen <- function (input_data, result, n.hood = NULL, toroidal = FALSE) 
+{
+  mapping <- map(som(result$codebook), newdata = input_data)
+  nSomX = nrow(result$uMatrix)
+  nSomY = ncol(result$uMatrix)
+  grid = somgrid(nSomX, nSomY)
+  if (missing(n.hood)) {
+    n.hood <- switch(grid$topo, hexagonal = "circular", 
+                     rectangular = "square")
   }
+  else {
+    n.hood <- match.arg(n.hood, c("circular", "square"))
+  }
+  grid$n.hood <- n.hood
+  sommap = structure(list(data = list(input_data), grid = grid, 
+                          codes = list(result$codebook), changes = NULL, unit.classif = mapping$unit.classif, 
+                          distances = mapping$distances, toroidal = toroidal, user.weights = 1, distance.weights=1,
+                          whatmap=1,  maxNA.fraction = 0L, method = "som", dist.fcts="sumofsquares"), class = "kohonen")
+  sommap
+}
+

@@ -30,9 +30,9 @@ res$uMatrix
 library('kohonen')
 sommap = Rsomoclu.kohonen(input_data, res)
 ## Show 'codebook'
-plot(sommap, type="codes", main = c("Codes X", "Codes Y"))
+plot(sommap, type="codes", main = "Codes")
 ## Show 'component planes'
-plot(sommap, type = "property", property = sommap$codes[,1],
+plot(sommap, type = "property", property = sommap$codes[[1]][,1],
      main = colnames(sommap$codes)[1])
 ## Show 'U-Matrix'
-#plot(sommap, type="dist.neighbours")
+plot(sommap, type="dist.neighbours")
