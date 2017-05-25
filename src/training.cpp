@@ -201,7 +201,7 @@ void train(int itask, float *data, svm_node **sparseData,
     // codebook
 
     if (codebook[0] == 1000 && codebook[1] == 2000) {
-        initializeCodebook(0, codebook, nSomX, nSomY, nDimensions);
+        initializeCodebook(get_wall_time(), codebook, nSomX, nSomY, nDimensions);
     }
     ///
     /// Parameters for SOM
