@@ -426,7 +426,7 @@ int main(int argc, char** argv)
         globalBmus = new int[nVectorsPerRank * int(ceil(nVectors / (double)nVectorsPerRank)) * 2];
         uMatrix = new float[nSomX * nSomY];
         if (initialCodebookFilename.empty()) {
-            initializeCodebook(0, codebook, nSomX, nSomY, nDimensions);
+            initializeCodebook(get_wall_time(), codebook, nSomX, nSomY, nDimensions);
         }
         else {
             unsigned int nSomXY = 0;
