@@ -1,3 +1,6 @@
+Since version 1.7.3:
+  - Fixed: The random seed was set to 0 for testing purposes. This is now changed to a wall-time based initialization.
+
 Version 1.7.3: 2017-04-21
   - New: Verbosity parameter in the command-line, Python, MATLAB, and Julia interfaces.
   - Changed: Calculation of U-matrix parallelized.
