@@ -15,7 +15,7 @@ Key features of the Python interface:
 
 The documentation is available online. Further details are found in the following paper:
 
-Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2017). Somoclu: An Efficient Parallel Library for Self-Organizing Maps.  Journal of Statistical Software, 78(9), pp.1--21. DOI: `10.18637/jss.v078.i09 <https://doi.org/10.18637/jss.v078.i09>`_. arXiv:`1305.1422 <https://arxiv.org/abs/1305.1422>`_.
+Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2017). Somoclu: An Efficient Parallel Library for Self-Organizing Maps.  Journal of Statistical Software, 78(9), pp.1--21. DOI:`10.18637/jss.v078.i09 <https://doi.org/10.18637/jss.v078.i09>`_. arXiv:`1305.1422 <https://arxiv.org/abs/1305.1422>`_.
 
 Copyright and License
 ---------------------

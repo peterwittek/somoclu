@@ -7,8 +7,12 @@ A BibTeX entry for LaTeX users is
 @Article{wittek2015somoclu,
   author =    {Wittek, Peter and Gao, Shi Chao and Lim, Ik Soo and Zhao, Li},
   title =     {Somoclu: An Efficient Parallel Library for Self-Organizing Maps},
-  journal =   {arXiv:1305.1422},
-  year =      {2015}
+  journal =   {Journal of Statistical Software},
+  year    =   {2017},
+  volume  =   {78},
+  number  =   {9},
+  pages   =   {1--21},
+  doi     =   {10.18637/jss.v078.i09}
 }
 
 You may also consider adding a link to the code. Please cite the PyPI version:
