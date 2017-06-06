@@ -1,6 +1,6 @@
 Package: Rsomoclu
-Version: 1.7.3
-Date: 2016-10-02
+Version: 1.7.4
+Date: 2017-06-06
 Title: Somoclu
 Depends: Rcpp
 Imports: kohonen
