@@ -4,7 +4,7 @@ Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Pa
 
 A BibTeX entry for LaTeX users is
 
-@Article{wittek2015somoclu,
+@Article{wittek2017somoclu,
   author =    {Wittek, Peter and Gao, Shi Chao and Lim, Ik Soo and Zhao, Li},
   title =     {Somoclu: An Efficient Parallel Library for Self-Organizing Maps},
   journal =   {Journal of Statistical Software},
