@@ -234,4 +234,5 @@ This work was supported by the European Commission Seventh Framework Programme u
 Citation
 ========
 
-1. Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. [arXiv:1305.1422](http://arxiv.org/abs/1305.1422).
+1. Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2017). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. Journal of Statistical Software, 78(9), pp.1--21. DOI: [10.18637/jss.v078.i09](https://doi.org/10.18637/jss.v078.i09).
+ arXiv:[1305.1422](https://arxiv.org/abs/1305.1422).

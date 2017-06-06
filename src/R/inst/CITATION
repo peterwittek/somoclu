@@ -1,18 +1,24 @@
-citHeader("To cite Rsomoclu in publications use:")
+bibentry(bibtype = "Article",
+  title        = "{somoclu}: An Efficient Parallel Library for Self-Organizing Maps",
+  author       = c(person(given = "Peter",
+                          family = "Wittek"),
+                   person(given = c("Shi", "Chao"),
+                          family = "Gao"),
+                   person(given = c("Ik", "Soo"),
+                          family = "Lim"),
+                   person(given = "Li",
+                          family = "Zhao")),
+  journal      = "Journal of Statistical Software",
+  year         = "2017",
+  volume       = "78",
+  number       = "9",
+  pages        = "1--21",
+  doi          = "10.18637/jss.v078.i09",
 
-citEntry(entry = "Article",
-  title        = "Somoclu: An Efficient Parallel Library for Self-Organizing Maps",
-  author       = personList(as.person("Peter Wittek"),
-	                          as.person("Shi Chao Gao"),
-                            as.person("Ik Soo Lim"),
-                  		      as.person("Li Zhao")),
-  journal      = "arXiv:1305.1422",
-  year         = "2015",
-  url          = "http://arxiv.org/abs/1305.1422",
-
+  header       = "To cite somoclu in publications use:",
   textVersion  =
-  paste("Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015).",
-        "Somoclu: An Efficient Parallel Library for Self-Organizing Maps.",
-        "arXiv:1305.1422.",
-        "URL http://arxiv.org/abs/1305.1422.")
+  paste("Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2017).",
+        "somoclu: An Efficient Parallel Library for Self-Organizing Maps.",
+        "Journal of Statistical Software, 78(9), 1-21.",
+        "doi:10.18637/jss.v078.i09")
 )

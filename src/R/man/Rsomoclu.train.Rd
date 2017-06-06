@@ -44,7 +44,7 @@ Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
   \item{globalBmus}{global Best Matching Unit matrix}
   \item{uMatrix}{uMatrix}
 }
-\references{Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. arXiv:1305.1422.}
+\references{Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2017). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. Journal of Statistical Software, 78(9), 1-21. doi:10.18637/jss.v078.i09.}
 \author{Peter Wittek, Shichao Gao}
 \examples{
 library('Rsomoclu')
