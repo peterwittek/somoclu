@@ -25,6 +25,8 @@
 #include "Windows/unistd.h"
 #include "Windows/getopt.h"
 #else
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <getopt.h>
 #endif
