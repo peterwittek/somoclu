@@ -50,6 +50,7 @@ Arguments:
                                 2: Also save codebook and best matching
     -t STRATEGY              Radius cooling strategy: linear or exponential (default: linear)
     -T STRATEGY              Learning rate cooling strategy: linear or exponential (default: linear)
+    -v NUMBER                Verbosity level, 0-2 (default: 0)    
     -x, --columns NUMBER     Number of columns in map (size of SOM in direction x)
     -y, --rows    NUMBER     Number of rows in map (size of SOM in direction y)
 
@@ -134,7 +135,7 @@ Some pre-built binaries in the wheel format or Windows installer are provided at
 
 The wheel binaries for OSX are compiled with [clang-omp](http://clang-omp.github.io/), and depend on libiomp5, which you can install by:
 
-    $ brew install libiomp
+    $ brew install homebrew/boneyard/libiomp
 
 To get it working with the GPU kernel, you might have to follow the instructions at [Somoclu - Python Interface](https://github.com/peterwittek/somoclu/tree/master/src/Python).
 
@@ -148,7 +149,7 @@ To get it working with the GPU kernel, download the source zip file and specify 
 
 The Julia version is available on [GitHub](https://github.com/peterwittek/Somoclu.jl). Clone it with `Pkg.clone("https://github.com/peterwittek/Somoclu.jl")` and build it with `Pkg.build("Somoclu")`.
 
-For using the MATLAB toolbox, define the location of your MATLAB install to the configure script:
+For using the MATLAB toolbox, install SOM-Toolbox following the instructions at [ilarinieminen/SOM-Toolbox](https://github.com/ilarinieminen/SOM-Toolbox) and define the location of your MATLAB install to the configure script:
 
     ./configure --without-mpi --with-matlab=/usr/local/MATLAB/R2014a
 
@@ -233,4 +234,5 @@ This work was supported by the European Commission Seventh Framework Programme u
 Citation
 ========
 
-1. Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2015). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. [arXiv:1305.1422](http://arxiv.org/abs/1305.1422).
+1. Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2017). Somoclu: An Efficient Parallel Library for Self-Organizing Maps. Journal of Statistical Software, 78(9), pp.1--21. DOI:[10.18637/jss.v078.i09](https://doi.org/10.18637/jss.v078.i09).
+ arXiv:[1305.1422](https://arxiv.org/abs/1305.1422).
