@@ -560,10 +560,13 @@ class Somoclu(object):
             d = self._data
         else:
             d = data
-        am = cdist(self.codebook.reshape((self.codebook.shape[0] *
-                                          self.codebook.shape[1],
-                                          self.codebook.shape[2])),
-                   d, 'euclidean').T
+        
+        codebookReshaped = self.codebook.reshape(self.codebook.shape[0] * self.codebook.shape[1], self.codebook.shape[2])
+        parts = np.array_split(d, 200, axis=0)
+        am = np.empty((0, (self._n_columns * self._n_rows)), dtype="float64")
+        for part in parts:
+            sum = np.concatenate((sum, (cdist((part), codebookReshaped, 'euclidean'))), axis=0)
+        
         if data is None:
             self.activation_map = am
         return am
