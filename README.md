@@ -209,18 +209,18 @@ Somoclu looks for CUDA in /usr/local/cuda. If your installation is not there, th
 
 Windows
 -------
-Use the `somoclu.sln` under `src/Windows/somoclu` as an example Visual Studio 2013 solution. Modify the CUDA version or VC compiler version according to your needs.
+Use the `somoclu.sln` under `src/Windows/somoclu` as an example Visual Studio 2015 solution. Modify the CUDA version or VC compiler version according to your needs.
 
-The default solution enables all of OpenMP, MPI, and CUDA. The default MPI installation path is `C:\Program Files (x86)\Microsoft SDKs\MPI\`, modify the settings if yours is in a different path. The configuration default CUDA version is 7.5.  Disable MPI by removing `HAVE_MPI` macro in the project properties (`Properties -> Configuration Properties -> C/C++ -> Preprocessor`). Disable CUDA by removing `CUDA` macro in the solution properties and uncheck CUDA in `Project -> Custom Build Rules`. If you open the solution without CUDA installed, please remove the following sections in `somoclu.vcxproj`:
+The default solution enables all of OpenMP, MPI, and CUDA. The default MPI installation path is `C:\Program Files (x86)\Microsoft SDKs\MPI\`, modify the settings if yours is in a different path. The configuration default CUDA version is 8.0.  Disable MPI by removing `HAVE_MPI` macro in the project properties (`Properties -> Configuration Properties -> C/C++ -> Preprocessor`). Disable CUDA by removing `CUDA` macro in the solution properties and uncheck CUDA in `Project -> Custom Build Rules`. If you open the solution without CUDA installed, please remove the following sections in `somoclu.vcxproj`:
 ```
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 7.5.props" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 8.0.props" />
   </ImportGroup>
 ```
 and
 ```
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 7.5.targets" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 8.0.targets" />
   </ImportGroup>
 ```
 or change the version number according to which you installed.
