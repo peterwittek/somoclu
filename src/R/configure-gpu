@@ -1,0 +1,28 @@
+#!/bin/bash
+if [ "$#" -ne 1 ]; then
+    exit 0
+fi
+ARCH=$(uname -m)
+if [ ${ARCH} = 'i386' ] ; then
+    CUDA_LIB=$1/lib
+else
+    CUDA_LIB=$1/lib64
+fi
+mkdir -p src/src
+mv src/*cpp src/*cu src/Makefile.in src/src/
+cp src/somoclu.h src/src/
+mv src/src/Rsomoclu.cpp src/
+mv src/Makefile.root.in src/Makefile.in
+rm src/Makevars*
+cd src
+./configure --with-cuda=$1 --without-mpi
+make libwrapper
+rm Makefile*
+mv src/*.o ./
+mv src/*.co ./
+rm -fr src
+export PKG_LIBS=`${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()"`
+export PKG_CXXFLAGS=`${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()"`" -DHAVE_R -DCUDA"
+${R_HOME}/bin/R CMD SHLIB $PKG_CXXFLAGS Rsomoclu.cpp denseCpuKernels.o sparseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o denseGpuKernels.cu.co -lgomp -L${CUDA_LIB} -lcudart -lcublas
+cp Rsomoclu.so ../
+cd ..

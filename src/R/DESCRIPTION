@@ -1,5 +1,5 @@
 Package: Rsomoclu
-Version: 1.7.4
+Version: 1.7.4.1
 Date: 2017-06-06
 Title: Somoclu
 Depends: Rcpp
@@ -18,3 +18,4 @@ NeedsCompilation: yes
 Repository: CRAN
 SystemRequirements: GNU make
 SystemRequirements: C++11
+LinkingTo: Rcpp
