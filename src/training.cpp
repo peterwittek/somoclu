@@ -99,10 +99,10 @@ void train(float *data, int data_length, unsigned int nEpoch,
            float *uMatrix, int uMatrix_size) {
 #ifdef HAVE_R
 #ifndef CUDA
-	if(kernelType == DENSE_GPU){
-		Rprintf("Error: CUDA kernel not compiled \n");
-		return;
-	}
+    if(kernelType == DENSE_GPU){
+        Rprintf("Error: CUDA kernel not compiled \n");
+        return;
+    }
 #endif // CUDA
 #endif // HAVE_R
     train(0, data, NULL, codebook, globalBmus, uMatrix, nSomX, nSomY,
@@ -187,6 +187,7 @@ void train(int itask, float *data, svm_node **sparseData,
 #endif
 {
     int nProcs = 1;
+    float * X2 = NULL;
 #ifdef HAVE_MPI
     MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
 #endif
@@ -196,6 +197,28 @@ void train(int itask, float *data, svm_node **sparseData,
         initializeGpu(data, nVectorsPerRank, nDimensions, nSomX, nSomY);
     }
 #endif
+
+    if (kernelType == SPARSE_CPU) {
+        // Pre-compute the squared norm of all the vectors
+
+        X2 = new float[nVectorsPerRank];
+
+#ifdef _OPENMP
+    #pragma omp parallel for
+#endif
+#ifdef _WIN32
+        for (int i=0; i<nVectorsPerRank; ++i) {
+#else
+        for (unsigned int i=0; i<nVectorsPerRank; ++i) {
+#endif
+            float acc=0.f;
+            for (unsigned int j=0; sparseData[i][j].index!=-1; ++j) {
+                acc += sparseData[i][j].value * sparseData[i][j].value;
+            }
+            X2[i] = acc;
+        }
+    }
+
     // (Re-)Initialize codebook with random values only if requested through
     // the passed codebook -- meaning that the user did not have an initial
     // codebook
@@ -224,7 +247,7 @@ void train(int itask, float *data, svm_node **sparseData,
     while ( currentEpoch < nEpoch ) {
 
         double epoch_time = get_wall_time();
-        trainOneEpoch(itask, data, sparseData, codebook, globalBmus,
+        trainOneEpoch(itask, data, sparseData, X2, codebook, globalBmus,
                       nEpoch, currentEpoch,
                       nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
                       radius0, radiusN, radiusCooling,
@@ -268,7 +291,7 @@ void train(int itask, float *data, svm_node **sparseData,
         cout << endl;
     }
 #endif
-    trainOneEpoch(itask, data, sparseData, codebook, globalBmus,
+    trainOneEpoch(itask, data, sparseData, X2, codebook, globalBmus,
                   nEpoch, currentEpoch,
                   nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
                   radius0, radiusN, radiusCooling,
@@ -279,6 +302,10 @@ void train(int itask, float *data, svm_node **sparseData,
         freeGpu();
     }
 #endif
+
+    if (kernelType == SPARSE_CPU) {
+        delete [] X2;
+    }
 }
 
 float linearCooling(float start, float end, float nEpoch, float epoch) {
@@ -321,10 +348,10 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
 #ifdef _WIN32
     for (int som_y = 0; som_y < nSomY; som_y++) {
 #else
-	for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+    for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
 #endif
-		for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-			for (unsigned int d = 0; d < nDimensions; d++) {
+        for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
+            for (unsigned int d = 0; d < nDimensions; d++) {
 #ifdef HAVE_R
                 int w = 0xFFF & (int) (RAND_MAX * R::runif(0,1));
 #else
@@ -340,7 +367,7 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
 #endif
 }
 
-void trainOneEpoch(int itask, float *data, svm_node **sparseData,
+void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
                    float *codebook, int *globalBmus,
                    unsigned int nEpoch, unsigned int currentEpoch,
                    unsigned int nSomX, unsigned int nSomY,
@@ -418,7 +445,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData,
 #endif
         break;
     case SPARSE_CPU:
-        trainOneEpochSparseCPU(itask, sparseData, numerator, denominator,
+        trainOneEpochSparseCPU(itask, sparseData, X2, numerator, denominator,
                                codebook, nSomX, nSomY, nDimensions,
                                nVectors, nVectorsPerRank, radius, scale,
                                mapType, gridType, compact_support, gaussian,
