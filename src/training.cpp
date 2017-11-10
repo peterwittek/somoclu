@@ -211,11 +211,13 @@ void train(int itask, float *data, svm_node **sparseData,
 #else
         for (unsigned int i=0; i<nVectorsPerRank; ++i) {
 #endif
-            float acc=0.f;
-            for (unsigned int j=0; sparseData[i][j].index!=-1; ++j) {
-                acc += sparseData[i][j].value * sparseData[i][j].value;
+            if (itask * nVectorsPerRank + i < nVectors) {
+                float acc=0.f;
+                for (unsigned int j=0; sparseData[i][j].index!=-1; ++j) {
+                    acc += sparseData[i][j].value * sparseData[i][j].value;
+                }
+                X2[i] = acc;
             }
-            X2[i] = acc;
         }
     }
 
