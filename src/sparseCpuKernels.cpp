@@ -24,51 +24,37 @@
 #include <Rconfig.h>
 #endif
 
-/** Distance b/w a feature vector and a weight vector
- * = Euclidean
- * @param som_y
- * @param som_x
- * @param r - row number in the input feature file
+/** Dot-product b/w a feature vector and a weight vector
+ * @param w - the weight vector
+ * @param x - the feature vector
   */
-
-float get_distance(float* codebook, svm_node **sparseData,
-                   unsigned int som_y, unsigned int som_x, unsigned int nSomX,
-                   unsigned int nDimensions, unsigned int r) {
-    float distance = 0.0f;
-    unsigned int j = 0;
-    for ( unsigned int d = 0; d < nDimensions; d++ ) {
-        if ( (int) d == sparseData[r][j].index ) {
-            distance += (codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] -
-                         sparseData[r][j].value) *
-                        (codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] -
-                         sparseData[r][j].value);
-            ++j;
-        }
-        else {
-            distance += codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] *
-                        codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d];
-        }
+float dot_product_dense_by_sparse(float *w, svm_node *x) {
+    float acc = 0.0f;
+    for (unsigned int j=0; x[j].index!=-1; ++j) {
+        acc += x[j].value * w[x[j].index];
     }
-    return distance;
+    return acc;
 }
 
 /** Get node coords for the best matching unit (BMU)
  * @param coords - BMU coords
- * @param n - row num in the input feature file
  */
-void get_bmu_coord(float* codebook, svm_node **sparseData,
+void get_bmu_coord(float* codebook, svm_node *sparseVec,
+                   float x2, float *W2,
                    unsigned int nSomY, unsigned int nSomX,
-                   unsigned int nDimensions, int* coords, unsigned int n) {
+                   unsigned int nDimensions, int* coords) {
     float mindist = 0.0f;
-    float dist = 0.0f;
 
     /// Check nSomX * nSomY nodes one by one and compute the distance
     /// D(W_K, Fvec) and get the mindist and get the coords for the BMU.
     ///
     for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-            dist = get_distance(codebook, sparseData, som_y, som_x, nSomX,
-                                nDimensions, n);
+            size_t idx = som_y * nSomX + som_x;
+
+            float dist = x2 + W2[idx] - 2 * dot_product_dense_by_sparse(codebook + idx * nDimensions, sparseVec);
+            if (dist < 0.f) dist = 0.f;
+
             if ((som_y == 0 && som_x == 0) || (dist < mindist)) {
                 mindist = dist;
                 coords[0] = som_x;
@@ -78,8 +64,8 @@ void get_bmu_coord(float* codebook, svm_node **sparseData,
     }
 }
 
-void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
-                            float *denominator, float *codebook,
+void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *X2,
+                            float *numerator, float *denominator, float *codebook,
                             unsigned int nSomX, unsigned int nSomY,
                             unsigned int nDimensions, unsigned int nVectors,
                             unsigned int nVectorsPerRank, float radius,
@@ -93,6 +79,29 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
 #else
     bmus = globalBmus;
 #endif
+
+    // Pre-compute the squared norm of all the weights
+    float *W2 = new float[nSomY * nSomX];
+
+#ifdef _OPENMP
+    #pragma omp parallel for collapse(2)
+#endif
+#ifdef _WIN32
+    for (int som_y = 0; som_y < nSomY; som_y++) {
+        for (int som_x = 0; som_x < nSomX; som_x++) {
+#else
+    for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+        for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
+#endif
+            size_t idx = som_y * nSomX + som_x;
+            float acc = 0.;
+            for ( unsigned int d = 0; d < nDimensions; d++ ) {
+                acc += codebook[idx * nDimensions + d] * codebook[idx * nDimensions + d];
+            }
+            W2[idx] = acc;
+        }
+    }
+
 #ifdef _OPENMP
     #pragma omp parallel default(shared) private(p1)
 #endif
@@ -107,8 +116,8 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
 #endif
             if (itask * nVectorsPerRank + n < nVectors) {
                 /// get the best matching unit
-                get_bmu_coord(codebook, sparseData, nSomY, nSomX,
-                              nDimensions, p1, n);
+                get_bmu_coord(codebook, sparseData[n], X2[n], W2, 
+                              nSomY, nSomX, nDimensions, p1);
                 bmus[2 * n] = p1[0];
                 bmus[2 * n + 1] = p1[1];
             }
@@ -237,4 +246,6 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *numerator,
     delete [] localNumerator;
     delete [] bmus;
 #endif
+
+    delete [] W2;
 }
