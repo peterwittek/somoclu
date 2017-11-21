@@ -389,6 +389,9 @@ int main(int argc, char** argv)
 #endif
     }
     else {
+#ifdef HAVE_MPI
+        MPI_Bcast(&zerobased, 1, MPI_BYTE, 0, MPI_COMM_WORLD);
+#endif
         int currentRankProcessed = 0;
         while (currentRankProcessed < nProcs) {
             if (rank == currentRankProcessed) {
