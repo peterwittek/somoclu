@@ -27,10 +27,11 @@ Rsomoclu.train <-
 
 Rsomoclu.kohonen <- function (input_data, result, n.hood = NULL, toroidal = FALSE) 
 {
-  mapping <- map(som(result$codebook), newdata = input_data)
+  
   nSomX = nrow(result$uMatrix)
   nSomY = ncol(result$uMatrix)
   grid = somgrid(nSomX, nSomY)
+  mapping <- map(som(result$codebook, grid=grid), newdata = input_data)
   if (missing(n.hood)) {
     n.hood <- switch(grid$topo, hexagonal = "circular", 
                      rectangular = "square")
