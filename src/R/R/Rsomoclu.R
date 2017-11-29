@@ -27,7 +27,6 @@ Rsomoclu.train <-
 
 Rsomoclu.kohonen <- function (input_data, result, n.hood = NULL, toroidal = FALSE) 
 {
-  
   nSomX = nrow(result$uMatrix)
   nSomY = ncol(result$uMatrix)
   grid = somgrid(nSomX, nSomY)
