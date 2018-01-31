@@ -10,7 +10,8 @@
 
 float *calculateUMatrix(float *uMatrix, float *codebook, unsigned int nSomX,
                         unsigned int nSomY, unsigned int nDimensions,
-                        string mapType, string gridType) {
+                        string mapType, string gridType,
+                        float (*get_distance)(float*, float*, unsigned int)) {
     float min_dist = 1.5f;
 #ifdef _OPENMP
     #pragma omp parallel default(shared)

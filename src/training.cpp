@@ -110,14 +110,15 @@ void train(float *data, int data_length, unsigned int nEpoch,
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
-          gridType, compact_support, gaussian, std_coeff, verbose
+          gridType, compact_support, gaussian, std_coeff, verbose,
+          get_euclidean_distance
 #ifdef CLI
           , "", 0);
 #else
          );
 #endif
     calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
-                     gridType);
+                     gridType, get_euclidean_distance);
 }
 
 void julia_train(float *data, int data_length, unsigned int nEpoch,
@@ -160,14 +161,15 @@ void julia_train(float *data, int data_length, unsigned int nEpoch,
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
-          gridType, compact_support, gaussian, std_coeff, verbose
+          gridType, compact_support, gaussian, std_coeff, verbose,
+          get_euclidean_distance
 #ifdef CLI
           , "", 0);
 #else
          );
 #endif
     calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
-                     gridType);
+                     gridType, get_euclidean_distance);
 }
 
 void train(int itask, float *data, svm_node **sparseData,
@@ -179,7 +181,8 @@ void train(int itask, float *data, svm_node **sparseData,
            float scale0, float scaleN, string scaleCooling,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support, bool gaussian,
-           float std_coeff, unsigned int verbose
+           float std_coeff, unsigned int verbose,
+           float (*get_distance)(float*, float*, unsigned int)
 #ifdef CLI
            , string outPrefix, unsigned int snapshots)
 #else
@@ -254,11 +257,11 @@ void train(int itask, float *data, svm_node **sparseData,
                       nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
                       radius0, radiusN, radiusCooling,
                       scale0, scaleN, scaleCooling, kernelType, mapType,
-                      gridType, compact_support, gaussian, std_coeff);
+                      gridType, compact_support, gaussian, get_distance, std_coeff);
 #ifdef CLI
         if (snapshots > 0 && itask == 0) {
             calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions,
-                             mapType, gridType);
+                             mapType, gridType, get_distance);
             stringstream sstm;
             sstm << outPrefix << "." << currentEpoch + 1;
             saveUMatrix(sstm.str() + string(".umx"), uMatrix, nSomX, nSomY);
@@ -298,7 +301,8 @@ void train(int itask, float *data, svm_node **sparseData,
                   nSomX, nSomY, nDimensions, nVectors, nVectorsPerRank,
                   radius0, radiusN, radiusCooling,
                   scale0, scaleN, scaleCooling, kernelType, mapType,
-                  gridType, compact_support, gaussian, std_coeff, true);
+                  gridType, compact_support, gaussian, get_distance,
+                  std_coeff, true);
 #ifdef CUDA
     if (kernelType == DENSE_GPU) {
         freeGpu();
@@ -381,6 +385,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
                    string scaleCooling,
                    unsigned int kernelType, string mapType,
                    string gridType, bool compact_support, bool gaussian,
+                   float (*get_distance)(float*, float*, unsigned int),
                    float std_coeff, bool only_bmus) {
 
     float N = (float)nEpoch;
@@ -434,7 +439,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
                               codebook, nSomX, nSomY, nDimensions,
                               nVectors, nVectorsPerRank, radius, scale,
                               mapType, gridType, compact_support, gaussian,
-                              globalBmus, only_bmus, std_coeff);
+                              globalBmus, only_bmus, std_coeff, get_distance);
         break;
     case DENSE_GPU:
 #ifdef CUDA

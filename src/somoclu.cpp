@@ -459,7 +459,8 @@ int main(int argc, char** argv)
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
-          gridType, compactSupport == 1, gaussian == 1, std_coeff, verbose
+          gridType, compactSupport == 1, gaussian == 1, std_coeff, verbose,
+          get_euclidean_distance
 #ifdef CLI
 	, outPrefix, snapshots);
 #else
@@ -477,7 +478,7 @@ int main(int argc, char** argv)
         /// Save U-mat
         ///
         calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
-                         gridType);
+                         gridType, get_euclidean_distance);
         int ret =  saveUMatrix(outPrefix + string(".umx"), uMatrix, nSomX, nSomY);
         if (ret < 0)
             cerr << "    Failed to save u-matrix. !" << endl;

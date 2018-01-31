@@ -53,14 +53,15 @@ float euclideanDistanceOnToroidMap(const unsigned int som_x, const unsigned int 
 float euclideanDistanceOnPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y);
 float euclideanDistanceOnHexagonalToroidMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y, const unsigned int nSomX, const unsigned int nSomY);
 float euclideanDistanceOnHexagonalPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y);
-float get_distance(float* vec1, float* vec2, unsigned int nDimensions);
+float get_euclidean_distance(float* vec1, float* vec2, unsigned int nDimensions);
 double get_wall_time();
 float getWeight(float distance, float radius, float scaling, bool compact_support, bool gaussian, float std_coeff);
 int saveCodebook(string cbFileName, float *codebook,
                  unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions);
 float *calculateUMatrix(float* uMatrix, float *codebook, unsigned int nSomX,
                         unsigned int nSomY, unsigned int nDimensions,
-                        string mapType, string gridType);
+                        string mapType, string gridType,
+                        float (*get_distance)(float*, float*, unsigned int));
 int saveUMatrix(string fname, float *uMatrix, unsigned int nSomX,
                 unsigned int nSomY);
 int saveBmus(string filename, int *bmus, unsigned int nSomX,
@@ -85,6 +86,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
                    string scaleCooling,
                    unsigned int kernelType, string mapType,
                    string gridType, bool compact_support, bool gaussian,
+                   float (*get_distance)(float*, float*, unsigned int),
                    float std_coeff=0.5, bool only_bmus=false);
 void train(float *data, int data_length,
            unsigned int nEpoch,
@@ -111,7 +113,8 @@ void train(int itask, float *data, svm_node **sparseData,
            string scaleCooling,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support, bool gaussian,
-           float std_coeff, unsigned int verbose
+           float std_coeff, unsigned int verbose,
+           float (*get_distance)(float*, float*, unsigned int)
 #ifdef CLI
            , string outPrefix, unsigned int snapshots);
 #else
@@ -125,7 +128,8 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nVectorsPerRank, float radius,
                            float scale, string mapType,
                            string gridType, bool compact_support, bool gaussian,
-                           int *globalBmus, bool only_bmus, float std_coeff);
+                           int *globalBmus, bool only_bmus, float std_coeff,
+                           float (*get_distance)(float*, float*, unsigned int));
 void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *X2,
                             float *numerator, float *denominator, float *codebook,
                             unsigned int nSomX, unsigned int nSomY,

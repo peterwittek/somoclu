@@ -31,7 +31,7 @@
  * @return distance
  */
 
-float get_distance(float* vec1, float* vec2, unsigned int nDimensions) {
+float get_euclidean_distance(float* vec1, float* vec2, unsigned int nDimensions) {
     float distance = 0.0f;
     for (unsigned int d = 0; d < nDimensions; ++d) {
         distance += (vec1[d] - vec2[d]) * (vec1[d] - vec2[d]);
@@ -45,7 +45,8 @@ float get_distance(float* vec1, float* vec2, unsigned int nDimensions) {
  */
 void get_bmu_coord(float* codebook, float* data,
                    unsigned int nSomY, unsigned int nSomX,
-                   unsigned int nDimensions, unsigned int* coords, unsigned int n) {
+                   unsigned int nDimensions, unsigned int* coords, unsigned int n,
+                   float (*get_distance)(float*, float*, unsigned int)) {
     float mindist = 0.0f;
     float dist = 0.0f;
 
@@ -72,7 +73,8 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            unsigned int nVectorsPerRank, float radius,
                            float scale, string mapType, string gridType,
                            bool compact_support, bool gaussian, int *globalBmus,
-                           bool only_bmus, float std_coeff) {
+                           bool only_bmus, float std_coeff,
+                           float (*get_distance)(float*, float*, unsigned int)) {
     unsigned int p1[2] = {0, 0};
     int *bmus;
 #ifdef HAVE_MPI
@@ -95,7 +97,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
             if (itask * nVectorsPerRank + n < nVectors) {
                 /// get the best matching unit
                 get_bmu_coord(codebook, data, nSomY, nSomX,
-                              nDimensions, p1, n);
+                              nDimensions, p1, n, get_distance);
                 bmus[2 * n] = p1[0];
                 bmus[2 * n + 1] = p1[1];
             }
