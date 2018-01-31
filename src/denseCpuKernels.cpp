@@ -24,24 +24,19 @@
 #include <Rconfig.h>
 #endif
 
-/** Distance b/w a feature vector and a weight vector
- * = Euclidean
- * @param som_y
- * @param som_x
- * @param r - row number in the input feature file
-  */
+/** Euclidean distance between vec1 and vec2
+ * @param vec1
+ * @param vec2
+ * @param nDimensions
+ * @return distance
+ */
 
-float get_distance(float* codebook, float* data,
-                   unsigned int som_y, unsigned int som_x, unsigned int nSomX,
-                   unsigned int nDimensions, unsigned int r) {
+float get_distance(float* vec1, float* vec2, unsigned int nDimensions) {
     float distance = 0.0f;
-    for (unsigned int d = 0; d < nDimensions; d++)
-        distance += (codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] -
-                     * (data + r * nDimensions + d))
-                    *
-                    (codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d] -
-                     * (data + r * nDimensions + d));
-    return distance;
+    for (unsigned int d = 0; d < nDimensions; ++d) {
+        distance += (vec1[d] - vec2[d]) * (vec1[d] - vec2[d]);
+    }
+    return sqrt(distance);
 }
 
 /** Get node coords for the best matching unit (BMU)
@@ -59,8 +54,8 @@ void get_bmu_coord(float* codebook, float* data,
     ///
     for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-            dist = get_distance(codebook, data, som_y, som_x, nSomX,
-                                nDimensions, n);
+            dist = get_distance(codebook + som_y * nSomX * nDimensions + som_x * nDimensions,
+                                data + n * nDimensions, nDimensions);
             if ((som_y == 0 && som_x == 0) || (dist < mindist)) {
                 mindist = dist;
                 coords[0] = som_x;

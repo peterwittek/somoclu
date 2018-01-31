@@ -1,21 +1,5 @@
-#include"somoclu.h"
-#include<cmath>
-
-/** Euclidean distance between vec1 and vec2
- * @param vec1
- * @param vec2
- * @param nDimensions
- * @return distance
- */
-
-float get_distance(float* vec1, float* vec2, unsigned int nDimensions) {
-    float distance = 0.0f;
-    for (unsigned int d = 0; d < nDimensions; ++d) {
-        distance += (vec1[d] - vec2[d]) * (vec1[d] - vec2[d]);
-    }
-    return sqrt(distance);
-}
-
+#include "somoclu.h"
+#include <cmath>
 
 /** Calculate U-matrix
  * @param codebook - the codebook
