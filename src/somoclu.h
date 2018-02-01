@@ -178,6 +178,7 @@ extern "C" {
                      float std_coeff, unsigned int verbose,
                      float* codebook, int codebook_size,
                      int* globalBmus, int globalBmus_size,
-                     float* uMatrix, int uMatrix_size);
+                     float* uMatrix, int uMatrix_size,
+                     float (*get_distance)(float*, float*, unsigned int));
 }
 #endif  // SOMOCLU_H

@@ -131,7 +131,8 @@ void julia_train(float *data, int data_length, unsigned int nEpoch,
            float std_coeff, unsigned int verbose,
            float *codebook, int codebook_size,
            int *globalBmus, int globalBmus_size,
-           float *uMatrix, int uMatrix_size) {
+           float *uMatrix, int uMatrix_size,
+           float (*get_distance)(float*, float*, unsigned int)){
     string radiusCooling;
     string scaleCooling;
     string mapType;
@@ -156,13 +157,15 @@ void julia_train(float *data, int data_length, unsigned int nEpoch,
     } else {
         gridType = "hexagonal";
     }
+    float (*fp)(float*, float*, unsigned int) = (get_distance == NULL) ? get_euclidean_distance : get_distance;
+    
     train(0, data, NULL, codebook, globalBmus, uMatrix, nSomX, nSomY,
           nDimensions, nVectors, nVectors,
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
           gridType, compact_support, gaussian, std_coeff, verbose,
-          get_euclidean_distance
+          fp
 #ifdef CLI
           , "", 0);
 #else
