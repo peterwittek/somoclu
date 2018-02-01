@@ -172,7 +172,7 @@ void julia_train(float *data, int data_length, unsigned int nEpoch,
          );
 #endif
     calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
-                     gridType, get_euclidean_distance);
+                     gridType, fp);
 }
 
 void train(int itask, float *data, svm_node **sparseData,
