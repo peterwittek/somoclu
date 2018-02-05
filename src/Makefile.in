@@ -36,7 +36,7 @@ MEX_BIN        = @MEX_BIN@
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
-LIBOBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o
+LIBOBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o julia.o
 
 MEX_FLAGS=-I./
 MEX_LIBS=-lgomp

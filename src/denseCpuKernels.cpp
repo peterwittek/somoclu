@@ -24,6 +24,16 @@
 #include <Rconfig.h>
 #endif
 
+
+float EuclideanDistance::operator()(float* vec1, float* vec2) const{
+    unsigned int nDimensions = Dim();
+    float distance = 0.0f;
+    for (unsigned int d = 0; d < nDimensions; ++d) {
+        distance += (vec1[d] - vec2[d]) * (vec1[d] - vec2[d]);
+    }
+    return sqrt(distance);
+}
+
 /** Euclidean distance between vec1 and vec2
  * @param vec1
  * @param vec2
@@ -46,7 +56,7 @@ float get_euclidean_distance(float* vec1, float* vec2, unsigned int nDimensions)
 void get_bmu_coord(float* codebook, float* data,
                    unsigned int nSomY, unsigned int nSomX,
                    unsigned int nDimensions, unsigned int* coords, unsigned int n,
-                   float (*get_distance)(float*, float*, unsigned int)) {
+                   const Distance& get_distance) {
     float mindist = 0.0f;
     float dist = 0.0f;
 
@@ -56,7 +66,7 @@ void get_bmu_coord(float* codebook, float* data,
     for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
             dist = get_distance(codebook + som_y * nSomX * nDimensions + som_x * nDimensions,
-                                data + n * nDimensions, nDimensions);
+                                data + n * nDimensions);
             if ((som_y == 0 && som_x == 0) || (dist < mindist)) {
                 mindist = dist;
                 coords[0] = som_x;
@@ -74,7 +84,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            float scale, string mapType, string gridType,
                            bool compact_support, bool gaussian, int *globalBmus,
                            bool only_bmus, float std_coeff,
-                           float (*get_distance)(float*, float*, unsigned int)) {
+                           const Distance& get_distance) {
     unsigned int p1[2] = {0, 0};
     int *bmus;
 #ifdef HAVE_MPI

@@ -111,69 +111,16 @@ void train(float *data, int data_length, unsigned int nEpoch,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
           gridType, compact_support, gaussian, std_coeff, verbose,
-          get_euclidean_distance
+	  EuclideanDistance(nDimensions)
 #ifdef CLI
           , "", 0);
 #else
          );
 #endif
     calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
-                     gridType, get_euclidean_distance);
+                     gridType, EuclideanDistance(nDimensions));
 }
 
-void julia_train(float *data, int data_length, unsigned int nEpoch,
-           unsigned int nSomX, unsigned int nSomY,
-           unsigned int nDimensions, unsigned int nVectors,
-           float radius0, float radiusN, unsigned int _radiusCooling,
-           float scale0, float scaleN, unsigned int _scaleCooling,
-           unsigned int kernelType, unsigned int _mapType,
-           unsigned int _gridType, bool compact_support, bool gaussian,
-           float std_coeff, unsigned int verbose,
-           float *codebook, int codebook_size,
-           int *globalBmus, int globalBmus_size,
-           float *uMatrix, int uMatrix_size,
-           float (*get_distance)(float*, float*, unsigned int)){
-    string radiusCooling;
-    string scaleCooling;
-    string mapType;
-    string gridType;
-    if (_radiusCooling == 0) {
-        radiusCooling = "linear";
-    } else {
-        radiusCooling = "exponential";
-    }
-    if (_scaleCooling == 0) {
-        scaleCooling = "linear";
-    } else {
-        scaleCooling = "exponential";
-    }
-    if (_mapType == 0) {
-        mapType = "planar";
-    } else {
-        mapType = "toroid";
-    }
-    if (_gridType == 0) {
-        gridType = "square";
-    } else {
-        gridType = "hexagonal";
-    }
-    float (*fp)(float*, float*, unsigned int) = (get_distance == NULL) ? get_euclidean_distance : get_distance;
-    
-    train(0, data, NULL, codebook, globalBmus, uMatrix, nSomX, nSomY,
-          nDimensions, nVectors, nVectors,
-          nEpoch, radius0, radiusN, radiusCooling,
-          scale0, scaleN, scaleCooling,
-          kernelType, mapType,
-          gridType, compact_support, gaussian, std_coeff, verbose,
-          fp
-#ifdef CLI
-          , "", 0);
-#else
-         );
-#endif
-    calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
-                     gridType, fp);
-}
 
 void train(int itask, float *data, svm_node **sparseData,
            float *codebook, int *globalBmus, float *uMatrix,
@@ -185,7 +132,7 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support, bool gaussian,
            float std_coeff, unsigned int verbose,
-           float (*get_distance)(float*, float*, unsigned int)
+           const Distance& get_distance
 #ifdef CLI
            , string outPrefix, unsigned int snapshots)
 #else
@@ -388,7 +335,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
                    string scaleCooling,
                    unsigned int kernelType, string mapType,
                    string gridType, bool compact_support, bool gaussian,
-                   float (*get_distance)(float*, float*, unsigned int),
+                   const Distance& get_distance,
                    float std_coeff, bool only_bmus) {
 
     float N = (float)nEpoch;
