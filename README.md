@@ -192,6 +192,8 @@ Before importing the module from other languages, may need to use the following 
 
     export DYLD_LIBRARY_PATH=/usr/local/lib/gcc/7/:$DYLD_LIBRARY_PATH
 
+Then you can follow the linux instructions.
+
 ### linux
 
 From GIT repository first run
