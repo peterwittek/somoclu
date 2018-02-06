@@ -33,9 +33,7 @@ except ImportError:
         print("https://github.com/peterwittek/somoclu/issues/28")
     elif sys.platform.startswith('darwin'):
         print("If you installed Somoclu with pip on OS X, this typically "
-              "means missing libiomp. Please refer to the documentation and to"
-              " this issue:")
-        print("https://github.com/peterwittek/somoclu/issues/28")
+              "means missing linked library. Please make sure you have set DYLD_LIBRARY_PATH to include gcc path")
 
 
 class Somoclu(object):
