@@ -158,7 +158,7 @@ try:
           description="Massively parallel implementation of self-organizing maps",
           ext_modules=[somoclu_module],
           packages=["somoclu"],
-          install_requires=['numpy', 'matplotlib'],
+          install_requires=['numpy', 'matplotlib', 'scipy'],
           classifiers=[
             'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
             'Operating System :: OS Independent',
@@ -195,6 +195,6 @@ except:
             'Programming Language :: Python',
             'Programming Language :: C++'
           ],
-          install_requires=['numpy', 'matplotlib'],
+          install_requires=['numpy', 'matplotlib', 'scipy'],
           test_suite="tests"
           )
