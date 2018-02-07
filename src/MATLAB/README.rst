@@ -34,11 +34,11 @@ If you encounter errors like:
 
 You can rename ``libstdc++.so.6*`` under ``MATLAB_ROOT/sys/os/glnxa64`` to solve this issue.
 
-Note for Mac OS X users:
+Note for macOS users:
 ================================
 Using GCC
 ---------------
-As of OS X 10.10, gcc is just symlink to clang. To build somoclu and this extension using GCC, it is recommended to install gcc using something like:
+As of macOS 10.10, gcc is just symlink to clang. To build somoclu and this extension using GCC, it is recommended to install gcc using something like:
 ::
    $ brew install gcc --without-multilib
 

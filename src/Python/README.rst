@@ -50,7 +50,7 @@ The code is available on PyPI, hence it can be installed by
 
 Some pre-built binaries in the wheel format or windows installer are provided at `PyPI Dowloads <https://pypi.python.org/pypi/somoclu#downloads>`_, they are tested with `Anaconda <https://www.continuum.io/downloads>`_ distributions. If you encounter errors like `ImportError: DLL load failed: The specified module could not be found` when `import somoclu`, you may need to use `Dependency Walker <http://www.dependencywalker.com/>`_ as shown `here <http://stackoverflow.com/a/24704384/1136027>`_ on ``_somoclu_wrap.pyd`` to find out missing DLLs and place them at the write place. Usually right version (32/64bit) of ``vcomp90.dll, msvcp90.dll, msvcr90.dll`` should be put to ``C:\Windows\System32`` or ``C:\Windows\SysWOW64``.
 
-The wheel binaries for OSX are compiled with `gcc`, which you can use before running Python:
+The wheel binaries for macOS are compiled with `gcc`, which you can use before running Python:
 ::
 
     $ export DYLD_LIBRARY_PATH=/usr/local/lib/gcc/7/:$DYLD_LIBRARY_PATH
@@ -65,7 +65,7 @@ If you want the latest git version, first git clone the repo, install `swig <htt
     $ make
     $ make python
 
-to generate python interface files.
+to generate Python interface files.
 
 Then follow the standard procedure for installing Python modules:
 
@@ -73,7 +73,7 @@ Then follow the standard procedure for installing Python modules:
 
     $ sudo python setup.py install
 
-Build on Mac OS X
+Build on Mac macOS
 --------------------
 Using GCC
 ---------------

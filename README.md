@@ -132,7 +132,7 @@ The Python version is also available in [PyPI](https://pypi.python.org/pypi/somo
 
 Some pre-built binaries in the wheel format or Windows installer are provided at [PyPI Dowloads](https://pypi.python.org/pypi/somoclu#downloads), they are tested with [Anaconda](https://www.continuum.io/downloads) distributions. If you encounter errors like `ImportError: DLL load failed: The specified module could not be found` when `import somoclu`, you may need to use [Dependency Walker](http://www.dependencywalker.com/) as shown [here](http://stackoverflow.com/a/24704384/1136027) on `_somoclu_wrap.pyd` to find out missing DLLs and place them at the write place. Usually right version (32/64bit) of `vcomp90.dll, msvcp90.dll, msvcr90.dll` should be put to `C:\Windows\System32` or `C:\Windows\SysWOW64`.
 
-The wheel binaries for OSX are compiled with `gcc`, which you can install by:
+The wheel binaries for macOS are compiled with `gcc`, which you can install by:
 
     $ brew install gcc --without-multilib
 
@@ -140,7 +140,7 @@ and use
 
     $ export DYLD_LIBRARY_PATH=/usr/local/lib/gcc/7/:$DYLD_LIBRARY_PATH
 
-before running the python interpreter.
+before running the Python interpreter.
 
 To get it working with the GPU kernel, you might have to follow the instructions at [Somoclu - Python Interface](https://github.com/peterwittek/somoclu/tree/master/src/Python).
 
@@ -170,12 +170,12 @@ Multicore execution is supported through OpenMP -- the compiler must support thi
 
 ### macOS
 
-install the build tools and compiler with openmp support:
+Install build tools and the compiler with OpenMP support:
 
     $ brew install autoconf automake libtool swig
     $ brew install gcc --without-multilib
 
-set environment variables to use gcc instead:
+set environment variables to use gcc instead of the system compiler:
 
     export CC=/usr/local/bin/gcc-7
     export CXX=/usr/local/bin/g++-7
@@ -188,15 +188,15 @@ set environment variables to use gcc instead:
     alias ld=/usr/local/bin/gcc-7
     alias cc=/usr/local/bin/gcc-7
 
-Before importing the module from other languages, may need to use the following to avoid importing erros:
+Before importing the module from other languages, you may need to use the following to avoid importing errors:
 
     export DYLD_LIBRARY_PATH=/usr/local/lib/gcc/7/:$DYLD_LIBRARY_PATH
 
-Then you can follow the linux instructions.
+Then you can follow the Linux instructions.
 
-### linux
+### Linux
 
-From GIT repository first run
+From git repository first run
 
     $ ./autogen.sh
 
