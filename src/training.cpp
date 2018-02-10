@@ -157,13 +157,9 @@ void train(int itask, float *data, svm_node **sparseData,
         X2 = new float[nVectorsPerRank];
 
 #ifdef _OPENMP
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif
-#ifdef _WIN32
-        for (int i=0; i<nVectorsPerRank; ++i) {
-#else
-        for (unsigned int i=0; i<nVectorsPerRank; ++i) {
-#endif
+        for (omp_iter_t i=0; i<nVectorsPerRank; ++i) {
             if (itask * nVectorsPerRank + i < nVectors) {
                 float acc=0.f;
                 for (unsigned int j=0; sparseData[i][j].index!=-1; ++j) {
@@ -301,11 +297,7 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
     srand(seed);
 #endif
     #pragma omp parallel for
-#ifdef _WIN32
-    for (int som_y = 0; som_y < nSomY; som_y++) {
-#else
-    for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-#endif
+    for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
             for (unsigned int d = 0; d < nDimensions; d++) {
 #ifdef HAVE_R
@@ -415,12 +407,11 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
     if (!only_bmus) {
       MPI_Barrier(MPI_COMM_WORLD);
       if (itask == 0 && !only_bmus) {
-          #pragma omp parallel for
-#ifdef _WIN32
-          for (int som_y = 0; som_y < nSomY; som_y++) {
-#else
-          for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+
+#ifdef _OPENMP
+#pragma omp parallel for
 #endif
+          for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
               for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                   float denom = denominator[som_y * nSomX + som_x];
                   if (denom != 0) {

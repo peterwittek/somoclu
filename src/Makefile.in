@@ -36,7 +36,8 @@ MEX_BIN        = @MEX_BIN@
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
-LIBOBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o julia.o
+LIBOBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o
+LIBJLOBJS= $(LIBOBJS) julia.o
 
 MEX_FLAGS=-I./
 MEX_LIBS=-lgomp
@@ -52,13 +53,15 @@ endif
 
 ifeq ($(OS), Windows_NT)
 	libname = libsomoclu.dll
+	libjlname = libjlsomoclu.dll
 else
 	libname = libsomoclu.so
+	libjlname = libjlsomoclu.so
 endif
 
 OBJS=$(LIBOBJS) io.o somoclu.o
 
-all: somoclu lib
+all: somoclu lib libjl
 
 libwrapper: $(LIBOBJS)
 	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
@@ -70,6 +73,13 @@ else
 	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 endif
 
+libjl: CXXFLAGS+= -DCLI
+libjl: $(LIBJLOBJS) io.o
+ifeq ($(OS), Windows_NT)
+	$(CXX) -g $(DEFS) $(CXXFLAGS) -shared -o ${libjlname} $^ $(LIBS)
+else
+	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libjlname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
+endif
 
 somoclu: CXXFLAGS+= -DCLI
 somoclu: $(OBJS)
@@ -151,16 +161,19 @@ r:
 	R CMD build R
 
 clean: python_clean r_clean matlab_clean
-	-rm -fr $(OBJS) somoclu ${libname} *.cu.o 1>/dev/null
+	-rm -fr $(OBJS) julia.o somoclu ${libname} ${libjlname} *.cu.o 1>/dev/null
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	-$(INSTALL_PROGRAM) -m 0755 somoclu $(DESTDIR)$(bindir)
 	$(INSTALL) -d $(DESTDIR)$(libdir)
 	$(INSTALL_PROGRAM) -m 0755 ${libname} $(DESTDIR)$(libdir)
+	$(INSTALL_PROGRAM) -m 0755 ${libjlname} $(DESTDIR)$(libdir)
 
 uninstall:
 	-rm $(DESTDIR)$(bindir)/somoclu &>/dev/null
+	-rm $(DESTDIR)$(libdir)/${libname} &>/dev/null
+	-rm $(DESTDIR)$(libdir)/${libjlname} &>/dev/null
 
 Makefile: Makefile.in ../config.status
 	cd .. && ./config.status $@

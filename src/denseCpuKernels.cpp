@@ -99,11 +99,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
 #ifdef _OPENMP
         #pragma omp for
 #endif
-#ifdef _WIN32
-        for (int n = 0; n < nVectorsPerRank; n++) {
-#else
-        for (unsigned int n = 0; n < nVectorsPerRank; n++) {
-#endif
+      for (omp_iter_t n = 0; n < nVectorsPerRank; n++) {
             if (itask * nVectorsPerRank + n < nVectors) {
                 /// get the best matching unit
                 get_bmu_coord(codebook, data, nSomY, nSomX,
@@ -130,11 +126,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
 #ifdef _OPENMP
         #pragma omp for
 #endif // _OPENMP
-#ifdef _WIN32
-        for (int som_y = 0; som_y < nSomY; som_y++) {
-#else
-        for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-#endif // _WIN32
+        for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 localDenominator[som_y * nSomX + som_x] = 0.0;
                 for (unsigned int d = 0; d < nDimensions; d++)
@@ -158,17 +150,13 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
         localNumerator = new float[nDimensions];
 #endif // HAVE_MPI
 #ifdef _OPENMP
-        #pragma omp for
+#pragma omp for
 #endif
-#ifdef _WIN32
-        for (int som_y = 0; som_y < nSomY; som_y++) {
-#else
-        for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-#endif
-            for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-                for (unsigned int n = 0; n < nVectorsPerRank; n++) {
-                    if (itask * nVectorsPerRank + n < nVectors) {
-                        float dist = 0.0f;
+        for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
+                for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
+	            for (unsigned int n = 0; n < nVectorsPerRank; n++) {
+		        if (itask * nVectorsPerRank + n < nVectors) {
+			    float dist = 0.0f;
                         if (gridType == "rectangular") {
                             if (mapType == "planar") {
                                 dist = euclideanDistanceOnPlanarMap(som_x, som_y, bmus[2 * n], bmus[2 * n + 1]);
