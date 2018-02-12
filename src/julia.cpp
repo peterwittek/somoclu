@@ -1,5 +1,5 @@
 #include "somoclu.h"
-#include<omp.h>
+#include <omp.h>
 
 struct JuliaMessage{
     float  r;

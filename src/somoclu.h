@@ -104,18 +104,7 @@ float euclideanDistanceOnHexagonalToroidMap(const unsigned int som_x, const unsi
 float euclideanDistanceOnHexagonalPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y);
 double get_wall_time();
 float getWeight(float distance, float radius, float scaling, bool compact_support, bool gaussian, float std_coeff);
-int saveCodebook(string cbFileName, som map);
 void calculateUMatrix(som map);
-int saveUMatrix(string fname, som map);
-int saveBmus(string filename, som map);
-float *readMatrix(const string inFilename,
-                  unsigned int &nRows, unsigned int &nCols);
-void readSparseMatrixDimensions(const string filename, unsigned int &nRows,
-                                unsigned int &nColumns, bool& zerobased);
-svm_node** readSparseMatrixChunk(const string filename, unsigned int nRows,
-                                 unsigned int nRowsToRead,
-                                 unsigned int rowOffset,
-                                 unsigned int colOffset=0);
 void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
                    som map,
                    unsigned int nEpoch, unsigned int currentEpoch,
@@ -175,9 +164,9 @@ extern "C" {
 
 #endif
 #ifdef _WIN32
-    __declspec(dllexport) void my_abort(string err);
+    __declspec(dllexport) void cuda_abort(string err);
 #else
-    void my_abort(string err);
+    void cuda_abort(string err);
 #endif
 }
 #endif  // SOMOCLU_H

@@ -32,6 +32,7 @@
 #endif
 
 #include "somoclu.h"
+#include "io.h"
 
 using namespace std;
 
@@ -132,13 +133,13 @@ void processCommandLine(int argc, char** argv, string *inFilename,
         case 'd':
             *std_coeff = atof(optarg);
             if (*std_coeff <= 0) {
-                my_abort("The argument of option -l should be a positive float.");
+                cli_abort("The argument of option -l should be a positive float.");
             }
             break;
         case 'e':
             *nEpoch = atoi(optarg);
             if (*nEpoch <= 0) {
-                my_abort("The argument of option -e should be a positive integer.");
+                cli_abort("The argument of option -e should be a positive integer.");
             }
             break;
         case 'h':
@@ -148,7 +149,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
         case 'k':
             *kernelType = atoi(optarg);
             if (*kernelType > SPARSE_CPU) {
-                my_abort("The argument of option -k should be a valid kernel.");
+                cli_abort("The argument of option -k should be a valid kernel.");
             }
             break;
         case 'n':
@@ -158,86 +159,86 @@ void processCommandLine(int argc, char** argv, string *inFilename,
             } else if (neighborhood_function == "gaussian") {
                 *gaussian = 1;
             } else {
-                my_abort("The argument of option -n should be either bubble or Gaussian.");
+                cli_abort("The argument of option -n should be either bubble or Gaussian.");
             }
             break;
         case 'p':
             *compactSupport = atoi(optarg);
             if (*compactSupport != 0 && *compactSupport != 1) {
-                my_abort("The argument of option -g should be either 0 (false) or 1 (true).");
+                cli_abort("The argument of option -g should be either 0 (false) or 1 (true).");
             }
             break;
         case 'm':
             *mapType = optarg;
             if (*mapType != "planar" && *mapType != "toroid") {
-                my_abort("The argument of option -m should be either planar or toroid.");
+                cli_abort("The argument of option -m should be either planar or toroid.");
             }
             break;
         case 'g':
             *gridType = optarg;
             if (*gridType != "rectangular" && *gridType != "hexagonal") {
-                my_abort("The argument of option -h should be either rectangular or hexagonal.");
+                cli_abort("The argument of option -h should be either rectangular or hexagonal.");
             }
             break;
         case 'r':
             *radius0 = atof(optarg);
             if (*radius0 <= 0) {
-                my_abort("The argument of option -r should be a positive integer.");
+                cli_abort("The argument of option -r should be a positive integer.");
             }
             break;
         case 'R':
             *radiusN = atof(optarg);
             if (*radiusN <= 0) {
-                my_abort("The argument of option -R should be a positive integer.");
+                cli_abort("The argument of option -R should be a positive integer.");
             }
             break;
         case 't':
             *radiusCooling = optarg;
             if (*radiusCooling != "linear" && *radiusCooling != "exponential") {
-                my_abort("The argument of option -t should be linear or exponential.");
+                cli_abort("The argument of option -t should be linear or exponential.");
             }
             break;
         case 'l':
             *scale0 = atof(optarg);
             if (*scale0 <= 0) {
-                my_abort("The argument of option -l should be a positive float.");
+                cli_abort("The argument of option -l should be a positive float.");
             }
             break;
         case 'L':
             *scaleN = atof(optarg);
             if (*scaleN <= 0) {
-                my_abort("The argument of option -L should be a positive float.");
+                cli_abort("The argument of option -L should be a positive float.");
             }
             break;
         case 'T':
             *scaleCooling = optarg;
             if (*scaleCooling != "linear" && *scaleCooling != "exponential") {
-                my_abort("The argument of option -T should be linear or exponential.");
+                cli_abort("The argument of option -T should be linear or exponential.");
             }
             break;
         case 's':
             *snapshots = atoi(optarg);
             if (*snapshots > 2) {
-                my_abort("The argument of option -s should be 0, 1, or 2.");
+                cli_abort("The argument of option -s should be 0, 1, or 2.");
             }
 
             break;
         case 'v':
             *verbose = atoi(optarg);
             if (*verbose > 2) {
-                my_abort("The argument of option -v should be 0, 1, or 2.");
+                cli_abort("The argument of option -v should be 0, 1, or 2.");
             }
             break;
         case 'x':
             *nSomX = atoi(optarg);
             if (*nSomX <= 0) {
-                my_abort("The argument of option -x should be a positive integer.");
+                cli_abort("The argument of option -x should be a positive integer.");
             }
             break;
         case 'y':
             *nSomY = atoi(optarg);
             if (*nSomY <= 0) {
-                my_abort("The argument of option -y should be a positive integer.");
+                cli_abort("The argument of option -y should be a positive integer.");
             }
             break;
         case '?':
@@ -245,24 +246,24 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                     optopt == 'x'    || optopt == 'y') {
                 stringstream sstm;
                 sstm << "Option -" <<  optopt << " requires an argument.";
-                my_abort(sstm.str());
+                cli_abort(sstm.str());
             }
             else if (isprint (optopt)) {
                 stringstream sstm;
                 sstm << "Unknown option -" << optopt;
-                my_abort(sstm.str());
+                cli_abort(sstm.str());
             }
             else {
                 stringstream sstm;
                 sstm << "Unknown option character `\\x" << optopt << "'";
-                my_abort(sstm.str());
+                cli_abort(sstm.str());
             }
         default:
             abort ();
         }
     }
     if (argc - optind != 2) {
-        my_abort("Incorrect number of mandatory parameters");
+        cli_abort("Incorrect number of mandatory parameters");
     }
     *inFilename = argv[optind++];
     *outPrefix = argv[optind++];
@@ -316,7 +317,7 @@ int main(int argc, char** argv)
                            &initialCodebookFilename);
 #ifndef CUDA
         if (kernelType == DENSE_GPU) {
-            my_abort("Somoclu was compile without GPU support!");
+            cli_abort("Somoclu was compile without GPU support!");
         }
 #endif
     }
@@ -444,10 +445,10 @@ int main(int argc, char** argv)
             delete [] map.codebook;
             map.codebook = readMatrix(initialCodebookFilename, nSomXY, tmpNDimensions);
             if (tmpNDimensions != nDimensions) {
-                my_abort("Dimension of initial map.codebook does not match data!");
+                cli_abort("Dimension of initial map.codebook does not match data!");
             }
             else if (nSomXY / nSomY != map.nSomX) {
-                my_abort("Dimension of initial map.codebook does not match specified SOM grid!");
+                cli_abort("Dimension of initial map.codebook does not match specified SOM grid!");
             }
             if (verbose > 0) {
                 cout << "Read initial map.codebook: " << initialCodebookFilename << "\n";

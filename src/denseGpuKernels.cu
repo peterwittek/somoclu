@@ -44,7 +44,7 @@
         cudaError_t err = cudaGetLastError(); \
         stringstream sstm; \
         sstm << "CUDA error calling \""#call"\", code is " << err; \
-        my_abort(sstm.str()); }
+        cuda_abort(sstm.str()); }
 
 //Globals
 cublasHandle_t handle;
@@ -165,7 +165,7 @@ void freeGpu() {
     thrust::device_vector<float>().swap(deviceCodebookNorms);
     cublasStatus_t status = cublasDestroy(handle);
     if (status != CUBLAS_STATUS_SUCCESS) {
-        my_abort("CuBLAS shutdown error");
+        cuda_abort("CuBLAS shutdown error");
     }
 }
 
@@ -194,7 +194,7 @@ void getBmusOnGpu(int *bmus, som map, int nVectorsPerRank) {
                                         &beta,  thrust::raw_pointer_cast(&deviceGramMatrix[0]), map.nSomX * map.nSomY);
 
     if (status != CUBLAS_STATUS_SUCCESS) {
-        my_abort("Kernel execution error.");
+        cuda_abort("Kernel execution error.");
     }
 
     //All components of the vectorized Euclidean distance are available
@@ -231,7 +231,7 @@ void initializeGpu(float *hostData, int nVectorsPerRank, som map) {
     /* Initialize CUBLAS */
     cublasStatus_t status = cublasCreate(&handle);
     if (status != CUBLAS_STATUS_SUCCESS) {
-        my_abort("CuBLAS initialization error");
+        cuda_abort("CuBLAS initialization error");
     }
     deviceData = thrust::device_vector<float>(hostData, hostData + nVectorsPerRank * map.nDimensions);
     deviceDataNorms = normsOfRowSpace<float>(deviceData, nVectorsPerRank, map.nDimensions);
@@ -288,7 +288,7 @@ void setDevice(int commRank, int commSize) {
             if (it->second.size() > static_cast<unsigned int>(devCounts[it->first])) {
                 stringstream sstm;
                 sstm << "Error, more jobs running on " << it->first.c_str() << " than devices - " << static_cast<int>(it->second.size()) << " jobs > " << devCounts[it->first] << " devices.";
-                my_abort(sstm.str());
+                cuda_abort(sstm.str());
             }
         }
 

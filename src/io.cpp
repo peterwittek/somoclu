@@ -24,8 +24,21 @@
 #include <fstream>
 
 #include "somoclu.h"
+#include "io.h"
 
-using namespace std;
+void cli_abort(string err) {
+#ifdef HAVE_MPI
+    int rank = 0;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if (rank == 0) {
+        cerr << "Error: " << err << endl;
+    }
+    MPI_Abort(MPI_COMM_WORLD, 1);
+#else
+    cerr << "Error: " << err << endl;
+    exit(1);
+#endif  // HAVE_MPI
+}
 
 void Snapshot::write(unsigned int currentEpoch, som map) {
     calculateUMatrix(map);
@@ -142,7 +155,7 @@ void getMatrixDimensions(string inFilename, unsigned int &nRows, unsigned int &n
         file.close();
     }
     else {
-        my_abort("Input file could not be opened!");
+        cli_abort("Input file could not be opened!");
     }
 }
 
@@ -303,7 +316,7 @@ void readSparseMatrixDimensions(string filename, unsigned int &nRows,
         file.close();
     }
     else {
-        my_abort("Input file could not be opened!");
+        cli_abort("Input file could not be opened!");
     }
 }
 

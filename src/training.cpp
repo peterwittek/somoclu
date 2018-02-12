@@ -20,11 +20,9 @@
 
 #include <cmath>
 #include <cstdlib>
-#ifndef CLI
+#ifndef HAVE_MPI
 #include <stdexcept>
-#else
-#include <sstream>
-#endif  // CLI
+#endif
 
 #include "somoclu.h"
 
@@ -68,8 +66,7 @@ double get_wall_time(){
 #include <iomanip>
 #endif  // HAVE_R
 
-void my_abort(string err) {
-#ifdef CLI
+void cuda_abort(string err) {
 #ifdef HAVE_MPI
     int rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -78,12 +75,8 @@ void my_abort(string err) {
     }
     MPI_Abort(MPI_COMM_WORLD, 1);
 #else
-    cerr << "Error: " << err << endl;
-    exit(1);
-#endif  // HAVE_MPI
-#else
     throw std::runtime_error(err);
-#endif  // CLI
+#endif  // HAVE_MPI
 }
 
 void train(float *data, int data_length, unsigned int nEpoch,
@@ -360,7 +353,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
                               map, nVectorsPerRank, radius, scale,
                               compact_support, gaussian, only_bmus, std_coeff);
 #else
-        my_abort("Compiled without CUDA!");
+        cuda_abort("Compiled without CUDA!");
 #endif
         break;
     case SPARSE_CPU:

@@ -73,7 +73,6 @@ else
 	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 endif
 
-libjl: CXXFLAGS+= -DCLI
 libjl: $(LIBJLOBJS) io.o
 ifeq ($(OS), Windows_NT)
 	$(CXX) -g $(DEFS) $(CXXFLAGS) -shared -o ${libjlname} $^ $(LIBS)
@@ -81,7 +80,6 @@ else
 	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libjlname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 endif
 
-somoclu: CXXFLAGS+= -DCLI
 somoclu: $(OBJS)
 	$(CXX) $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -o $@ $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 
