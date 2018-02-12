@@ -48,6 +48,30 @@ struct svm_node {
     float value;
 };
 
+#ifdef _WIN32
+typedef int omp_iter_t;
+#else
+typedef unsigned int omp_iter_t;
+#endif
+
+
+class Distance{
+private:    
+    unsigned int dim;
+public:
+    Distance(unsigned int d):dim(d){}
+    virtual ~Distance(){}
+    virtual float operator()(float* v1, float* v2) const = 0;
+	virtual void precompute(){}
+    unsigned int Dim() const {return dim;}
+};
+
+class EuclideanDistance: public Distance{
+public:
+    EuclideanDistance(unsigned int d):Distance(d){}
+    virtual ~EuclideanDistance(){}
+    virtual float operator()(float* vec1, float* vec2) const;
+};
 
 float euclideanDistanceOnToroidMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y, const unsigned int nSomX, const unsigned int nSomY);
 float euclideanDistanceOnPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y);
@@ -61,7 +85,7 @@ int saveCodebook(string cbFileName, float *codebook,
 float *calculateUMatrix(float* uMatrix, float *codebook, unsigned int nSomX,
                         unsigned int nSomY, unsigned int nDimensions,
                         string mapType, string gridType,
-                        float (*get_distance)(float*, float*, unsigned int));
+                        const Distance& get_distance);
 int saveUMatrix(string fname, float *uMatrix, unsigned int nSomX,
                 unsigned int nSomY);
 int saveBmus(string filename, int *bmus, unsigned int nSomX,
@@ -86,7 +110,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
                    string scaleCooling,
                    unsigned int kernelType, string mapType,
                    string gridType, bool compact_support, bool gaussian,
-                   float (*get_distance)(float*, float*, unsigned int),
+		   const Distance& get_distance,
                    float std_coeff=0.5, bool only_bmus=false);
 void train(float *data, int data_length,
            unsigned int nEpoch,
@@ -114,7 +138,7 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support, bool gaussian,
            float std_coeff, unsigned int verbose,
-           float (*get_distance)(float*, float*, unsigned int)
+	   const Distance& get_distance
 #ifdef CLI
            , string outPrefix, unsigned int snapshots);
 #else
@@ -129,7 +153,7 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            float scale, string mapType,
                            string gridType, bool compact_support, bool gaussian,
                            int *globalBmus, bool only_bmus, float std_coeff,
-                           float (*get_distance)(float*, float*, unsigned int));
+			   const Distance& get_distance);
 void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *X2,
                             float *numerator, float *denominator, float *codebook,
                             unsigned int nSomX, unsigned int nSomY,
@@ -156,28 +180,11 @@ extern "C" {
                                string gridType, bool compact_support, bool gaussian,
                                int *globalBmus, bool only_bmus, float std_coeff);
 
-
 #endif
-
 #ifdef _WIN32
-	__declspec(dllexport) void my_abort(string err);
-	__declspec(dllexport) void julia_train(float *data, int data_length,
+    __declspec(dllexport) void my_abort(string err);
 #else
-	void my_abort(string err);
-	void julia_train(float *data, int data_length,
+    void my_abort(string err);
 #endif
-                     unsigned int nEpoch,
-                     unsigned int nSomX, unsigned int nSomY,
-                     unsigned int nDimensions, unsigned int nVectors,
-                     float radius0, float radiusN,
-                     unsigned int radiusCooling,
-                     float scale0, float scaleN,
-                     unsigned int scaleCooling,
-                     unsigned int kernelType, unsigned int mapType,
-                     unsigned int gridType, bool compact_support, bool gaussian,
-                     float std_coeff, unsigned int verbose,
-                     float* codebook, int codebook_size,
-                     int* globalBmus, int globalBmus_size,
-                     float* uMatrix, int uMatrix_size);
 }
 #endif  // SOMOCLU_H

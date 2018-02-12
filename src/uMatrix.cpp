@@ -11,31 +11,19 @@
 float *calculateUMatrix(float *uMatrix, float *codebook, unsigned int nSomX,
                         unsigned int nSomY, unsigned int nDimensions,
                         string mapType, string gridType,
-                        float (*get_distance)(float*, float*, unsigned int)) {
+                        const Distance& get_distance) {
     float min_dist = 1.5f;
 #ifdef _OPENMP
-    #pragma omp parallel default(shared)
-#endif // _OPENMP
+#pragma omp parallel default(shared)
     {
-#ifdef _OPENMP
-        #pragma omp for
+#pragma omp for
 #endif // _OPENMP
-#ifdef _WIN32
-		for (int som_y1 = 0; som_y1 < nSomY; som_y1++) {
-			for (int som_x1 = 0; som_x1 < nSomX; som_x1++) {
-#else
-        for (unsigned int som_y1 = 0; som_y1 < nSomY; som_y1++) {
-            for (unsigned int som_x1 = 0; som_x1 < nSomX; som_x1++) {
-#endif
+      for (omp_iter_t som_y1 = 0; som_y1 < nSomY; som_y1++) {
+	for (omp_iter_t som_x1 = 0; som_x1 < nSomX; som_x1++) {
                 float dist = 0.0f;
                 unsigned int nodes_number = 0;
-#ifdef _WIN32
-				for (int som_y2 = 0; som_y2 < nSomY; ++som_y2) {
-					for (int som_x2 = 0; som_x2 < nSomX; ++som_x2) {
-#else
-                for (unsigned int som_y2 = 0; som_y2 < nSomY; ++som_y2) {
-                    for (unsigned int som_x2 = 0; som_x2 < nSomX; ++som_x2) {
-#endif
+				for (omp_iter_t som_y2 = 0; som_y2 < nSomY; ++som_y2) {
+					for (omp_iter_t som_x2 = 0; som_x2 < nSomX; ++som_x2) {
                         if (som_x1 == som_x2 && som_y1 == som_y2) continue;
                         float tmp = 0.0f;
                         if (gridType == "rectangular") {
@@ -57,8 +45,7 @@ float *calculateUMatrix(float *uMatrix, float *codebook, unsigned int nSomX,
                         if (tmp <= min_dist) {
                             ++nodes_number;
                             dist += get_distance(codebook + som_y1 * nSomX * nDimensions + som_x1 * nDimensions,
-                                                 codebook + som_y2 * nSomX * nDimensions + som_x2 * nDimensions,
-                                                 nDimensions);
+                                                 codebook + som_y2 * nSomX * nDimensions + som_x2 * nDimensions);
                         }
                     }
                 }
@@ -66,6 +53,8 @@ float *calculateUMatrix(float *uMatrix, float *codebook, unsigned int nSomX,
                 uMatrix[som_y1 * nSomX + som_x1] = dist;
             }
         }
+#ifdef _OPENMP
     }
+#endif
     return uMatrix;
 }

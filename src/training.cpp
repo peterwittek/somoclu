@@ -111,66 +111,16 @@ void train(float *data, int data_length, unsigned int nEpoch,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
           gridType, compact_support, gaussian, std_coeff, verbose,
-          get_euclidean_distance
+	  EuclideanDistance(nDimensions)
 #ifdef CLI
           , "", 0);
 #else
          );
 #endif
     calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
-                     gridType, get_euclidean_distance);
+                     gridType, EuclideanDistance(nDimensions));
 }
 
-void julia_train(float *data, int data_length, unsigned int nEpoch,
-           unsigned int nSomX, unsigned int nSomY,
-           unsigned int nDimensions, unsigned int nVectors,
-           float radius0, float radiusN, unsigned int _radiusCooling,
-           float scale0, float scaleN, unsigned int _scaleCooling,
-           unsigned int kernelType, unsigned int _mapType,
-           unsigned int _gridType, bool compact_support, bool gaussian,
-           float std_coeff, unsigned int verbose,
-           float *codebook, int codebook_size,
-           int *globalBmus, int globalBmus_size,
-           float *uMatrix, int uMatrix_size) {
-    string radiusCooling;
-    string scaleCooling;
-    string mapType;
-    string gridType;
-    if (_radiusCooling == 0) {
-        radiusCooling = "linear";
-    } else {
-        radiusCooling = "exponential";
-    }
-    if (_scaleCooling == 0) {
-        scaleCooling = "linear";
-    } else {
-        scaleCooling = "exponential";
-    }
-    if (_mapType == 0) {
-        mapType = "planar";
-    } else {
-        mapType = "toroid";
-    }
-    if (_gridType == 0) {
-        gridType = "square";
-    } else {
-        gridType = "hexagonal";
-    }
-    train(0, data, NULL, codebook, globalBmus, uMatrix, nSomX, nSomY,
-          nDimensions, nVectors, nVectors,
-          nEpoch, radius0, radiusN, radiusCooling,
-          scale0, scaleN, scaleCooling,
-          kernelType, mapType,
-          gridType, compact_support, gaussian, std_coeff, verbose,
-          get_euclidean_distance
-#ifdef CLI
-          , "", 0);
-#else
-         );
-#endif
-    calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
-                     gridType, get_euclidean_distance);
-}
 
 void train(int itask, float *data, svm_node **sparseData,
            float *codebook, int *globalBmus, float *uMatrix,
@@ -182,7 +132,7 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support, bool gaussian,
            float std_coeff, unsigned int verbose,
-           float (*get_distance)(float*, float*, unsigned int)
+           const Distance& get_distance
 #ifdef CLI
            , string outPrefix, unsigned int snapshots)
 #else
@@ -207,13 +157,9 @@ void train(int itask, float *data, svm_node **sparseData,
         X2 = new float[nVectorsPerRank];
 
 #ifdef _OPENMP
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif
-#ifdef _WIN32
-        for (int i=0; i<nVectorsPerRank; ++i) {
-#else
-        for (unsigned int i=0; i<nVectorsPerRank; ++i) {
-#endif
+        for (omp_iter_t i=0; i<nVectorsPerRank; ++i) {
             if (itask * nVectorsPerRank + i < nVectors) {
                 float acc=0.f;
                 for (unsigned int j=0; sparseData[i][j].index!=-1; ++j) {
@@ -351,11 +297,7 @@ void initializeCodebook(unsigned int seed, float *codebook, unsigned int nSomX,
     srand(seed);
 #endif
     #pragma omp parallel for
-#ifdef _WIN32
-    for (int som_y = 0; som_y < nSomY; som_y++) {
-#else
-    for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-#endif
+    for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
             for (unsigned int d = 0; d < nDimensions; d++) {
 #ifdef HAVE_R
@@ -385,7 +327,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
                    string scaleCooling,
                    unsigned int kernelType, string mapType,
                    string gridType, bool compact_support, bool gaussian,
-                   float (*get_distance)(float*, float*, unsigned int),
+                   const Distance& get_distance,
                    float std_coeff, bool only_bmus) {
 
     float N = (float)nEpoch;
@@ -465,12 +407,11 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
     if (!only_bmus) {
       MPI_Barrier(MPI_COMM_WORLD);
       if (itask == 0 && !only_bmus) {
-          #pragma omp parallel for
-#ifdef _WIN32
-          for (int som_y = 0; som_y < nSomY; som_y++) {
-#else
-          for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
+
+#ifdef _OPENMP
+#pragma omp parallel for
 #endif
+          for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
               for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                   float denom = denominator[som_y * nSomX + som_x];
                   if (denom != 0) {

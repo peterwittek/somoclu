@@ -8,6 +8,11 @@ AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_SRCDIR([src/somoclu.h])
 AC_CONFIG_HEADERS([config.h])
 
+# Checks for libraries.
+AC_SEARCH_LIBS([dlopen, dlsym], [dl], [], [
+  AC_MSG_ERROR([unable to find dlopen(), dlsym()])
+])
+
 # Checks for programs.
 CXXFLAGS="-fPIC"
 AC_PROG_CXX
