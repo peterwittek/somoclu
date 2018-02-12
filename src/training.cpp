@@ -111,12 +111,8 @@ void train(float *data, int data_length, unsigned int nEpoch,
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
           gridType, compact_support, gaussian, std_coeff, verbose,
-	  EuclideanDistance(nDimensions)
-#ifdef CLI
-          , "", 0);
-#else
-         );
-#endif
+          EuclideanDistance(nDimensions));
+
     calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
                      gridType, EuclideanDistance(nDimensions));
 }
@@ -132,12 +128,8 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support, bool gaussian,
            float std_coeff, unsigned int verbose,
-           const Distance& get_distance
-#ifdef CLI
-           , string outPrefix, unsigned int snapshots)
-#else
-          )
-#endif
+           const Distance& get_distance, string outPrefix,
+           unsigned int snapshots)
 {
     int nProcs = 1;
     float * X2 = NULL;
@@ -202,12 +194,13 @@ void train(int itask, float *data, svm_node **sparseData,
                       radius0, radiusN, radiusCooling,
                       scale0, scaleN, scaleCooling, kernelType, mapType,
                       gridType, compact_support, gaussian, get_distance, std_coeff);
+        ++currentEpoch;
 #ifdef CLI
         if (snapshots > 0 && itask == 0) {
             calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions,
                              mapType, gridType, get_distance);
             stringstream sstm;
-            sstm << outPrefix << "." << currentEpoch + 1;
+            sstm << outPrefix << "." << currentEpoch;
             saveUMatrix(sstm.str() + string(".umx"), uMatrix, nSomX, nSomY);
             if (snapshots == 2) {
                 saveBmus(sstm.str() + string(".bm"), globalBmus, nSomX, nSomY, nVectors);
@@ -215,7 +208,6 @@ void train(int itask, float *data, svm_node **sparseData,
             }
         }
 #endif
-        ++currentEpoch;
 #ifndef HAVE_R
         if (itask == 0 && verbose > 0) {
             epoch_time = get_wall_time() - epoch_time;

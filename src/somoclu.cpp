@@ -460,12 +460,7 @@ int main(int argc, char** argv)
           scale0, scaleN, scaleCooling,
           kernelType, mapType,
           gridType, compactSupport == 1, gaussian == 1, std_coeff, verbose,
-	  EuclideanDistance(nDimensions)
-#ifdef CLI
-	, outPrefix, snapshots);
-#else
-	);
-#endif
+          EuclideanDistance(nDimensions), outPrefix, snapshots);
 
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);

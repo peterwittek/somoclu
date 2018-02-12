@@ -179,12 +179,7 @@ void julia_train(float *data, int data_length, unsigned int nEpoch,
                   scale0, scaleN, scaleCooling,
                   kernelType, mapType,
                   gridType, compact_support, gaussian, std_coeff, verbose,
-                  *pdist
-#ifdef CLI
-                  , "", 0);
-#else
-            );
-#endif
+                  *pdist);
             calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
                              gridType, *pdist);
             delete pdist;

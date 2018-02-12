@@ -137,12 +137,8 @@ void train(int itask, float *data, svm_node **sparseData,
            unsigned int kernelType, string mapType,
            string gridType, bool compact_support, bool gaussian,
            float std_coeff, unsigned int verbose,
-	   const Distance& get_distance
-#ifdef CLI
-           , string outPrefix, unsigned int snapshots);
-#else
-          );
-#endif
+           const Distance& get_distance, string outPrefix="",
+           unsigned int snapshots=0);
 
 void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
                            float *denominator, float *codebook,
