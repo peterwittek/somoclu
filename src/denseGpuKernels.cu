@@ -342,11 +342,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
     float *localNumerator = new float[nSomY * nSomX * nDimensions];
     float *localDenominator = new float[nSomY * nSomX];
     #pragma omp for
-#ifdef _WIN32
-    for (int som_y = 0; som_y < nSomY; som_y++) {
-#else
-    for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-#endif // _WIN32
+    for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
         for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
             localDenominator[som_y * nSomX + som_x] = 0.0;
             for (unsigned int d = 0; d < nDimensions; d++)
@@ -364,11 +360,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
         localNumerator = new float[nDimensions];
 #endif // HAVE_MPI
         #pragma omp for
-#ifdef _WIN32
-        for (int som_y = 0; som_y < nSomY; som_y++) {
-#else
-        for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-#endif
+        for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 for (unsigned int n = 0; n < nVectorsPerRank; n++) {
                     if (itask * nVectorsPerRank + n < nVectors) {

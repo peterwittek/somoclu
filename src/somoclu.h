@@ -31,7 +31,7 @@ using namespace std;
 #endif
 
 #ifdef _WIN32
-#include<algorithm>
+#include <algorithm>
 #endif
 
 #define DENSE_CPU 0
