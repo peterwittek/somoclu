@@ -325,7 +325,7 @@ void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
 #ifdef HAVE_MPI
     bmus = new int[nVectorsPerRank * 2];
 #else
-    bmus = som.bmus;
+    bmus = map.bmus;
 #endif
     getBmusOnGpu(bmus, map, nVectorsPerRank);
     if (only_bmus) {

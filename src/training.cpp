@@ -127,8 +127,8 @@ void train(int itask, float *data, svm_node **sparseData,
            float std_coeff, unsigned int verbose, Snapshot *snapshot)
 {
     float * X2 = NULL;
-#ifdef HAVE_MPI
     int nProcs = 1;
+#ifdef HAVE_MPI
     MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
 #endif
 #ifdef CUDA
