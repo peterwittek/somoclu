@@ -77,7 +77,6 @@ float euclideanDistanceOnToroidMap(const unsigned int som_x, const unsigned int 
 float euclideanDistanceOnPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y);
 float euclideanDistanceOnHexagonalToroidMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y, const unsigned int nSomX, const unsigned int nSomY);
 float euclideanDistanceOnHexagonalPlanarMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y);
-float get_euclidean_distance(float* vec1, float* vec2, unsigned int nDimensions);
 double get_wall_time();
 float getWeight(float distance, float radius, float scaling, bool compact_support, bool gaussian, float std_coeff);
 int saveCodebook(string cbFileName, float *codebook,

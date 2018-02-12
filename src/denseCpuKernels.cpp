@@ -34,21 +34,6 @@ float EuclideanDistance::operator()(float* vec1, float* vec2) const{
     return sqrt(distance);
 }
 
-/** Euclidean distance between vec1 and vec2
- * @param vec1
- * @param vec2
- * @param nDimensions
- * @return distance
- */
-
-float get_euclidean_distance(float* vec1, float* vec2, unsigned int nDimensions) {
-    float distance = 0.0f;
-    for (unsigned int d = 0; d < nDimensions; ++d) {
-        distance += (vec1[d] - vec2[d]) * (vec1[d] - vec2[d]);
-    }
-    return sqrt(distance);
-}
-
 /** Get node coords for the best matching unit (BMU)
  * @param coords - BMU coords
  * @param n - row num in the input feature file
