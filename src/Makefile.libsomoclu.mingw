@@ -1,0 +1,57 @@
+SHELL=C:/Windows/system32/cmd
+
+# Package-related substitution variables
+package	= somoclu
+tarname	= somoclu
+distdir	= $(tarname)-$(version)
+
+# Prefix-related substitution variables
+prefix	 = ..\\..\\usr
+bindir	 = $(prefix)\\bin
+libdir	 = $(prefix)\\lib
+libname = libjlsomoclu.dll
+
+# Tool-related substitution variables
+SYSROOT        ?= ..\\..\\..\\..\\WinRPM\\deps
+ARCH           ?= x86_64
+
+RPATH1         = $(SYSROOT)\\usr\\$(ARCH)-w64-mingw32\\sys-root\\mingw\\bin
+RPATH2         = $(SYSROOT)\\usr\\$(ARCH)-w64-mingw32\\sys-root\\mingw\\$(ARCH)-w64-mingw32\\bin
+BINPATH        = $(RPATH1);$(RPATH2)
+CXX		       = PATH=$(BINPATH) && g++
+CXXFLAGS       =  --sysroot=$(SYSROOT)
+LDFLAGS        = -Wl,-rpath=$(RPATH1) -Wl,-rpath=$(RPATH2)
+
+# VPATH-related substitution variables
+srcdir	 =  ..\\..\\src\\$(distdir)\\src\\
+VPATH	  = srcdir
+
+LIBOBJS=sparseCpuKernels.o denseCpuKernels.o mapDistanceFunctions.o training.o uMatrix.o julia.o
+
+OBJS=$(LIBOBJS) io.o
+
+SOURCES=$(OBJS: .o=.cpp)
+
+all: somoclu.exe lib
+
+libwrapper: $(LIBOBJS)
+	$(CXX) -g $(DEFS) $(CXXFLAGS) $(LDFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
+
+lib: $(LIBOBJS) io.o
+	$(CXX) -g $(DEFS) $(CXXFLAGS) $(LDFLAGS) -shared -o ${libname} $^ $(LIBS)
+
+
+somoclu.exe: CXXFLAGS+= -DCLI
+somoclu.exe: $(OBJS) somoclu.o 
+	$(CXX) $(DEFS) $(CXXFLAGS) $(LDFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -o $@ $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
+
+somoclu.o: somoclu.cpp
+	$(CXX) $(DEFS) $(CXXFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $<
+
+%.o: $(srcdir)%.cpp
+	$(CXX) $(DEFS) $(CXXFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $<
+
+clean: 
+	DEL /F $(OBJS) somoclu.o somoclu.exe ${libname} 
+
+.PHONY: all clean
