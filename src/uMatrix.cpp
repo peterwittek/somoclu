@@ -13,13 +13,11 @@ float *calculateUMatrix(float *uMatrix, float *codebook, unsigned int nSomX,
                         string mapType, string gridType,
                         const Distance& get_distance) {
     float min_dist = 1.5f;
-#ifdef _OPENMP
-#pragma omp parallel default(shared)
+    #pragma omp parallel default(shared)
     {
-#pragma omp for
-#endif // _OPENMP
+      #pragma omp for
       for (omp_iter_t som_y1 = 0; som_y1 < nSomY; som_y1++) {
-	for (omp_iter_t som_x1 = 0; som_x1 < nSomX; som_x1++) {
+      for (omp_iter_t som_x1 = 0; som_x1 < nSomX; som_x1++) {
                 float dist = 0.0f;
                 unsigned int nodes_number = 0;
 				for (omp_iter_t som_y2 = 0; som_y2 < nSomY; ++som_y2) {
@@ -53,8 +51,6 @@ float *calculateUMatrix(float *uMatrix, float *codebook, unsigned int nSomX,
                 uMatrix[som_y1 * nSomX + som_x1] = dist;
             }
         }
-#ifdef _OPENMP
     }
-#endif
     return uMatrix;
 }

@@ -83,16 +83,9 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *X2,
     // Pre-compute the squared norm of all the weights
     float *W2 = new float[nSomY * nSomX];
 
-#ifdef _OPENMP
     #pragma omp parallel for collapse(2)
-#endif
-#ifdef _WIN32
-    for (int som_y = 0; som_y < nSomY; som_y++) {
-        for (int som_x = 0; som_x < nSomX; som_x++) {
-#else
-    for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-        for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-#endif
+    for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
+        for (omp_iter_t som_x = 0; som_x < nSomX; som_x++) {
             size_t idx = som_y * nSomX + som_x;
             float acc = 0.;
             for ( unsigned int d = 0; d < nDimensions; d++ ) {
@@ -102,18 +95,10 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *X2,
         }
     }
 
-#ifdef _OPENMP
     #pragma omp parallel default(shared) private(p1)
-#endif
     {
-#ifdef _OPENMP
         #pragma omp for
-#endif
-#ifdef _WIN32
-        for (int n = 0; n < nVectorsPerRank; n++) {
-#else
-        for (unsigned int n = 0; n < nVectorsPerRank; n++) {
-#endif
+        for (omp_iter_t n = 0; n < nVectorsPerRank; n++) {
             if (itask * nVectorsPerRank + n < nVectors) {
                 /// get the best matching unit
                 get_bmu_coord(codebook, sparseData[n], X2[n], W2, 
@@ -133,18 +118,10 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *X2,
 #ifdef HAVE_MPI
     float *localNumerator = new float[nSomY * nSomX * nDimensions];
     float *localDenominator = new float[nSomY * nSomX];
-#ifdef _OPENMP
     #pragma omp parallel default(shared)
-#endif // _OPENMP
     {
-#ifdef _OPENMP
         #pragma omp for
-#endif // _OPENMP
-#ifdef _WIN32
-        for (int som_y = 0; som_y < nSomY; som_y++) {
-#else
-        for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-#endif // _WIN32
+        for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 localDenominator[som_y * nSomX + som_x] = 0.0;
                 for (unsigned int d = 0; d < nDimensions; d++)
@@ -152,29 +129,19 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *X2,
             }
         }
     }
-#ifdef _OPENMP
     #pragma omp parallel default(shared)
-#endif
 #else  // not HAVE_MPI
     float *localNumerator;
     float localDenominator;
     // Accumulate denoms and numers
-#ifdef _OPENMP
     #pragma omp parallel default(shared) private(localDenominator) private(localNumerator)
-#endif
 #endif // HAVE_MPI
     {
 #ifndef HAVE_MPI
         localNumerator = new float[nDimensions];
 #endif // HAVE_MPI
-#ifdef _OPENMP
         #pragma omp for
-#endif
-#ifdef _WIN32
-        for (int som_y = 0; som_y < nSomY; som_y++) {
-#else
-        for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-#endif
+        for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
 #ifndef HAVE_MPI
                 localDenominator = 0;

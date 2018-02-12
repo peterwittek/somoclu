@@ -77,13 +77,9 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
 #else
     bmus = globalBmus;
 #endif
-#ifdef _OPENMP
     #pragma omp parallel default(shared) private(p1)
-#endif
     {
-#ifdef _OPENMP
-        #pragma omp for
-#endif
+      #pragma omp for
       for (omp_iter_t n = 0; n < nVectorsPerRank; n++) {
             if (itask * nVectorsPerRank + n < nVectors) {
                 /// get the best matching unit
@@ -104,13 +100,9 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
 #ifdef HAVE_MPI
     float *localNumerator = new float[nSomY * nSomX * nDimensions];
     float *localDenominator = new float[nSomY * nSomX];
-#ifdef _OPENMP
     #pragma omp parallel default(shared)
-#endif // _OPENMP
     {
-#ifdef _OPENMP
         #pragma omp for
-#endif // _OPENMP
         for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
             for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                 localDenominator[som_y * nSomX + som_x] = 0.0;
@@ -119,24 +111,18 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
             }
         }
     }  
-#ifdef _OPENMP
     #pragma omp parallel default(shared)
-#endif
 #else  // not HAVE_MPI
     float *localNumerator;
     float localDenominator = 0;
     // Accumulate denoms and numers
-#ifdef _OPENMP
     #pragma omp parallel default(shared) private(localDenominator) private(localNumerator)
-#endif
 #endif // HAVE_MPI
     {
 #ifndef HAVE_MPI
         localNumerator = new float[nDimensions];
 #endif // HAVE_MPI
-#ifdef _OPENMP
-#pragma omp for
-#endif
+        #pragma omp for
         for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
                 for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
 	            for (unsigned int n = 0; n < nVectorsPerRank; n++) {

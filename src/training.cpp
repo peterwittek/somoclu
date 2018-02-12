@@ -156,9 +156,7 @@ void train(int itask, float *data, svm_node **sparseData,
 
         X2 = new float[nVectorsPerRank];
 
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
+        #pragma omp parallel for
         for (omp_iter_t i=0; i<nVectorsPerRank; ++i) {
             if (itask * nVectorsPerRank + i < nVectors) {
                 float acc=0.f;
@@ -407,10 +405,7 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
     if (!only_bmus) {
       MPI_Barrier(MPI_COMM_WORLD);
       if (itask == 0 && !only_bmus) {
-
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
+          #pragma omp parallel for
           for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {
               for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
                   float denom = denominator[som_y * nSomX + som_x];
