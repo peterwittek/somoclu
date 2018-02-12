@@ -114,13 +114,14 @@ void trainOneEpochDenseCPU(int itask, float *data, float *numerator,
     #pragma omp parallel default(shared)
 #else  // not HAVE_MPI
     float *localNumerator;
-    float localDenominator = 0;
+    float localDenominator;
     // Accumulate denoms and numers
     #pragma omp parallel default(shared) private(localDenominator) private(localNumerator)
 #endif // HAVE_MPI
     {
 #ifndef HAVE_MPI
         localNumerator = new float[nDimensions];
+        localDenominator = 0;
 #endif // HAVE_MPI
         #pragma omp for
         for (omp_iter_t som_y = 0; som_y < nSomY; som_y++) {

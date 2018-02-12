@@ -224,7 +224,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
             break;
         case 'v':
             *verbose = atoi(optarg);
-            if (*verbose < 0 && *verbose > 2) {
+            if (*verbose > 2) {
                 my_abort("The argument of option -v should be 0, 1, or 2.");
             }
             break;
@@ -348,9 +348,6 @@ int main(int argc, char** argv)
     }
     MPI_Bcast(gridTypeCStr, 255, MPI_CHAR, 0, MPI_COMM_WORLD);
     gridType = gridTypeCStr;
-
-
-    double profile_time = MPI_Wtime();
 #endif
 
     float * dataRoot = NULL;
@@ -451,7 +448,6 @@ int main(int argc, char** argv)
     }
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
-    double training_time = MPI_Wtime();
 #endif
     // TRAINING
     train(rank, data, sparseData, codebook, globalBmus, uMatrix, nSomX, nSomY,

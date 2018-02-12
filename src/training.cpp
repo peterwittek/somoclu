@@ -131,9 +131,9 @@ void train(int itask, float *data, svm_node **sparseData,
            const Distance& get_distance, string outPrefix,
            unsigned int snapshots)
 {
-    int nProcs = 1;
     float * X2 = NULL;
 #ifdef HAVE_MPI
+    int nProcs = 1;
     MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
 #endif
 #ifdef CUDA
@@ -321,8 +321,8 @@ void trainOneEpoch(int itask, float *data, svm_node **sparseData, float *X2,
                    float std_coeff, bool only_bmus) {
 
     float N = (float)nEpoch;
-    float *numerator;
-    float *denominator;
+    float *numerator = NULL;
+    float *denominator = NULL;
     float scale = scale0;
     float radius = radius0;
     if (itask == 0 && !only_bmus) {
