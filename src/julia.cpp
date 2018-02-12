@@ -173,15 +173,22 @@ void julia_train(float *data, int data_length, unsigned int nEpoch,
             pdist->precompute();
 #pragma omp single
         {
-            train(0, data, NULL, codebook, globalBmus, uMatrix, nSomX, nSomY,
-                  nDimensions, nVectors, nVectors,
-                  nEpoch, radius0, radiusN, radiusCooling,
-                  scale0, scaleN, scaleCooling,
-                  kernelType, mapType,
-                  gridType, compact_support, gaussian, std_coeff, verbose,
-                  *pdist);
-            calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
-                             gridType, *pdist);
+             som map = {
+              .nSomX = nSomX,
+              .nSomY = nSomY,
+              .nDimensions = nDimensions,
+              .nVectors = nVectors,
+              .mapType = mapType,
+              .gridType = gridType,
+              .get_distance = *pdist,
+              .uMatrix = uMatrix,
+              .codebook = codebook,
+              .bmus = globalBmus};
+
+            train(0, data, NULL, map, nVectors, nEpoch, radius0, radiusN,
+                  radiusCooling, scale0, scaleN, scaleCooling,
+                  kernelType, compact_support, gaussian, std_coeff, verbose);
+            calculateUMatrix(map);
             delete pdist;
         }
     }

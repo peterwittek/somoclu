@@ -27,23 +27,34 @@
 
 using namespace std;
 
-/** Save a SOM codebook
+void Snapshot::write(unsigned int currentEpoch, som map) {
+    calculateUMatrix(map);
+    stringstream sstm;
+    sstm << outPrefix << "." << currentEpoch;
+    saveUMatrix(sstm.str() + string(".umx"), map);
+    if (snapshots == 2) {
+        saveBmus(sstm.str() + string(".bm"), map);
+        saveCodebook(sstm.str() + string(".wts"), map);
+    }
+}
+
+/** Save a SOM map.codebook
  * @param cbFileName - name of the file to save
- * @param codebook - the codebook to save
- * @param nSomX - dimensions of SOM map in the x direction
+ * @param map.codebook - the map.codebook to save
+ * @param map.nSomX - dimensions of SOM map in the x direction
  * @param nSomY - dimensions of SOM map in the y direction
- * @param nDimensions - dimensions of a data instance
+ * @param map.nDimensions - dimensions of a data instance
  */
-int saveCodebook(string cbFilename, float *codebook, unsigned int nSomX, unsigned int nSomY, unsigned int nDimensions) {
+int saveCodebook(string cbFilename, som map) {
     FILE* file = fopen(cbFilename.c_str(), "wt");
     cout << "    Saving Codebook " << cbFilename << endl;
-    fprintf(file, "%%%d %d\n", nSomY, nSomX);
-    fprintf(file, "%%%d\n", nDimensions);
+    fprintf(file, "%%%d %d\n", map.nSomY, map.nSomX);
+    fprintf(file, "%%%d\n", map.nDimensions);
     if (file != 0) {
-        for (unsigned int som_y = 0; som_y < nSomY; som_y++) {
-            for (unsigned int som_x = 0; som_x < nSomX; som_x++) {
-                for (unsigned int d = 0; d < nDimensions; d++) {
-                    fprintf(file, "%0.10f ", codebook[som_y * nSomX * nDimensions + som_x * nDimensions + d]);
+        for (unsigned int som_y = 0; som_y < map.nSomY; som_y++) {
+            for (unsigned int som_x = 0; som_x < map.nSomX; som_x++) {
+                for (unsigned int d = 0; d < map.nDimensions; d++) {
+                    fprintf(file, "%0.10f ", map.codebook[som_y * map.nSomX * map.nDimensions + som_x * map.nDimensions + d]);
                 }
                 fprintf(file, "\n");
             }
@@ -59,19 +70,19 @@ int saveCodebook(string cbFilename, float *codebook, unsigned int nSomX, unsigne
 /** Save best matching units
  * @param filename - name of the file to save
  * @param bmus - the best matching units to save
- * @param nSomX - dimensions of SOM map in the x direction
+ * @param map.nSomX - dimensions of SOM map in the x direction
  * @param nSomY - dimensions of SOM map in the y direction
- * @param nVectors - the number of vectors
+ * @param map.nVectors - the number of vectors
  */
-int saveBmus(string filename, int *bmus, unsigned int nSomX, unsigned int nSomY, unsigned int nVectors) {
+int saveBmus(string filename, som map) {
     FILE* file = fopen(filename.c_str(), "wt");
     cout << "    Saving best matching units " << filename << endl;
-    fprintf(file, "%%%d %d\n", nSomY, nSomX);
-    fprintf(file, "%%%d\n", nVectors);
+    fprintf(file, "%%%d %d\n", map.nSomY, map.nSomX);
+    fprintf(file, "%%%d\n", map.nVectors);
     if (file != 0) {
-        for (unsigned int i = 0; i < nVectors; ++i) {
+        for (unsigned int i = 0; i < map.nVectors; ++i) {
             // ESOM Tools swaps x and y!
-            fprintf(file, "%d %d %d\n", i, bmus[2 * i + 1], bmus[2 * i]);
+            fprintf(file, "%d %d %d\n", i, map.bmus[2 * i + 1], map.bmus[2 * i]);
         }
         fclose(file);
         return 0;
@@ -84,23 +95,22 @@ int saveBmus(string filename, int *bmus, unsigned int nSomX, unsigned int nSomY,
 
 /** Save u-matrix
  * @param fname
- * @param codebook - the codebook to save
- * @param nSomX - dimensions of SOM map in the x direction
+ * @param map.codebook - the map.codebook to save
+ * @param map.nSomX - dimensions of SOM map in the x direction
  * @param nSomY - dimensions of SOM map in the y direction
- * @param nDimensions - dimensions of a data instance
+ * @param map.nDimensions - dimensions of a data instance
  */
 
-int saveUMatrix(string fname, float *uMatrix, unsigned int nSomX,
-                unsigned int nSomY) {
+int saveUMatrix(string fname, som map) {
 
     FILE* fp = fopen(fname.c_str(), "wt");
     fprintf(fp, "%%");
-    fprintf(fp, "%d %d", nSomY, nSomX);
+    fprintf(fp, "%d %d", map.nSomY, map.nSomX);
     fprintf(fp, "\n");
     if (fp != 0) {
-        for (unsigned int som_y1 = 0; som_y1 < nSomY; som_y1++) {
-            for (unsigned int som_x1 = 0; som_x1 < nSomX; som_x1++) {
-                fprintf(fp, " %f", uMatrix[som_y1 * nSomX + som_x1]);
+        for (unsigned int som_y1 = 0; som_y1 < map.nSomY; som_y1++) {
+            for (unsigned int som_x1 = 0; som_x1 < map.nSomX; som_x1++) {
+                fprintf(fp, " %f", map.uMatrix[som_y1 * map.nSomX + som_x1]);
             }
             fprintf(fp, "\n");
         }

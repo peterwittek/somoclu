@@ -51,7 +51,7 @@ void printUsage() {
     cout << "Usage:\n" \
          "     [mpirun -np NPROC] somoclu [OPTIONs] INPUT_FILE OUTPUT_PREFIX\n" \
          "Arguments:\n" \
-         "     -c FILENAME           Specify an initial codebook for the map.\n" \
+         "     -c FILENAME           Specify an initial map.codebook for the map.\n" \
          "     -d NUMBER             Coefficient in the Gaussian neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2)) (default: 0.5)\n" \
          "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
          "     -g TYPE               Grid type: rectangular or hexagonal (default: rectangular)\n"\
@@ -70,7 +70,7 @@ void printUsage() {
          "     -s NUMBER             Save interim files (default: 0):\n" \
          "                              0: Do not save interim files\n" \
          "                              1: Save U-matrix only\n" \
-         "                              2: Also save codebook and best matching neurons\n" \
+         "                              2: Also save map.codebook and best matching neurons\n" \
          "     -t STRATEGY           Radius cooling strategy: linear or exponential (default: linear)\n" \
          "     -T STRATEGY           Learning rate cooling strategy: linear or exponential (default: linear)\n" \
          "     -v NUMBER             Verbosity level, 0-2 (default: 0)\n" \
@@ -417,32 +417,39 @@ int main(int argc, char** argv)
           cout << endl;
         }
     }
-
+    som map = {
+      .nSomX = nSomX,
+      .nSomY = nSomY,
+      .nDimensions = nDimensions,
+      .nVectors = nVectors,
+      .mapType = mapType,
+      .gridType = gridType,
+      .get_distance = EuclideanDistance(nDimensions),
+      .uMatrix = NULL,
+      .codebook = new float[nSomY * nSomX * nDimensions],
+      .bmus = NULL};
     ///
     /// Codebook
     ///
-    float *codebook = new float[nSomY * nSomX * nDimensions];
-    int *globalBmus = NULL;
-    float *uMatrix = NULL;
     if (rank == 0) {
-        globalBmus = new int[nVectorsPerRank * int(ceil(nVectors / (double)nVectorsPerRank)) * 2];
-        uMatrix = new float[nSomX * nSomY];
+        map.bmus = new int[nVectorsPerRank * int(ceil(nVectors / (double)nVectorsPerRank)) * 2];
+        map.uMatrix = new float[nSomX * nSomY];
         if (initialCodebookFilename.empty()) {
-            initializeCodebook(get_wall_time(), codebook, nSomX, nSomY, nDimensions);
+            initializeCodebook(get_wall_time(), map);
         }
         else {
             unsigned int nSomXY = 0;
             unsigned int tmpNDimensions = 0;
-            delete [] codebook;
-            codebook = readMatrix(initialCodebookFilename, nSomXY, tmpNDimensions);
+            delete [] map.codebook;
+            map.codebook = readMatrix(initialCodebookFilename, nSomXY, tmpNDimensions);
             if (tmpNDimensions != nDimensions) {
-                my_abort("Dimension of initial codebook does not match data!");
+                my_abort("Dimension of initial map.codebook does not match data!");
             }
-            else if (nSomXY / nSomY != nSomX) {
-                my_abort("Dimension of initial codebook does not match specified SOM grid!");
+            else if (nSomXY / nSomY != map.nSomX) {
+                my_abort("Dimension of initial map.codebook does not match specified SOM grid!");
             }
             if (verbose > 0) {
-                cout << "Read initial codebook: " << initialCodebookFilename << "\n";
+                cout << "Read initial map.codebook: " << initialCodebookFilename << "\n";
             }
         }
     }
@@ -450,13 +457,10 @@ int main(int argc, char** argv)
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
     // TRAINING
-    train(rank, data, sparseData, codebook, globalBmus, uMatrix, nSomX, nSomY,
-          nDimensions, nVectors, nVectorsPerRank,
+    train(rank, data, sparseData, map, nVectorsPerRank,
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
-          kernelType, mapType,
-          gridType, compactSupport == 1, gaussian == 1, std_coeff, verbose,
-          EuclideanDistance(nDimensions), outPrefix, snapshots);
+          kernelType, compactSupport == 1, gaussian == 1, std_coeff, verbose);
 
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
@@ -468,19 +472,18 @@ int main(int argc, char** argv)
         ///
         /// Save U-mat
         ///
-        calculateUMatrix(uMatrix, codebook, nSomX, nSomY, nDimensions, mapType,
-                         gridType, EuclideanDistance(nDimensions));
-        int ret =  saveUMatrix(outPrefix + string(".umx"), uMatrix, nSomX, nSomY);
+        calculateUMatrix(map);
+        int ret =  saveUMatrix(outPrefix + string(".umx"), map);
         if (ret < 0)
             cerr << "    Failed to save u-matrix. !" << endl;
         else if (verbose > 0) {
             cout << "    Done!" << endl;
         }
-        saveBmus(outPrefix + string(".bm"), globalBmus, nSomX, nSomY, nVectors);
+        saveBmus(outPrefix + string(".bm"), map);
         ///
-        /// Save codebook
+        /// Save map.codebook
         ///
-        saveCodebook(outPrefix + string(".wts"), codebook, nSomX, nSomY, nDimensions);
+        saveCodebook(outPrefix + string(".wts"), map);
     }
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
@@ -492,9 +495,9 @@ int main(int argc, char** argv)
     else {
         delete [] sparseData;
     }
-    delete [] codebook;
-    delete [] globalBmus;
-    delete [] uMatrix;
+    delete [] map.codebook;
+    delete [] map.bmus;
+    delete [] map.uMatrix;
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
