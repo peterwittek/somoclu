@@ -1,4 +1,5 @@
 Version 1.7.5:
+  - New: A Makefile for mingw to build on Windows.
   - Changed: PR #94 added a much more efficient sparse kernel.
   - Changed: boilerplate code for Julia greatly improved.
   - Changed: Code cleanup, pre-processor macros simplified.
