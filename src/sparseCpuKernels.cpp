@@ -104,7 +104,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *X2,
     }
     if (only_bmus) {
 #ifdef HAVE_MPI
-        MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, map.bmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
         delete [] bmus;
 #endif
         return;
@@ -201,7 +201,7 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *X2,
                map.nSomY * map.nSomX * map.nDimensions, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(localDenominator, denominator,
                map.nSomY * map.nSomX, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, map.bmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
 
     delete [] localDenominator;
     delete [] localNumerator;

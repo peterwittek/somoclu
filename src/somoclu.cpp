@@ -428,6 +428,7 @@ int main(int argc, char** argv)
       .uMatrix = NULL,
       .codebook = new float[nSomY * nSomX * nDimensions],
       .bmus = NULL};
+    Snapshot *snapshot = new Snapshot(snapshots, outPrefix);
     ///
     /// Codebook
     ///
@@ -460,7 +461,8 @@ int main(int argc, char** argv)
     train(rank, data, sparseData, map, nVectorsPerRank,
           nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
-          kernelType, compactSupport == 1, gaussian == 1, std_coeff, verbose);
+          kernelType, compactSupport == 1, gaussian == 1, std_coeff, verbose,
+          snapshot);
 
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);

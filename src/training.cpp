@@ -196,11 +196,9 @@ void train(int itask, float *data, svm_node **sparseData,
                       scale0, scaleN, scaleCooling, kernelType, compact_support,
                       gaussian, std_coeff);
         ++currentEpoch;
-#ifdef CLI
         if (snapshot != NULL && itask == 0) {
-            // snapshot.write()
+            snapshot->write(currentEpoch, map);
         }
-#endif
 #ifndef HAVE_R
         if (itask == 0 && verbose > 0) {
             epoch_time = get_wall_time() - epoch_time;

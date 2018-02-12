@@ -9,9 +9,9 @@ class DeterministicCodebook(unittest.TestCase):
         n_rows, n_columns = 2, 2
         codebook = np.zeros((2*2, 2), dtype=np.float32)
         data = np.array([[0.1, 0.2], [0.3, 0.4]], dtype=np.float32)
-        som = Somoclu(n_columns, n_rows, data=data, initialcodebook=codebook,
+        som = Somoclu(n_columns, n_rows, initialcodebook=codebook,
                       compactsupport=False)
-        som.train()
+        som.train(data)
         correct_codebook = np.array([[[ 0.2       ,  0.30000001],
                                       [ 0.10359724,  0.20359723]],
                                      [[ 0.29640275,  0.39640275],
