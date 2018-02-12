@@ -178,7 +178,7 @@ void freeGpu() {
  * @param nVectorsPerRank - the number of data points assigned to this GPU
  */
 
-void getBmusOnGpu(int *bmus, float *map.codebook, int map.nSomX, int map.nSomY, int map.nDimensions, int nVectorsPerRank) {
+void getBmusOnGpu(int *bmus, som map, int nVectorsPerRank) {
     deviceCodebook = thrust::device_vector<float>(map.codebook, map.codebook + map.nSomX * map.nSomY * map.nDimensions);
     deviceCodebookNorms = normsOfRowSpace<float>(deviceCodebook, map.nSomX * map.nSomY, map.nDimensions);
     thrust::device_vector<float> deviceGramMatrix(map.nSomX * map.nSomY * nVectorsPerRank, 0);
@@ -227,7 +227,7 @@ void getBmusOnGpu(int *bmus, float *map.codebook, int map.nSomX, int map.nSomY, 
  * @param width - dimensions of a data instance
  */
 
-void initializeGpu(float *hostData, int nVectorsPerRank, int map.nDimensions, int map.nSomX, int map.nSomY) {
+void initializeGpu(float *hostData, int nVectorsPerRank, som map) {
     /* Initialize CUBLAS */
     cublasStatus_t status = cublasCreate(&handle);
     if (status != CUBLAS_STATUS_SUCCESS) {
@@ -317,23 +317,20 @@ void setDevice(int commRank, int commSize) {
 /** One epoch on the GPU, dense variant
  */
 void trainOneEpochDenseGPU(int itask, float *data, float *numerator,
-                           float *denominator, float *map.codebook,
-                           unsigned int map.nSomX, unsigned int map.nSomY,
-                           unsigned int map.nDimensions, unsigned int map.nVectors,
+                           float *denominator, som map,
                            unsigned int nVectorsPerRank, float radius,
-                           float scale, string map.mapType, string map.gridType,
-                           bool compact_support, bool gaussian,
-                           int *globalBmus, bool only_bmus, float std_coeff) {
+                           float scale, bool compact_support, bool gaussian,
+                           bool only_bmus, float std_coeff) {
     int *bmus;
 #ifdef HAVE_MPI
     bmus = new int[nVectorsPerRank * 2];
 #else
-    bmus = globalBmus;
+    bmus = som.bmus;
 #endif
-    getBmusOnGpu(bmus, map.codebook, map.nSomX, map.nSomY, map.nDimensions, nVectorsPerRank);
+    getBmusOnGpu(bmus, map, nVectorsPerRank);
     if (only_bmus) {
 #ifdef HAVE_MPI
-        MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, globalBmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Gather(bmus, nVectorsPerRank * 2, MPI_INT, map.bmus, nVectorsPerRank * 2, MPI_INT, 0, MPI_COMM_WORLD);
         delete [] bmus;
 #endif
         return;
