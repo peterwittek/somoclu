@@ -3,6 +3,7 @@ Version 1.7.5:
   - Changed: PR #94 added a much more efficient sparse kernel.
   - Changed: boilerplate code for Julia greatly improved.
   - Changed: Code cleanup, pre-processor macros simplified.
+  - Changed: Adapted to Seaborn API changes in plotting heatmaps.
 
 Version 1.7.4: 2017-06-06
   - Fixed: The random seed was set to 0 for testing purposes. This is now changed to a wall-time based initialization.

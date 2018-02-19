@@ -619,12 +619,17 @@ class Somoclu(object):
         f, ax = plt.subplots(figsize=figsize)
 
         # Y axis has inverted labels (seaborn default, no idea why)
-        yticklabels = np.atleast_2d(labels)
-        yticklabels = np.fliplr(yticklabels)[0]
+        if labels is None:
+            xticklabels = []
+            yticklabels = []
+        else:
+            xticklabels = labels
+            yticklabels = labels
 
         # Draw the heatmap using seaborn
-        sns.heatmap(corrmat, vmax=1, vmin=-1, square=True, xticklabels=labels,
-                    yticklabels=labels, cmap="RdBu_r", center=0)
+        sns.heatmap(corrmat, vmax=1, vmin=-1, square=True,
+                    xticklabels=xticklabels, yticklabels=yticklabels,
+                    cmap="RdBu_r", center=0)
         f.tight_layout()
 
         # This sets the ticks to a readable angle
@@ -633,7 +638,7 @@ class Somoclu(object):
 
         # This sets the labels for the two axes
         ax.set_yticklabels(yticklabels, ha='right', va='center', size=8)
-        ax.set_xticklabels(labels, ha='center', va='top', size=8)
+        ax.set_xticklabels(xticklabels, ha='center', va='top', size=8)
 
         # Save and close the figure
         if filename is not None:
