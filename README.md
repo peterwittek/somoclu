@@ -162,16 +162,6 @@ Multicore execution is supported through OpenMP -- the compiler must support thi
 
 ## Linux or macOS
 
-### macOS
-
-Install build tools and the compiler with OpenMP support:
-
-    $ brew install autoconf automake libtool swig
-
-Then you can follow the Linux instructions.
-
-### Linux
-
 If you have just cloned the git repository first run
 
     $ ./autogen.sh
@@ -181,16 +171,6 @@ Then follow the standard POSIX procedure:
     $ ./configure [options]
     $ make
     $ make install
-
-Using Intel compilers
-
-    export CC=/path/of/intel/compiler/icc
-    export CXX=/path/of/intel/compiler/icpc
-    export OMPI_CC=/path/of/intel/compiler/icc
-    export OMPI_CXX=/path/of/intel/compiler/icpc
-
-In order to use icc and icpc compilers, you have to set these variables
-so the mpic++ will invoke icpc instead of the default compiler.
 
 Options for configure
 
