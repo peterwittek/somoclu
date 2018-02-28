@@ -1,6 +1,7 @@
 #include "somoclu.h"
+#ifdef _OPENMP
 #include <omp.h>
-
+#endif
 struct JuliaMessage{
     float  r;
     unsigned int d;
@@ -10,10 +11,10 @@ struct JuliaMessage{
         v1(tv1), v2(tv2), d(td), r(0.0f){}
 };
 
-typedef float (*compute_distance_t)(void*); 
+typedef float (*compute_distance_t)(void*);
 
 class JuliaDistance: public Distance{
-protected:   
+protected:
     compute_distance_t compute_distance;
 public:
     JuliaDistance(unsigned int d, compute_distance_t tcd):
@@ -64,7 +65,7 @@ public:
         }
         delete head;
     }
-    
+
     virtual JuliaMessage* createMessage(unsigned int d, float* v1, float* v2) const{
         return new JuliaMessageMT(Dim(), v1, v2);
     }
@@ -83,7 +84,7 @@ public:
                     compute_distance(msg);
                     bool &updated = msg->updated;
                     updated = true;
-#pragma omp flush (updated)             
+#pragma omp flush (updated)
                 }while(msg->next != NULL);
             }
 #pragma omp taskyield
@@ -98,14 +99,14 @@ public:
         attach_message(msgMT);
         while(true){
             bool &updated = msgMT->updated;
-#pragma omp flush (updated) 
+#pragma omp flush (updated)
             if (updated) break;
-#pragma omp taskyield           
+#pragma omp taskyield
         }
     }
 
     // Messages are attached to the head node for computation by master thread
-    // when scheduled. 
+    // when scheduled.
     void attach_message(JuliaMessageMT* msg) const{
 #pragma omp critical(async_head)
         {
@@ -113,19 +114,19 @@ public:
             head->next = msg;
         }
     }
-    
+
     // Detach the head quickly so that other threads who need to place their
     // computations can do so without being made to wait for the whole
     // computation chain to complete.
     JuliaMessageMT* detach_messages(){
         JuliaMessageMT* ret = NULL;
-#pragma omp critical(async_head) 
+#pragma omp critical(async_head)
         if (head->next != NULL){
             ret = head->next;
             head->next = NULL;
         }
         return ret;
-    }   
+    }
 };
 
 static JuliaDistance* GetJuliaDistance(unsigned int d, void* fp){
@@ -149,7 +150,7 @@ void julia_train(float *data, int data_length, unsigned int nEpoch,
                  int *globalBmus, int globalBmus_size,
                  float *uMatrix, int uMatrix_size,
                  void* get_distance){
-  
+
     string radiusCooling = (_radiusCooling == 0)? "linear" : "exponential";
     string scaleCooling  = (_scaleCooling == 0) ? "linear" : "exponential";
     string mapType       = (_mapType == 0)      ? "planar" : "toroid";
