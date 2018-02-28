@@ -7,9 +7,7 @@ Dependencies
 ============
 The module requires `Numpy <http://www.numpy.org/>`_ and `matplotlib <http://www.matplotlib.org/>`_. The code is compatible with both Python 2 and 3.
 
-On Linux, you need a standard GCC compile chain. Other compiler chains, for instance, ICC, are known to work too.
-
-On OS X, you must have ``libiomp`` installed. See `this issue <https://github.com/peterwittek/somoclu/issues/28#issuecomment-220883160>`_ if you encounter problems. If you build it from source, please refer to the section below.
+On Linux and macOS, you need a standard C++ compile chain, for instance, GCC, ICC and clang are known to work.
 
 On Windows, having ``MSVCP90.DLL`` and ``VCOMP90.DLL`` is usually sufficient. See `this issue <https://github.com/peterwittek/somoclu/issues/28#issuecomment-238419778>`_ if you have problems.
 
@@ -19,7 +17,13 @@ The code is available on PyPI, hence it can be installed by
 
 ::
 
-    $ sudo pip install somoclu
+    $ pip install somoclu
+
+Alternatively, it is also available on [conda-forge](https://github.com/conda-forge/somoclu-feedstock):
+
+::
+
+    $ conda install somoclu
 
 If you want the latest git version, clone the repository, make the Python target, and follow the standard procedure for installing Python modules:
 
@@ -32,32 +36,6 @@ If you want the latest git version, clone the repository, make the Python target
     $ make python
     $ cd src/Python
     $ sudo python setup.py install
-
-Build on Mac OS X
---------------------
-GCC should be installed first. As of OS X 10.9, gcc is just symlink to clang. To build somoclu and this extension correctly, it is recommended to install gcc using something like:
-::
-
-    $ brew install gcc48
-
-and set environment using:
-::
-
-    export CC=/usr/local/bin/gcc
-    export CXX=/usr/local/bin/g++
-    export CPP=/usr/local/bin/cpp
-    export LD=/usr/local/bin/gcc
-    alias c++=/usr/local/bin/c++
-    alias g++=/usr/local/bin/g++
-    alias gcc=/usr/local/bin/gcc
-    alias cpp=/usr/local/bin/cpp
-    alias ld=/usr/local/bin/gcc
-    alias cc=/usr/local/bin/gcc
-
-Then you can issue
-::
-
-    $ sudo pip install somoclu
 
 
 Build with CUDA support on Linux and OS X:

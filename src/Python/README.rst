@@ -46,15 +46,15 @@ The code is available on PyPI, hence it can be installed by
 
 ::
 
-    $ sudo pip install somoclu
+    $ pip install somoclu
 
-Some pre-built binaries in the wheel format or windows installer are provided at `PyPI Dowloads <https://pypi.python.org/pypi/somoclu#downloads>`_, they are tested with `Anaconda <https://www.continuum.io/downloads>`_ distributions. If you encounter errors like `ImportError: DLL load failed: The specified module could not be found` when `import somoclu`, you may need to use `Dependency Walker <http://www.dependencywalker.com/>`_ as shown `here <http://stackoverflow.com/a/24704384/1136027>`_ on ``_somoclu_wrap.pyd`` to find out missing DLLs and place them at the write place. Usually right version (32/64bit) of ``vcomp90.dll, msvcp90.dll, msvcr90.dll`` should be put to ``C:\Windows\System32`` or ``C:\Windows\SysWOW64``.
+Alternatively, it is also available on [conda-forge](https://github.com/conda-forge/somoclu-feedstock):
 
-The wheel binaries for macOS are compiled with `gcc`, which you can use before running Python:
 ::
 
-    $ export DYLD_LIBRARY_PATH=/usr/local/lib/gcc/7/:$DYLD_LIBRARY_PATH
+    $ conda install somoclu
 
+Some pre-built binaries in the wheel format or windows installer are provided at `PyPI Dowloads <https://pypi.python.org/pypi/somoclu#downloads>`_, they are tested with `Anaconda <https://www.continuum.io/downloads>`_ distributions. If you encounter errors like `ImportError: DLL load failed: The specified module could not be found` when `import somoclu`, you may need to use `Dependency Walker <http://www.dependencywalker.com/>`_ as shown `here <http://stackoverflow.com/a/24704384/1136027>`_ on ``_somoclu_wrap.pyd`` to find out missing DLLs and place them at the write place. Usually right version (32/64bit) of ``vcomp90.dll, msvcp90.dll, msvcr90.dll`` should be put to ``C:\Windows\System32`` or ``C:\Windows\SysWOW64``.
 
 If you want the latest git version, first git clone the repo, install `swig <http://www.swig.org/>`_ and run:
 
@@ -71,38 +71,7 @@ Then follow the standard procedure for installing Python modules:
 
 ::
 
-    $ sudo python setup.py install
-
-Build on Mac macOS
---------------------
-Using GCC
----------------
-Since OS X 10.9, gcc is just symlink to clang. To build somoclu and this extension correctly, it is recommended to install gcc using something like:
-
-::
-
-    $ brew install gcc --without-multilib
-
-and set environment using:
-
-::
-
-    export CC=/usr/local/bin/gcc-7
-    export CXX=/usr/local/bin/g++-7
-    export CPP=/usr/local/bin/cpp-7
-    export LD=/usr/local/bin/gcc-7
-    alias c++=/usr/local/bin/c++-7
-    alias g++=/usr/local/bin/g++-7
-    alias gcc=/usr/local/bin/gcc-7
-    alias cpp=/usr/local/bin/cpp-7
-    alias ld=/usr/local/bin/gcc-7
-    alias cc=/usr/local/bin/gcc-7
-
-Before building the module manually with:
-
-::
-
-    $ python setup.py build
+    $ python setup.py install
 
 Build with CUDA support on Linux and OS X:
 ------------------------------------------

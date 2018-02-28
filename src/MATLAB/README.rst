@@ -60,7 +60,6 @@ before running ``./configure`` .
 Then follow the instructions at https://github.com/peterwittek/somoclu to build somoclu itself.
 
 
-
 Building Mex Extension on OS X:
 ===============================
 Using GCC

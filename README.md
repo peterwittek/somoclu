@@ -124,25 +124,19 @@ If the input file is sparse, but a dense kernel is invoked, Somoclu will execute
 
 # Interfaces
 
-[Python](https://somoclu.readthedocs.io/), [R](https://cran.r-project.org/web/packages/Rsomoclu/), and [MATLAB](https://github.com/peterwittek/somoclu/tree/master/src/MATLAB) interfaces are available for the dense CPU and GPU kernels. MPI and the sparse kernel are not support through the interfaces. For respective examples, see the folders in src.
+[Python](https://somoclu.readthedocs.io/), [Julia](https://github.com/peterwittek/Somoclu.jl), [R](https://cran.r-project.org/web/packages/Rsomoclu/), and [MATLAB](https://github.com/peterwittek/somoclu/tree/master/src/MATLAB) interfaces are available for the dense CPU and GPU kernels. MPI and the sparse kernel are not support through the interfaces. For respective examples, see the folders in src.
 
 The Python version is also available in [PyPI](https://pypi.python.org/pypi/somoclu). You can install it with
 
-    $ sudo pip install somoclu
+    $ pip install somoclu
+
+Alternatively, it is also available on [conda-forge](https://github.com/conda-forge/somoclu-feedstock):
+
+    $ conda install somoclu
 
 Some pre-built binaries in the wheel format or Windows installer are provided at [PyPI Dowloads](https://pypi.python.org/pypi/somoclu#downloads), they are tested with [Anaconda](https://www.continuum.io/downloads) distributions. If you encounter errors like `ImportError: DLL load failed: The specified module could not be found` when `import somoclu`, you may need to use [Dependency Walker](http://www.dependencywalker.com/) as shown [here](http://stackoverflow.com/a/24704384/1136027) on `_somoclu_wrap.pyd` to find out missing DLLs and place them at the write place. Usually right version (32/64bit) of `vcomp90.dll, msvcp90.dll, msvcr90.dll` should be put to `C:\Windows\System32` or `C:\Windows\SysWOW64`.
 
-The wheel binaries for macOS are compiled with `gcc`, which you can install by:
-
-    $ brew install gcc --without-multilib
-
-and use
-
-    $ export DYLD_LIBRARY_PATH=/usr/local/lib/gcc/7/:$DYLD_LIBRARY_PATH
-
-before running the Python interpreter.
-
-To get it working with the GPU kernel, you might have to follow the instructions at [Somoclu - Python Interface](https://github.com/peterwittek/somoclu/tree/master/src/Python).
+The wheel binaries for macOS are compiled with the system `clang++`, which means by default it is not parallelized. To use the parallel version on Mac, you can either use the version in [conda-forge](https://github.com/conda-forge/somoclu-feedstock) or compile it from source with your favourite OpenMP-friendly compiler. To get it working with the GPU kernel, you might have to follow the instructions at the [Somoclu - Python Interface](https://github.com/peterwittek/somoclu/tree/master/src/Python).
 
 The R version is available on CRAN. You can install it with
 
@@ -152,7 +146,7 @@ To get it working with the GPU kernel, download the source zip file and specify 
 
     R CMD INSTALL src/Rsomoclu_version.tar.gz --configure-args=/path/to/cuda
 
-The Julia version is available on [GitHub](https://github.com/peterwittek/Somoclu.jl). Clone it with `Pkg.clone("https://github.com/peterwittek/Somoclu.jl")` and build it with `Pkg.build("Somoclu")`.
+The Julia version is available on [GitHub](https://github.com/peterwittek/Somoclu.jl). The standard `Pkg.add("Somoclu")` should work.
 
 For using the MATLAB toolbox, install SOM-Toolbox following the instructions at [ilarinieminen/SOM-Toolbox](https://github.com/ilarinieminen/SOM-Toolbox) and define the location of your MATLAB install to the configure script:
 
@@ -162,7 +156,7 @@ For the GPU kernel, specify the location of your CUDA library for the configure 
 
 # Compilation & Installation
 
-These are the instructions for compiling the core library and the command line interface. The only dependency is a C++ compiler chain -- GCC, ICC, and VC were tested.
+These are the instructions for compiling the core library and the command line interface. The only dependency is a C++ compiler chain -- GCC, ICC, clang, and VC were tested.
 
 Multicore execution is supported through OpenMP -- the compiler must support this. Distributed systems are supported through MPI. The package was tested with OpenMPI. It should also work with other MPI flavours. CUDA support is optional.
 
@@ -173,30 +167,12 @@ Multicore execution is supported through OpenMP -- the compiler must support thi
 Install build tools and the compiler with OpenMP support:
 
     $ brew install autoconf automake libtool swig
-    $ brew install gcc --without-multilib
-
-set environment variables to use gcc instead of the system compiler:
-
-    export CC=/usr/local/bin/gcc-7
-    export CXX=/usr/local/bin/g++-7
-    export CPP=/usr/local/bin/cpp-7
-    export LD=/usr/local/bin/gcc-7
-    alias c++=/usr/local/bin/c++-7
-    alias g++=/usr/local/bin/g++-7
-    alias gcc=/usr/local/bin/gcc-7
-    alias cpp=/usr/local/bin/cpp-7
-    alias ld=/usr/local/bin/gcc-7
-    alias cc=/usr/local/bin/gcc-7
-
-Before importing the module from other languages, you may need to use the following to avoid importing errors:
-
-    export DYLD_LIBRARY_PATH=/usr/local/lib/gcc/7/:$DYLD_LIBRARY_PATH
 
 Then you can follow the Linux instructions.
 
 ### Linux
 
-From git repository first run
+If you have just cloned the git repository first run
 
     $ ./autogen.sh
 
