@@ -46,7 +46,9 @@ class Somoclu(object):
     """Class for training and visualizing a self-organizing map.
 
     Attributes:
+
         codebook     The codebook of the self-organizing map.
+
         bmus         The BMUs corresponding to the data points.
 
     :param n_columns: The number of columns in the map.
