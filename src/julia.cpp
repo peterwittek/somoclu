@@ -137,7 +137,7 @@ static JuliaDistance* GetJuliaDistance(unsigned int d, void* fp){
 #endif
 }
 
-extern "C"
+extern "C" EXPORT
 void julia_train(float *data, int data_length, unsigned int nEpoch,
                  unsigned int nSomX, unsigned int nSomY,
                  unsigned int nDimensions, unsigned int nVectors,

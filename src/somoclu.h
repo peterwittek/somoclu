@@ -50,8 +50,10 @@ struct svm_node {
 
 #ifdef _WIN32
 typedef int omp_iter_t;
+#define EXPORT __declspec(dllexport)
 #else
 typedef unsigned int omp_iter_t;
+#define EXPORT
 #endif
 
 

@@ -9,7 +9,7 @@ distdir	= $(tarname)-$(version)
 prefix	 = ..\\..\\usr
 bindir	 = $(prefix)\\bin
 libdir	 = $(prefix)\\lib
-libname = libjlsomoclu.dll
+libname = libsomoclu.dll
 
 # Tool-related substitution variables
 SYSROOT        ?= ..\\..\\..\\..\\WinRPM\\deps
@@ -32,7 +32,7 @@ OBJS=$(LIBOBJS) io.o
 
 SOURCES=$(OBJS: .o=.cpp)
 
-all: somoclu.exe lib
+all: lib
 
 libwrapper: $(LIBOBJS)
 	$(CXX) -g $(DEFS) $(CXXFLAGS) $(LDFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
@@ -44,9 +44,6 @@ lib: $(LIBOBJS) io.o
 somoclu.exe: CXXFLAGS+= -DCLI
 somoclu.exe: $(OBJS) somoclu.o 
 	$(CXX) $(DEFS) $(CXXFLAGS) $(LDFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -o $@ $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
-
-somoclu.o: somoclu.cpp
-	$(CXX) $(DEFS) $(CXXFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $<
 
 %.o: $(srcdir)%.cpp
 	$(CXX) $(DEFS) $(CXXFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $<
