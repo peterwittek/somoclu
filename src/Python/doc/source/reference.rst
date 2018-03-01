@@ -6,6 +6,10 @@ Function Reference
 
    Class for training and visualizing a self-organizing map.
 
+    Attributes:
+        codebook     The codebook of the self-organizing map.
+        bmus         The BMUs corresponding to the data points.
+
    :param n_columns: The number of columns in the map.
    :type n_columns: int.
    :param n_rows: The number of rows in the map.
@@ -116,9 +120,7 @@ Function Reference
 
       Train the map on the current data in the Somoclu object.
 
-      :param data: Optional parameter to provide training data. It is not
-                  necessary if the data was added via the method
-                  `update_data`.
+      :param data: Training data..
       :type data: 2D numpy.array of float32.
       :param epochs: The number of epochs to train the map for.
       :type epochs: int.
@@ -142,15 +144,6 @@ Function Reference
                                  * "linear": Linear interpolation (default)
                                  * "exponential": Exponential decay
       :type scalecooling: str.
-
-
-   .. py:method:: Somoclu.update_data(data)
-
-      Change the data set in the Somoclu object. It is useful when the
-      data is updated and the training should continue on the new data.
-
-      :param data: The training data.
-      :type data: 2D numpy.array of float32.
 
    .. py:method:: Somoclu.view_activation_map(data_vector=None, data_index=None, activation_map=None, figsize=None, colormap=cm.Spectral_r, colorbar=False, bestmatches=False, bestmatchcolors=None, labels=None, zoom=None, filename=None)
 
