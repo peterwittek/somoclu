@@ -24,16 +24,22 @@ except ImportError:
 try:
     from .somoclu_wrap import train as wrap_train
 except ImportError:
-    print("Warning: training function cannot be imported. Only pre-trained "
-          "maps can be analyzed.")
+    print("Warning: the binary library cannot be imported. You cannot train "
+          "maps, but you can load and analyze ones that you have already saved.")
     if sys.platform.startswith('win'):
         print("If you installed Somoclu with pip on Windows, this typically "
-              "means missing DLLs. Please refer to the documentation and to "
-              "this issue:")
-        print("https://github.com/peterwittek/somoclu/issues/28")
+              "means missing DLLs. Please refer to the documentation.")
     elif sys.platform.startswith('darwin'):
-        print("If you installed Somoclu with pip on OS X, this typically "
-              "means missing linked library. Please make sure you have set DYLD_LIBRARY_PATH to include gcc path")
+        print("If you installed Somoclu with pip on macOS, this typically "
+              "means missing a linked library. If you compiled Somoclu with "
+              "GCC, please make sure you have set DYLD_LIBRARY_PATH to include "
+              "the GCC path. For more information, please refer to the "
+              "documentation.")
+    else:
+        print("The problem occurs because either compilation failed when you "
+              "installed Somoclu or a path is missing from the dependencies "
+              "when you are trying to import it. Please refer to the "
+              "documentation to see your options.")
 
 
 class Somoclu(object):

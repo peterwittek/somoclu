@@ -38,8 +38,8 @@ If you want the latest git version, clone the repository, make the Python target
     $ sudo python setup.py install
 
 
-Build with CUDA support on Linux and OS X:
-------------------------------------------
+Build with CUDA support on Linux and macOS:
+-------------------------------------------
 If the ``CUDAHOME`` variable is set, the usual install command will build and install the library:
 
 ::

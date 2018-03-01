@@ -6,7 +6,7 @@ Somoclu is a massively parallel implementation of self-organizing maps. It relie
 Key features of the Python interface:
 
 * Fast execution by parallelization: OpenMP and CUDA are supported.
-* Multi-platform: Linux, OS X, and Windows are supported.
+* Multi-platform: Linux, macOS, and Windows are supported.
 * Planar and toroid maps.
 * Rectangular and hexagonal grids.
 * Gaussian or bubble neighborhood functions.
@@ -73,8 +73,8 @@ Then follow the standard procedure for installing Python modules:
 
     $ python setup.py install
 
-Build with CUDA support on Linux and OS X:
-------------------------------------------
+Build with CUDA support on Linux and macOS:
+-------------------------------------------
 If the ``CUDAHOME`` variable is set, the usual install command will build and install the library:
 
 ::

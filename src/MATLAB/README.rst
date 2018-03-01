@@ -1,4 +1,4 @@
-Version: 1.7.4
+Version: 1.7.5
 
 Maintainer: ShichaoGao<xgdgsc at gmail.com>
 
@@ -13,7 +13,7 @@ OS_type: unix, windows
 Somoclu MATLAB Extension Build Guide (Linux/Mac):
 =================================================
 
-   **(OS X users see the Note below first)**
+   **(macOS users see the Note below first)**
 
 1. Configure the library to compile without MPI support. Optionally, specify the root of your MATLAB installation. E.g.::
 
@@ -60,11 +60,11 @@ before running ``./configure`` .
 Then follow the instructions at https://github.com/peterwittek/somoclu to build somoclu itself.
 
 
-Building Mex Extension on OS X:
+Building Mex Extension on macOS:
 ===============================
 Using GCC
 ---------------
-To build the extension on OS X, we need to make mex use gcc instead of the default clang compiler which doesn' t support openmp (As of OSX 10.10.5). We need to copy ``MATLAB_ROOT/bin/mexopts.sh`` to ``~/.matlab/VERSION/mexopts.sh`` , replace ``MATLAB_ROOT`` with your installation path of MATLAB and replace ``VERSION`` with your MATLAB version in that folder. Example:
+To build the extension on macOS, we need to make mex use gcc instead of the default clang compiler which doesn' t support openmp (As of OSX 10.10.5). We need to copy ``MATLAB_ROOT/bin/mexopts.sh`` to ``~/.matlab/VERSION/mexopts.sh`` , replace ``MATLAB_ROOT`` with your installation path of MATLAB and replace ``VERSION`` with your MATLAB version in that folder. Example:
 ::
    cp /Applications/MATLAB_R2013a.app/bin/mexopts.sh ~/.matlab/R2013a/mexopts.sh
 
@@ -72,7 +72,7 @@ Then modify ``~/.matlab/VERSION/mexopts.sh`` to use gcc as follows:
 
 1. change ``CC='gcc'`` and comment out all ``CC=`` statements after that.
 2. change ``CXX='g++'`` and comment out all ``CXX=`` statements after that.
-3. change ``MACOSX_DEPLOYMENT_TARGET='10.9'`` where ``10.9`` is your OS X version number.
+3. change ``MACOSX_DEPLOYMENT_TARGET='10.9'`` where ``10.9`` is your macOS version number.
 
 an example is given at https://gist.github.com/xgdgsc/9832340, then you can follow the instruction step 2 at the top to build the extension and test.
 

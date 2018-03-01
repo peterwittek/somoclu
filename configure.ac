@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.61])
-AC_INIT([Somoclu], [1.7.4])
+AC_INIT([Somoclu], [1.7.5])
 m4_include([m4/ax_mpi_options.m4])
 m4_include([m4/ax_mpi_tests.m4])
 AC_CONFIG_AUX_DIR([.])
@@ -72,7 +72,7 @@ if test x"$with_cuda" != x"no" ; then
      if test -e $CUDA_PATH/lib$SUFFIX; then
          CUDA_LDFLAGS="-L$CUDA_PATH/lib$SUFFIX"
      else
-         CUDA_LDFLAGS="-L$CUDA_PATH/lib" #OS X retardation
+         CUDA_LDFLAGS="-L$CUDA_PATH/lib" #macOS retardation
      fi
      NVCC="$CUDA_PATH/bin/nvcc"
      AC_SUBST(CUDA_CFLAGS)
