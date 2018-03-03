@@ -51,8 +51,8 @@ library('Rsomoclu')
 data("rgbs", package = "Rsomoclu")
 input_data <- rgbs
 input_data <- data.matrix(input_data)
-nSomX <- 50
-nSomY <- 50
+nSomX <- 10
+nSomY <- 10
 nEpoch <- 10
 radius0 <- 0
 radiusN <- 0
