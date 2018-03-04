@@ -99,17 +99,17 @@ void train(float *data, int data_length, unsigned int nEpoch,
 #endif // CUDA
 #endif // HAVE_R
     som map = {
-      .nSomX = nSomX,
-      .nSomY = nSomY,
-      .nDimensions = nDimensions,
-      .nVectors = nVectors,
-      .mapType = mapType,
-      .gridType = gridType,
-      .get_distance = EuclideanDistance(nDimensions),
-      .uMatrix = uMatrix,
-      .codebook = codebook,
-      .bmus = globalBmus};
-    
+        nSomX,
+        nSomY,
+        nDimensions,
+        nVectors,
+        mapType,
+        gridType,
+        EuclideanDistance(nDimensions),
+        uMatrix,
+        codebook,
+        globalBmus};
+
     train(0, data, NULL, map, nVectors, nEpoch, radius0, radiusN, radiusCooling,
           scale0, scaleN, scaleCooling,
           kernelType, compact_support, gaussian, std_coeff, verbose);
