@@ -77,8 +77,11 @@ void trainOneEpochSparseCPU(int itask, svm_node **sparseData, float *X2,
 
     // Pre-compute the squared norm of all the weights
     float *W2 = new float[map.nSomY * map.nSomX];
-
+#ifdef _WIN32
+    #pragma omp parallel for
+#else
     #pragma omp parallel for collapse(2)
+#endif
     for (omp_iter_t som_y = 0; som_y < map.nSomY; som_y++) {
         for (omp_iter_t som_x = 0; som_x < map.nSomX; som_x++) {
             size_t idx = som_y * map.nSomX + som_x;
