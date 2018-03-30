@@ -41,13 +41,15 @@ void cli_abort(string err) {
 }
 
 void Snapshot::write(unsigned int currentEpoch, som map) {
-    calculateUMatrix(map);
-    stringstream sstm;
-    sstm << outPrefix << "." << currentEpoch;
-    saveUMatrix(sstm.str() + string(".umx"), map);
-    if (snapshots == 2) {
-        saveBmus(sstm.str() + string(".bm"), map);
-        saveCodebook(sstm.str() + string(".wts"), map);
+    if (snapshots >= 1) {
+        calculateUMatrix(map);
+        stringstream sstm;
+        sstm << outPrefix << "." << currentEpoch;
+        saveUMatrix(sstm.str() + string(".umx"), map);
+        if (snapshots == 2) {
+            saveBmus(sstm.str() + string(".bm"), map);
+            saveCodebook(sstm.str() + string(".wts"), map);
+        }
     }
 }
 
