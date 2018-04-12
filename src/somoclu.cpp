@@ -418,17 +418,17 @@ int main(int argc, char** argv)
           cout << endl;
         }
     }
-    som map = {
-      .nSomX = nSomX,
-      .nSomY = nSomY,
-      .nDimensions = nDimensions,
-      .nVectors = nVectors,
-      .mapType = mapType,
-      .gridType = gridType,
-      .get_distance = EuclideanDistance(nDimensions),
-      .uMatrix = NULL,
-      .codebook = new float[nSomY * nSomX * nDimensions],
-      .bmus = NULL};
+	som map = {
+		nSomX,
+		nSomY,
+		nDimensions,
+		nVectors,
+		mapType,
+		gridType,
+		EuclideanDistance(nDimensions),
+		NULL,
+		new float[nSomY * nSomX * nDimensions],
+		NULL };
     Snapshot *snapshot = new Snapshot(snapshots, outPrefix);
     ///
     /// Codebook
