@@ -425,7 +425,7 @@ int main(int argc, char** argv)
 		nVectors,
 		mapType,
 		gridType,
-		EuclideanDistance(nDimensions),
+		*(new EuclideanDistance(nDimensions)),
 		NULL,
 		new float[nSomY * nSomX * nDimensions],
 		NULL };

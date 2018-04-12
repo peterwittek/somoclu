@@ -105,7 +105,7 @@ void train(float *data, int data_length, unsigned int nEpoch,
         nVectors,
         mapType,
         gridType,
-        EuclideanDistance(nDimensions),
+		*(new EuclideanDistance(nDimensions)),
         uMatrix,
         codebook,
         globalBmus};
