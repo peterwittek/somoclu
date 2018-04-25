@@ -328,6 +328,7 @@ int main(int argc, char** argv)
     MPI_Bcast(&nSomY, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&kernelType, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&compactSupport, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&std_coeff, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
     char *inFilenameCStr = new char[255];
     if (rank == 0) {
