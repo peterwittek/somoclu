@@ -51,7 +51,7 @@ float euclideanDistanceOnHexagonalPlanarMap(const unsigned int som_x, const unsi
     if (ydist & 1) {
         xdist += ((y1 & 1) ? -0.5 : 0.5);
     }
-    return sqrt(float(xdist * xdist + ydist * ydist));
+    return sqrt(float(xdist * xdist + ydist * ydist * 0.75));
 }
 
 float euclideanDistanceOnHexagonalToroidMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y, const unsigned int nSomX, const unsigned int nSomY) {
@@ -64,7 +64,7 @@ float euclideanDistanceOnHexagonalToroidMap(const unsigned int som_x, const unsi
     if (ydist & 1) {
         xdist += ((y1 & 1) ? -0.5 : 0.5);
     }
-    return sqrt(float(xdist * xdist + ydist * ydist));
+    return sqrt(float(xdist * xdist + ydist * ydist * 0.75));
 }
 
 float gaussianNeighborhood(float distance, float radius, float std_coeff) {
