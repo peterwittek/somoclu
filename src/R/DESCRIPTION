@@ -1,5 +1,5 @@
 Package: Rsomoclu
-Version: 1.7.5.1
+Version: 1.7.5.2
 Date: 2018-03-02
 Title: Somoclu
 Depends: Rcpp
