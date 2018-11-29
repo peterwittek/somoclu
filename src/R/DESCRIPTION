@@ -1,13 +1,13 @@
 Package: Rsomoclu
 Version: 1.7.5.2
-Date: 2018-03-02
+Date: 2018-11-29
 Title: Somoclu
 Depends: Rcpp
 Imports: kohonen
 Suggests:
 Authors@R: c(person(given = "Peter", family = "Wittek", role = c("aut"), email = ""),
              person(given = "Shichao", family = "Gao", role = c("cre"), email = "xgdgsc@gmail.com"))
-Description: Somoclu is a massively parallel implementation of self-organizing maps.  It exploits multicore CPUs and it can be accelerated by CUDA. The topology of the map can be planar or toroid and the grid of neurons can be rectangular or hexagonal .
+Description: Somoclu is a massively parallel implementation of self-organizing maps.  It exploits multicore CPUs and it can be accelerated by CUDA. The topology of the map can be planar or toroid and the grid of neurons can be rectangular or hexagonal . Details refer to (Peter Wittek, et al (2017)) <doi:10.18637/jss.v078.i09>.
 URL: http://peterwittek.github.io/somoclu/
 BugReports: https://github.com/peterwittek/somoclu/issues
 License: GPL-3
