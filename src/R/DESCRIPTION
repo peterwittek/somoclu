@@ -1,8 +1,7 @@
 Package: Rsomoclu
-Version: 1.7.5.2
-Date: 2018-11-29
+Version: 1.7.5.3
+Date: 2019-01-03
 Title: Somoclu
-Depends: Rcpp
 Imports: kohonen
 Suggests:
 Authors@R: c(person(given = "Peter", family = "Wittek", role = c("aut"), email = ""),
