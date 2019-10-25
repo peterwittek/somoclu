@@ -482,7 +482,6 @@ class Somoclu(object):
             raise Exception("Invalid parameter for verbose: " +
                             self._kernel_type)
 
-
     def _pca_init(self):
         try:
             from sklearn.decomposition import PCA
@@ -571,21 +570,25 @@ class Somoclu(object):
         else:
             d = data
 
-        codebookReshaped = self.codebook.reshape(self.codebook.shape[0] * self.codebook.shape[1], self.codebook.shape[2])
+        codebookReshaped = self.codebook.reshape(
+            self.codebook.shape[0] * self.codebook.shape[1], self.codebook.shape[2])
         parts = np.array_split(d, 200, axis=0)
         am = np.empty((0, (self._n_columns * self._n_rows)), dtype="float64")
         for part in parts:
-            am = np.concatenate((am, (cdist((part), codebookReshaped, 'euclidean'))), axis=0)
+            am = np.concatenate(
+                (am, (cdist((part), codebookReshaped, 'euclidean'))), axis=0)
 
         if data is None:
             self.activation_map = am
         return am
 
-    def get_bmus(self, activation_map):
+    def get_bmus(self, activation_map, order='F'):
         """Returns Best Matching Units indexes of the activation map.
 
         :param activation_map: Activation map computed with self.get_surface_state()
         :type activation_map: 2D numpy.array
+
+        :param order: order of returned numpy array, 'F' or 'C'
 
         :returns: The bmus indexes corresponding to this activation map
                   (same as self.bmus for the training samples).
@@ -594,7 +597,10 @@ class Somoclu(object):
 
         Y, X = np.unravel_index(activation_map.argmin(axis=1),
                                 (self._n_rows, self._n_columns))
-        return np.vstack((X, Y)).T
+        if order == 'F':
+            return np.vstack((X, Y)).T
+        elif order == 'C':
+            return np.vstack((X, Y))
 
     def view_similarity_matrix(self, data=None, labels=None, figsize=None,
                                filename=None):
