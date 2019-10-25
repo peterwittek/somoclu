@@ -588,7 +588,8 @@ class Somoclu(object):
         :param activation_map: Activation map computed with self.get_surface_state()
         :type activation_map: 2D numpy.array
 
-        :param order: order of returned numpy array, 'F' or 'C'
+        :param order: order of returned numpy array, 'F' for column-major
+                      (Fortran-style) or 'C' for row-major (C-style).
 
         :returns: The bmus indexes corresponding to this activation map
                   (same as self.bmus for the training samples).
@@ -600,7 +601,7 @@ class Somoclu(object):
         if order == 'F':
             return np.vstack((X, Y)).T
         elif order == 'C':
-            return np.vstack((X, Y))
+            return np.vstack((Y, X)).T
 
     def view_similarity_matrix(self, data=None, labels=None, figsize=None,
                                filename=None):
