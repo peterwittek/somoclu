@@ -34,6 +34,26 @@ float EuclideanDistance::operator()(float* vec1, float* vec2) const{
     return sqrt(distance);
 }
 
+float NormPDistance::operator()(float* vec1, float* vec2) const{
+    unsigned int nDimensions = Dim();
+    double distance = 0.0f;
+    for (unsigned int d = 0; d < nDimensions; ++d) {
+       distance += pow(fabs(vec1[d] - vec2[d]), p);
+    }
+    return pow(distance, 1.0/p);
+}
+
+float NormInfDistance::operator()(float* vec1, float* vec2) const{
+    unsigned int nDimensions = Dim();
+    double distance = 0.0f;
+    for (unsigned int d = 0; d < nDimensions; ++d) {
+       float tmp = fabs(vec1[d] - vec2[d]);
+       if (tmp > distance)
+          distance = tmp;
+    }
+    return distance;
+}
+
 /** Get node coords for the best matching unit (BMU)
  * @param coords - BMU coords
  * @param n - row num in the input feature file

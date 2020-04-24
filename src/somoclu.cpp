@@ -54,6 +54,7 @@ void printUsage() {
          "Arguments:\n" \
          "     -c FILENAME           Specify an initial map.codebook for the map.\n" \
          "     -d NUMBER             Coefficient in the Gaussian neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2)) (default: 0.5)\n" \
+         "     -D NORM               Norm to be used among vectors: euclidean, norm-inf or norm-p with any real p > 0\n" \
          "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
          "     -g TYPE               Grid type: rectangular or hexagonal (default: rectangular)\n"\
          "     -h, --help            This help text\n" \
@@ -92,7 +93,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                         unsigned int *kernelType, string *mapType,
                         unsigned int *snapshots,
                         string *gridType, unsigned int *compactSupport,
-                        unsigned int *gaussian, float *std_coeff,
+                        unsigned int *gaussian, string *vect_distance, float *std_coeff,
                         unsigned int *verbose,
                         string *initialCodebookFilename) {
 
@@ -112,6 +113,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     *gridType = "rectangular";
     *compactSupport = 1;
     *gaussian = 1;
+    *vect_distance = "euclidean";
     *std_coeff = 0.5;
     *verbose = 0;
     string neighborhood_function = "gaussian";
@@ -124,7 +126,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
     int c;
     extern int optind, optopt;
     int option_index = 0;
-    while ((c = getopt_long (argc, argv, "hx:y:d:e:g:k:l:m:n:p:r:s:t:v:c:L:R:T:",
+    while ((c = getopt_long (argc, argv, "hx:y:d:D:e:g:k:l:m:n:p:r:s:t:v:c:L:R:T:",
                              long_options, &option_index)) != -1) {
         switch (c) {
         case 'c':
@@ -160,6 +162,13 @@ void processCommandLine(int argc, char** argv, string *inFilename,
                 *gaussian = 1;
             } else {
                 cli_abort("The argument of option -n should be either bubble or Gaussian.");
+            }
+            break;
+        case 'D':
+            *vect_distance = optarg;
+            float p;
+            if (!(*vect_distance == "euclidean" || *vect_distance == "norm-inf" || (vect_distance->substr(0, 5) == "norm-" && sscanf(vect_distance->c_str() + 5, "%f", &p) == 1))) {
+                cli_abort("The argument of option -D should be either euclidean or norm-p (with p being a float > 0) or norm-inf.");
             }
             break;
         case 'p':
@@ -294,6 +303,7 @@ int main(int argc, char** argv)
     string gridType;
     unsigned int compactSupport;
     unsigned int gaussian;
+    string vect_distance;
     float radius0 = 0;
     float radiusN = 0;
     string radiusCooling;
@@ -312,7 +322,7 @@ int main(int argc, char** argv)
                            &scale0, &scaleN, &scaleCooling,
                            &nSomX, &nSomY,
                            &kernelType, &mapType, &snapshots,
-                           &gridType, &compactSupport, &gaussian, &std_coeff,
+                           &gridType, &compactSupport, &gaussian, &vect_distance, &std_coeff,
                            &verbose,
                            &initialCodebookFilename);
 #ifndef CUDA
@@ -419,14 +429,27 @@ int main(int argc, char** argv)
           cout << endl;
         }
     }
-	som map = {
+    Distance *d = 0;
+    if (vect_distance == "norm-inf") {
+       d = new NormInfDistance(nDimensions);
+    } else if (strncmp(vect_distance.c_str(), "norm-", 5) == 0) {
+      float p;
+      if (sscanf("%f", vect_distance.c_str() + 5, &p) == 1 && p > 0) {
+        d = new NormPDistance(nDimensions, p);
+      } else {
+        cerr << "norm-p needs a positive p value (falling back to Euclidean)" << endl;
+      }
+    }
+    if (d == 0)
+      d = new EuclideanDistance(nDimensions);
+    som map = {
 		nSomX,
 		nSomY,
 		nDimensions,
 		nVectors,
 		mapType,
 		gridType,
-		*(new EuclideanDistance(nDimensions)),
+		*d,
 		NULL,
 		new float[nSomY * nSomX * nDimensions],
 		NULL };
