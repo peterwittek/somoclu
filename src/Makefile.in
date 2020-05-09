@@ -63,7 +63,9 @@ all: somoclu lib
 libwrapper: $(LIBOBJS)
 	$(CXX) -g $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -shared -o ${libname} $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS}
 
-lib: $(LIBOBJS) io.o
+lib: ${libname}
+
+${libname}: $(LIBOBJS) io.o
 ifeq ($(OS), Windows_NT)
 	$(CXX) -g $(DEFS) $(CXXFLAGS) -shared -o ${libname} $^ $(LIBS)
 else
