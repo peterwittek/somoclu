@@ -8,10 +8,10 @@
 */
 
 /* .Call calls */
-extern SEXP Rtrain(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP Rtrain(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"Rtrain", (DL_FUNC) &Rtrain, 17},
+    {"Rtrain", (DL_FUNC) &Rtrain, 18},
     {NULL, NULL, 0}
 };
 
