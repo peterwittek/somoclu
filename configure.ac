@@ -56,12 +56,19 @@ fi
 CUDA_PATH=/usr/local/cuda
 AC_ARG_WITH([cuda],
    [  --with-cuda=PATH    prefix where cuda is installed [default=/usr/local/cuda]])
+AC_ARG_WITH([cuda-nvcc-flags],
+   [  --with-cuda-nvcc-flags=FLAGS    flags to be provided to NVCC])
 
 if test x"$with_cuda" != x"no" ; then
 
   if test -n "$with_cuda"
   then
      CUDA_PATH=$with_cuda
+  fi
+
+  if test -n "$with_cuda_nvcc_flags"
+  then
+     CUDA_NVCC_FLAGS="$with_cuda_nvcc_flags"
   fi
 
   AC_CHECK_PROG(NVCC_CHECK,nvcc,yes,no,$CUDA_PATH/bin)
@@ -76,6 +83,7 @@ if test x"$with_cuda" != x"no" ; then
      fi
      NVCC="$CUDA_PATH/bin/nvcc"
      AC_SUBST(CUDA_CFLAGS)
+     AC_SUBST(CUDA_NVCC_FLAGS)
      AC_SUBST(CUDA_LIBS)
      AC_SUBST(CUDA_LDFLAGS)
      AC_SUBST(NVCC)

@@ -22,6 +22,7 @@ INSTALL	       = @INSTALL@
 INSTALL_DATA   = @INSTALL_DATA@
 INSTALL_PROGRAM= @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
+CUDA_NVCC_FLAGS = @CUDA_NVCC_FLAGS@
 CUDA_CFLAGS    = @CUDA_CFLAGS@
 CUDA_LIBS      = @CUDA_LIBS@
 CUDA_LDFLAGS   = @CUDA_LDFLAGS@
@@ -79,7 +80,7 @@ somoclu: $(OBJS)
 		$(CXX) $(DEFS) $(CXXFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $<
 
 %.cu.co: %.cu
-		$(NVCC) $(DEFS) $(CUDA_CFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $<
+		$(NVCC) $(CUDA_NVCC_FLAGS) $(DEFS) $(CUDA_CFLAGS) ${MPI_INC} -I$(srcdir) -I.. -o $@ -c $<
 
 matlab: libwrapper
 	if [ -e denseGpuKernels.cu.co ]; then cp denseGpuKernels.cu.co denseGpuKernels.cu.o; fi
