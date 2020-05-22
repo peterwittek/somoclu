@@ -150,6 +150,9 @@ r:
 	gzip -f ./R/data/rgbs.txt
 	R CMD build R
 
+r_install:
+	R CMD INSTALL Rsomoclu_$(shell grep Version R/DESCRIPTION | sed -e 's/Version: //').tar.gz
+
 clean: python_clean r_clean matlab_clean
 	-rm -fr $(OBJS) somoclu ${libname} *.cu.o 1>/dev/null
 
