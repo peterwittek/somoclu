@@ -17,7 +17,7 @@ The documentation is available on `Read the Docs <https://somoclu.readthedocs.io
 
 Usage
 -----
-A simple example is below. For more example, please refer to the `documentation <https://somoclu.readthedocs.io/>`_ and a more thorough ipython notebook example at `Somoclu in Python.ipynb <http://nbviewer.ipython.org/github/peterwittek/ipython-notebooks/blob/master/Somoclu%20in%20Python.ipynb>`_.
+A simple example is below. For more example, please refer to the `documentation <https://somoclu.readthedocs.io/>`_ and a more thorough ipython notebook example at `Somoclu in Python.ipynb <https://github.com/peterwittek/ipython-notebooks/blob/ff373eecb8f62484880b4b0e7064eb60ccc50ddf/Somoclu%20in%20Python.ipynb>`_.
 
 ::
 
