@@ -1,4 +1,4 @@
-%module somoclu_wrap
+%module(package="somoclu", moduleimport="import $module") somoclu_wrap
 %include "std_string.i"
 %{
 #define SWIG_FILE_WITH_INIT
