@@ -20,7 +20,7 @@ jobs:
       - name: Configure
         run: |
           cd ${{github.workspace}}
-          autoreconf -i
+          ./autogen.sh
           ./configure --without-mpi
 
       - name: Build
