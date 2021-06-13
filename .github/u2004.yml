@@ -1,0 +1,42 @@
+name: Ubuntu2004
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: ls
+        run: ls -la  ${{github.workspace}}
+
+      - name: Install deps
+        run: sudo apt install -y swig build-essential autotools
+
+      - name: Configure
+        run: |
+          ./autogen.sh
+          ./configure --without-mpi
+
+      - name: Build
+        # Build your program with the given configuration
+        run: |
+          make
+          make python
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: libsomoclu.so
+          path: ${{github.workspace}}/src/libsomoclu.so
