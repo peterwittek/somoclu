@@ -33,3 +33,7 @@ jobs:
         with:
           name: libsomoclu.so
           path: ${{github.workspace}}/src/libsomoclu.so
+      - uses: actions/upload-artifact@v2
+        with:
+          name: python_dist_wheel.zip
+          path: ${{github.workspace}}/src/Python/dist/
