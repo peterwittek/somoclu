@@ -15,7 +15,7 @@ bindir	 = @bindir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@
 
-all clean install uninstall lib libwrapper somoclu python python_doc python_clean python_install r r_install r_clean matlab matlab_clean:
+all clean install uninstall lib libwrapper somoclu python python3_wheel python_doc python_clean python_install r r_install r_clean matlab matlab_clean:
 	$(MAKE) -C src $@
 
 dist: $(distdir).tar.gz

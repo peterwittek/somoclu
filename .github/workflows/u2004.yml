@@ -23,7 +23,7 @@ jobs:
         run: ls -la  ${{github.workspace}}
 
       - name: Install deps
-        run: sudo apt install -y swig build-essential autotools
+        run: sudo apt install -y swig build-essential autotools python3-pip
 
       - name: Configure
         run: |
@@ -34,7 +34,8 @@ jobs:
         # Build your program with the given configuration
         run: |
           make
-          make python
+          make python3_wheel
+          ls -la  ${{github.workspace}}/src/Python/dist/
 
       - uses: actions/upload-artifact@v2
         with:

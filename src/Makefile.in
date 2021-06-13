@@ -110,6 +110,26 @@ python:
 	swig -c++ -python ./Python/somoclu/somoclu.i
 	cd Python; python setup.py build
 
+python3_wheel:
+	mkdir -p ./Python/somoclu/src
+	mkdir -p ./Python/somoclu/src/Windows
+	cp ../LICENSE ./Python
+	cp ../Makefile.in ./Python/somoclu/
+	cp ../configure ./Python/somoclu/
+	cp ../config.h.in ./Python/somoclu/
+	cp ../install-sh ./Python/somoclu/
+	cp ./Makefile.in ./Python/somoclu/src/
+	cp ./*.h ./Python/somoclu/src/
+	cp ./mapDistanceFunctions.cpp ./Python/somoclu/src/
+	cp ./training.cpp ./Python/somoclu/src/
+	cp ./uMatrix.cpp ./Python/somoclu/src/
+	cp ./denseCpuKernels.cpp ./Python/somoclu/src/
+	cp ./denseGpuKernels.cu ./Python/somoclu/src/
+	cp ./sparseCpuKernels.cpp ./Python/somoclu/src/
+	cp ./*.cu ./Python/somoclu/src/
+	swig -c++ -python ./Python/somoclu/somoclu.i
+	cd Python; python3 setup.py bdist_wheel
+
 python_doc: python
 	export PYTHONPATH=`ls -d --color=never $$PWD/Python/build/lib.*| head -c -1`:$$PYTHONPATH; $(MAKE) -C Python/doc html latexpdf
 
