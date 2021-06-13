@@ -1,6 +1,6 @@
 # Somoclu
 [![Ubuntu2004](https://github.com/peterwittek/somoclu/actions/workflows/u2004.yml/badge.svg)](https://github.com/peterwittek/somoclu/actions/workflows/u2004.yml)
-
+[![Ubuntu2004-R](https://github.com/peterwittek/somoclu/actions/workflows/u2004-r.yml/badge.svg)](https://github.com/peterwittek/somoclu/actions/workflows/u2004-r.yml)
 Somoclu is a massively parallel implementation of self-organizing maps. It exploits multicore CPUs, it is able to rely on MPI for distributing the workload in a cluster, and it can be accelerated by CUDA. A sparse kernel is also included, which is useful for training maps on vector spaces generated in text mining processes.
 
 Key features:
