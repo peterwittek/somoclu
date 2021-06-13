@@ -23,7 +23,7 @@ jobs:
         run: ls -la  ${{github.workspace}}
 
       - name: Install deps
-        run: sudo apt install -y swig build-essential autotools python3-pip
+        run: sudo apt install -y swig build-essential python3-pip
 
       - name: Configure
         run: |
