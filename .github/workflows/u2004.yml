@@ -21,7 +21,6 @@ jobs:
         run: |
           cd ${{github.workspace}}
           autoreconf -i
-          automake --add-missing --copy  &>/dev/null
           ./configure --without-mpi
 
       - name: Build
