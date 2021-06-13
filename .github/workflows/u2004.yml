@@ -15,11 +15,11 @@ jobs:
         run: ls -la  ${{github.workspace}}
 
       - name: Install deps
-        run: sudo apt install -y swig build-essential python3-pip
+        run: sudo apt install -y swig autoconf build-essential python3-pip
 
       - name: Configure
         run: |
-          ./autogen.sh
+          bash ./autogen.sh
           ./configure --without-mpi
 
       - name: Build
