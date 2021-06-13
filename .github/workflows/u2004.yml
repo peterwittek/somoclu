@@ -15,7 +15,7 @@ jobs:
         run: ls -la  ${{github.workspace}}
 
       - name: Install deps
-        run: sudo apt install -y swig autoconf automake build-essential python3-pip
+        run: sudo apt install -y swig autoconf automake build-essential python3-pip python3-numpy
 
       - name: Configure
         run: |
