@@ -54,7 +54,7 @@ void printUsage() {
          "Arguments:\n" \
          "     -c FILENAME           Specify an initial map.codebook for the map.\n" \
          "     -d NUMBER             Coefficient in the Gaussian neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2)) (default: 0.5)\n" \
-         "     -D NORM               Norm to be used among vectors: euclidean, norm-inf or norm-p with any real p > 0\n" \
+         "     -D NORM               Norm to be used among vectors: euclidean, norm-inf or norm-p with any real p > 0 (default: euclidean)\n" \
          "     -e NUMBER             Maximum number of epochs (default: " << N_EPOCH << ")\n" \
          "     -g TYPE               Grid type: rectangular or hexagonal (default: rectangular)\n"\
          "     -h, --help            This help text\n" \
@@ -167,7 +167,7 @@ void processCommandLine(int argc, char** argv, string *inFilename,
         case 'D':
             *vect_distance = optarg;
             float p;
-            if (!(*vect_distance == "euclidean" || *vect_distance == "norm-inf" || (vect_distance->substr(0, 5) == "norm-" && sscanf(vect_distance->c_str() + 5, "%f", &p) == 1))) {
+            if (!(*vect_distance == "euclidean" || *vect_distance == "norm-inf" || (vect_distance->substr(0, 5) == "norm-" && sscanf(vect_distance->c_str() + 5, "%f", &p) == 1 && p > 0))) {
                 cli_abort("The argument of option -D should be either euclidean or norm-p (with p being a float > 0) or norm-inf.");
             }
             break;
