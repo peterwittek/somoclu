@@ -18,9 +18,9 @@ jobs:
         run: sudo apt install -y swig autoconf automake build-essential dirmngr gnupg apt-transport-https ca-certificates software-properties-common
       - name: CRAN R
         run: |
-          apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
-          add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'
-          apt install r-base
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+          sudo add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'
+          sudo apt install r-base
 
       - name: Configure
         run: |
