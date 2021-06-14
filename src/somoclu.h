@@ -75,6 +75,22 @@ public:
     virtual float operator()(float* vec1, float* vec2) const;
 };
 
+class NormPDistance: public Distance{
+private:
+    float p;
+public:
+    NormPDistance(unsigned int d, float p):Distance(d), p(p){}
+    virtual ~NormPDistance(){}
+    virtual float operator()(float* vec1, float* vec2) const;
+};
+
+class NormInfDistance: public Distance{
+public:
+    NormInfDistance(unsigned int d):Distance(d){}
+    virtual ~NormInfDistance(){}
+    virtual float operator()(float* vec1, float* vec2) const;
+};
+
 /// Som parameters
 struct som {
     unsigned int nSomX;
@@ -130,7 +146,7 @@ void train(float *data, int data_length,
            float std_coeff, unsigned int verbose,
            float* codebook, int codebook_size,
            int* globalBmus, int globalBmus_size,
-           float* uMatrix, int uMatrix_size);
+           float* uMatrix, int uMatrix_size, string vect_distance = "euclidean");
 void train(int itask, float *data, svm_node **sparseData,
            som map, unsigned int nVectorsPerRank, unsigned int nEpoch,
            float radius0, float radiusN,

@@ -17,7 +17,8 @@ RcppExport SEXP Rtrain(SEXP data_p,
                        SEXP gridType_p, SEXP compactSupport_p,
                        SEXP neighborhood_p,
                        SEXP stdCoeff_p,
-                       SEXP codebook_p) {
+                       SEXP codebook_p,
+                       SEXP vectDistance_p) {
     Rcpp::NumericMatrix dataMatrix(data_p);
     Rcpp::NumericMatrix codebookMatrix(codebook_p);
     int nVectors = dataMatrix.rows();
@@ -36,6 +37,7 @@ RcppExport SEXP Rtrain(SEXP data_p,
     bool compactSupport = as<bool>(compactSupport_p);
     string mapType = as<string>(mapType_p);
     string gridType = as<string>(gridType_p);
+    string vectDistance = as<string>(vectDistance_p);
     string neighborhood = as<string>(neighborhood_p);
     int data_length = nVectors * nDimensions;
     float* data = new float[data_length];
@@ -63,7 +65,7 @@ RcppExport SEXP Rtrain(SEXP data_p,
           gridType, compactSupport, neighborhood == "gaussian",
           std_coeff, 0,
           codebook, codebook_size, globalBmus, globalBmus_size,
-          uMatrix, uMatrix_size);
+          uMatrix, uMatrix_size, vectDistance);
     Rcpp::NumericMatrix globalBmusMatrix(nVectors, 2);
     Rcpp::NumericMatrix uMatrixMatrix(nSomX, nSomY);
     if(codebook != NULL) {

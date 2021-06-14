@@ -2,7 +2,7 @@
 Function Reference
 ******************
 
-.. py:class:: Somoclu(n_columns, n_rows, initialcodebook=None, kerneltype=0, maptype='planar', gridtype='rectangular', compactsupport=False, neighborhood='gaussian', std_coeff=0.5, initialization=None)
+.. py:class:: Somoclu(n_columns, n_rows, initialcodebook=None, kerneltype=0, maptype='planar', gridtype='rectangular', compactsupport=False, neighborhood='gaussian', vect_distance='euclidean', std_coeff=0.5, initialization=None)
 
    Class for training and visualizing a self-organizing map.
 
@@ -40,6 +40,11 @@ Function Reference
 
                           * "gaussian": Gaussian neighborhood (default)
                           * "bubble": bubble neighborhood function
+   :param vect_distance: Optional parameter to specify the vector distance:
+
+                          * "euclidean": Euclidean distance (default)
+                          * "norm-inf": Infinity-norm distance (max among components)
+                          * "norm-p": p-norm (p-th root of summed differences raised to the power of p), works only if kerneltype is 0
    :type neighborhood: str.
    :param std_coeff: Optional parameter to set the coefficient in the Gaussian
                      neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2))

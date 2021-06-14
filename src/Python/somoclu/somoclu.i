@@ -37,4 +37,4 @@ void train(float *data, int data_length,
            float std_coeff, unsigned int verbose,
            float* codebook, int codebook_size,
            int* globalBmus, int globalBmus_size,
-           float* uMatrix, int uMatrix_size);
+           float* uMatrix, int uMatrix_size, string vect_distance);

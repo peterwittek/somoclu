@@ -41,6 +41,13 @@ except ImportError:
               "when you are trying to import it. Please refer to the "
               "documentation to see your options.")
 
+def is_pos_real(s):
+    """ Returns True if s is a positive real.
+    """
+    try:
+        return (float(s) > 0)
+    except ValueError:
+        return False
 
 class Somoclu(object):
     """Class for training and visualizing a self-organizing map.
@@ -82,6 +89,12 @@ class Somoclu(object):
                            * "gaussian": Gaussian neighborhood (default)
                            * "bubble": bubble neighborhood function
     :type neighborhood: str.
+    :param vect_distance: Optional parameter to specify the vector distance function:
+
+                           * "euclidean": Euclidean (default)
+                           * "norm-inf": infinite norm (max absolute distance among components)
+                           * "norm-p": p-th root of sum of absolute differences ^ p (only supported by kerneltype 0)
+    :type vect_distance: str.
     :param std_coeff: Optional parameter to set the coefficient in the Gaussian
                       neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2))
                       Default: 0.5
@@ -100,7 +113,7 @@ class Somoclu(object):
     def __init__(self, n_columns, n_rows, initialcodebook=None,
                  kerneltype=0, maptype="planar", gridtype="rectangular",
                  compactsupport=True, neighborhood="gaussian", std_coeff=0.5,
-                 initialization=None, data=None, verbose=0):
+                 initialization=None, data=None, verbose=0, vect_distance="euclidean"):
         """Constructor for the class.
         """
         self._n_columns, self._n_rows = n_columns, n_rows
@@ -109,6 +122,7 @@ class Somoclu(object):
         self._grid_type = gridtype
         self._compact_support = compactsupport
         self._neighborhood = neighborhood
+        self._vect_distance = vect_distance
         self._std_coeff = std_coeff
         self._verbose = verbose
         self._check_parameters()
@@ -225,7 +239,7 @@ class Somoclu(object):
                    self._kernel_type, self._map_type, self._grid_type,
                    self._compact_support, self._neighborhood == "gaussian",
                    self._std_coeff, self._verbose, self.codebook, self.bmus,
-                   self.umatrix)
+                   self.umatrix, self._vect_distance)
         self.umatrix.shape = (self._n_rows, self._n_columns)
         self.bmus.shape = (self.n_vectors, 2)
         self.codebook.shape = (self._n_rows, self._n_columns, self.n_dim)
@@ -475,6 +489,13 @@ class Somoclu(object):
         if self._neighborhood != "gaussian" and self._neighborhood != "bubble":
             raise Exception("Invalid parameter for neighborhood: " +
                             self._neighborhood)
+        if not (self._vect_distance == "euclidean" or self._vect_distance == "norm-inf"
+                or (self._vect_distance[:5] == "norm-" and is_pos_real(self._vect_distance[5:]))):
+            raise Exception("Invalid parameter for vect_distance: " +
+                            self._vect_distance)
+        if (self._vect_distance[:5] == "norm-" and self._kernel_type != 0):
+            raise Exception("Invalid parameter for vect_distance: " +
+                            self._vect_distance + " when using kernel_type: " + self._kernel_type)
         if self._kernel_type != 0 and self._kernel_type != 1:
             raise Exception("Invalid parameter for kernelTye: " +
                             self._kernel_type)
