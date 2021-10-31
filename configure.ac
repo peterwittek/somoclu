@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.61])
-AC_INIT([Somoclu], [1.7.5])
+AC_INIT([Somoclu], [1.7.6])
 m4_include([m4/ax_mpi_options.m4])
 m4_include([m4/ax_mpi_tests.m4])
 AC_CONFIG_AUX_DIR([.])

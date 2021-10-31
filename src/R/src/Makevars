@@ -1,3 +1,7 @@
 CXX_STD = CXX11
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
-PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DHAVE_R
+CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DHAVE_R -fsanitize=address,undefined,bounds-strict -fno-omit-frame-pointer
+CXX = g++ -fsanitize=address,undefined,bounds-strict -fno-omit-frame-pointer
+CC = gcc -std=gnu99 -fsanitize=address,undefined -fno-omit-frame-pointer
+DEFS=-DSWITCH_TO_REFCNT
+LDFLAGS="-fsanitize=address,undefined -pthread"
