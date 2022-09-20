@@ -10,7 +10,7 @@ Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                      radiusCooling, scale0, scaleN,
                      scaleCooling,
                      kernelType, mapType, gridType, compactSupport,
-                     neighborhood, stdCoeff, codebook)
+                     neighborhood, stdCoeff, codebook, vectDistance)
 }
 \arguments{
   \item{input_data}{input data, matrix format}
@@ -36,6 +36,7 @@ Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
   \item{neighborhood}{Neighborhood function: gaussian or bubble (default: "gaussian")}
   \item{codebook}{initial codebook, (default:NULL)}
   \item{stdCoeff}{The coefficient in the Gaussian neighborhood function exp(-||x-y||^2/(2*(coeff*radius)^2)), (default:0.5)}
+  \item{vectDistance}{the vector distance function "norm-3", "norm-6", "norm-2"(same as default) "norm-inf",  is supported with kerneltype = 0 only , (default:euclidean)}
   %% \item{initialCodebookFilename}{Specify an initial codebook for the map}
 }
 \value{
@@ -67,12 +68,13 @@ compactSupport <- FALSE
 codebook <- NULL
 neighborhood <- "gaussian"
 stdCoeff <- 0.5
+vectDistance <- "euclidean"
 res <- Rsomoclu.train(input_data, nEpoch, nSomX, nSomY,
                       radius0, radiusN,
                       radiusCooling, scale0, scaleN,
                       scaleCooling,
                       kernelType, mapType, gridType, compactSupport, neighborhood,
-                      stdCoeff, codebook)
+                      stdCoeff, codebook, vectDistance)
 res$codebook
 res$globalBmus
 res$uMatrix
