@@ -112,8 +112,13 @@ private:
 public:
     Snapshot(unsigned int snapshots, string outPrefix):snapshots(snapshots),
     outPrefix(outPrefix){}
+#ifdef HAVE_R
+    ~Snapshot(){}
+    void write(unsigned int currentEpoch, som map) {}
+#else
     virtual ~Snapshot(){}
     virtual void write(unsigned int currentEpoch, som map);
+#endif
 };
 
 float euclideanDistanceOnToroidMap(const unsigned int som_x, const unsigned int som_y, const unsigned int x, const unsigned int y, const unsigned int nSomX, const unsigned int nSomY);
