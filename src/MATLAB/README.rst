@@ -6,7 +6,7 @@ URL: http://peterwittek.github.io/somoclu/
 
 BugReports: https://github.com/peterwittek/somoclu/issues
 
-License: GPL-3
+License: MIT
 
 OS_type: unix, windows
 

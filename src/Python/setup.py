@@ -148,7 +148,7 @@ else:
 try:
     setup(name='somoclu',
           version='1.7.6',
-          license='GPL3',
+          license='MIT',
           author="Peter Wittek, Shi Chao Gao",
           author_email="",
           maintainer="shichaogao",
@@ -160,7 +160,7 @@ try:
           packages=["somoclu"],
           install_requires=['numpy', 'matplotlib', 'scipy'],
           classifiers=[
-            'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+            'License :: OSI Approved :: MIT License',
             'Operating System :: OS Independent',
             'Development Status :: 5 - Production/Stable',
             'Topic :: Scientific/Engineering :: Artificial Intelligence',
@@ -176,7 +176,7 @@ except:
     traceback.print_exc()
     setup(name='somoclu',
           version='1.7.6',
-          license='GPL3',
+          license='MIT',
           author="Peter Wittek, Shi Chao Gao",
           author_email="",
           maintainer="shichaogao",
@@ -186,7 +186,7 @@ except:
           description="Massively parallel implementation of self-organizing maps",
           packages=["somoclu"],
           classifiers=[
-            'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+            'License :: OSI Approved :: MIT License',
             'Operating System :: OS Independent',
             'Development Status :: 5 - Production/Stable',
             'Topic :: Scientific/Engineering :: Artificial Intelligence',
