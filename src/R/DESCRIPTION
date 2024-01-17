@@ -9,7 +9,7 @@ Authors@R: c(person(given = "Peter", family = "Wittek", role = c("aut"), email =
 Description: Somoclu is a massively parallel implementation of self-organizing maps.  It exploits multicore CPUs and it can be accelerated by CUDA. The topology of the map can be planar or toroid and the grid of neurons can be rectangular or hexagonal . Details refer to (Peter Wittek, et al (2017)) <doi:10.18637/jss.v078.i09>.
 URL: https://peterwittek.github.io/somoclu/
 BugReports: https://github.com/peterwittek/somoclu/issues
-License: GPL-3
+License: MIT
 Packaged: 2014-03-16 16:55:16 UTC;
 Author: Peter Wittek [aut], Shichao Gao [cre]
 Maintainer: Shichao Gao <xgdgsc@gmail.com>

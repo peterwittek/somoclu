@@ -19,9 +19,9 @@ Peter Wittek, Shi Chao Gao, Ik Soo Lim, Li Zhao (2017). Somoclu: An Efficient Pa
 
 Copyright and License
 ---------------------
-Somoclu is free software; you can redistribute it and/or modify it under the terms of the `GNU General Public License <http://www.gnu.org/licenses/gpl-3.0.html>`_ as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+Somoclu is free software; you can redistribute it and/or modify it under the terms of the `MIT License <https://opensource.org/license/mit/>`_ as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
-Somoclu is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the `GNU General Public License <http://www.gnu.org/licenses/gpl-3.0.html>`_ for more details. 
+Somoclu is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the `MIT License <https://opensource.org/license/mit/>`_ for more details. 
 
 
 Acknowledgment
