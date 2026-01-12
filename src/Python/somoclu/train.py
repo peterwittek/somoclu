@@ -592,12 +592,12 @@ class Somoclu(object):
             d = data
 
         codebookReshaped = self.codebook.reshape(
-            self.codebook.shape[0] * self.codebook.shape[1], self.codebook.shape[2])
-        parts = np.array_split(d, 200, axis=0)
-        am = np.empty((0, (self._n_columns * self._n_rows)), dtype="float64")
-        for part in parts:
-            am = np.concatenate(
-                (am, (cdist((part), codebookReshaped, 'euclidean'))), axis=0)
+            self.codebook.shape[0] * self.codebook.shape[1], self.codebook.shape[2]
+        )      
+        
+        am = np.linalg.norm(
+            data_stack[:, np.newaxis, :] - codebookReshaped[np.newaxis, :, :], axis=2
+        )
 
         if data is None:
             self.activation_map = am
